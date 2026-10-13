@@ -1,0 +1,34 @@
+{
+  "name": "Avichal Goyal Complete Antigravity Portfolio Handoff Kit",
+  "version": "1.0.0",
+  "package_type": "standalone instruction, prompt, research-reference, workflow, and acceptance-test bundle",
+  "intended_agent": "Google Antigravity configured workspace",
+  "recommended_entrypoint": "MASTER_EXECUTION_PROMPT.md",
+  "alternate_prompts": [
+    "ANTIGRAVITY_FIRST_PROMPT.md",
+    "ANTIGRAVITY_BLENDER_ASSET_PROMPT.md"
+  ],
+  "persistent_rules": [
+    "AGENTS.md",
+    ".agents/rules/avatar-and-motion.md",
+    ".agents/rules/blender-3d-asset-lead.md",
+    ".agents/rules/project-content-and-routing.md",
+    ".agents/rules/quality-and-validation.md",
+    ".agents/rules/visual-system-and-gotham-mode.md"
+  ],
+  "contains_completed_blender_model": false,
+  "requires_original_model_sheet_in_active_workspace_for_exact_3d_match": true,
+  "requires_existing_portfolio_workspace_for_in_place_integration": true,
+  "deployment_authorized": false,
+  "featured_project_order": [
+    "MediStudyGo",
+    "Phoney",
+    "TruGifting Solutions",
+    "Masterplayer Designs & Printing"
+  ],
+  "notes": [
+    "No user-private portfolio repository or character model-sheet image is embedded in this instruction package.",
+    "The Blender spec defines the exact output contract for an agent to create; no placeholder or generic model is represented as the finished character.",
+    "Agent must inspect local sources, preserve user changes, and report actual validation evidence."
+  ]
+}
