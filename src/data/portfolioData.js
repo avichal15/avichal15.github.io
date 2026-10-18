@@ -718,3 +718,90 @@ export function getAdjacentCertifications(slug) {
   const next = CERTIFICATIONS[(idx + 1) % CERTIFICATIONS.length];
   return { prev, next };
 }
+
+
+export const PROFILE = OWNER_PROFILE;
+export const FEATURED_PROJECTS = FEATURED_STORIES;
+
+export const OUTFITS = [
+  {
+    id: 'classic',
+    label: 'Classic Builder Suit',
+    shortLabel: 'Builder',
+    atlasKey: 'base',
+    hairColor: '#1f1610',
+    accent: '#F5C518',
+    showHelmet: false,
+    showCape: false,
+    tagline: 'Product-minded full-stack builder ready to ship.',
+  },
+  {
+    id: 'doctor',
+    label: 'MediStudyGo Clinical Coat',
+    shortLabel: 'MedTech',
+    atlasKey: 'doctor',
+    hairColor: '#1f1610',
+    accent: '#38BDF8',
+    showHelmet: false,
+    showCape: false,
+    tagline: 'EdTech, LMS operations, and 50,000+ medical learners.',
+  },
+  {
+    id: 'techy',
+    label: 'Phoney & OmniRoute Systems Suit',
+    shortLabel: 'Systems AI',
+    atlasKey: 'techy',
+    hairColor: '#1f1610',
+    accent: '#A855F7',
+    showHelmet: false,
+    showCape: false,
+    tagline: 'Android telecom services, WebRTC audio, and AI gateways.',
+  },
+  {
+    id: 'masterplayer',
+    label: 'Masterplayer 3D Studio Flannel',
+    shortLabel: '3D Studio',
+    atlasKey: 'masterplayer',
+    hairColor: '#1f1610',
+    accent: '#EF4444',
+    showHelmet: false,
+    showCape: false,
+    tagline: '360° WebGL garment customizer & B2B print commerce.',
+  },
+  {
+    id: 'gotham',
+    label: 'Gotham Nocturnal Vigilante Rig',
+    shortLabel: 'Batman',
+    atlasKey: 'gotham',
+    hairColor: '#141821',
+    accent: '#F5C518',
+    showHelmet: true,
+    showCape: true,
+    tagline: 'Nocturnal debugging & high-stakes production architecture.',
+  },
+];
+
+export const TRICKS = ['backflip', 'spin', 'superhero', 'wave'];
+
+export const ROLE_OUTFIT_RULES = [
+  {
+    keywords: ['batman', 'gotham', 'dark', 'night', 'security', 'cyber', 'audit', 'vigilante'],
+    outfitId: 'gotham',
+    message: '🦇 Activated Gotham Nocturnal Rig — cowled helmet, scalloped cape & dark-mode telemetry.',
+  },
+  {
+    keywords: ['med', 'doctor', 'health', 'dental', 'edtech', 'study', 'lms', 'clinic', 'hospital'],
+    outfitId: 'doctor',
+    message: '🩺 Switched to MediStudyGo Clinical Coat — built for 50,000+ medical learners & LMS ops.',
+  },
+  {
+    keywords: ['print', 'jersey', '3d', 'webgl', 'shopify', 'commerce', 'design', 'apparel', 'gift', 'b2b'],
+    outfitId: 'masterplayer',
+    message: '🎨 Switched to Masterplayer 3D Studio Flannel — WebGL customizers & B2B commerce engines.',
+  },
+  {
+    keywords: ['android', 'phone', 'call', 'voice', 'ai', 'llm', 'omniroute', 'backend', 'api', 'fullstack'],
+    outfitId: 'techy',
+    message: '⚡ Switched to Systems & AI Engineer Suit — Android 15 InCallService, AI routing & full-stack.',
+  },
+];
