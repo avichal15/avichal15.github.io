@@ -22,85 +22,83 @@ function getMoodPose(mood, elapsed, pointer, trickKind, trickProgress, isBatman,
   const wave = Math.sin(elapsed * 2.5);
   const bounce = Math.abs(Math.sin(elapsed * 2.5));
   const pose = {
-    rootY: bounce * 0.04,
+    rootY: bounce * 0.022,
     rootZ: 0,
-    rootRotX: isJumpingAcross ? -0.14 : 0,
-    rootRotY: pointer.x * 0.24 + (isJumpingAcross ? 0.35 : 0),
-    rootRotZ: pointer.x * -0.03,
-    torsoX: 0.03,
-    torsoY: pointer.x * 0.14,
-    torsoZ: wave * 0.02,
-    headX: -pointer.y * 0.16,
-    headY: pointer.x * 0.3,
-    headZ: wave * 0.025,
-    leftArmX: -0.22 + wave * 0.1,
-    leftArmZ: 0.06,
-    rightArmX: 0.22 - wave * 0.1,
-    rightArmZ: -0.06,
-    leftLegX: isJumpingAcross ? -0.45 : -wave * 0.08,
-    rightLegX: isJumpingAcross ? 0.42 : wave * 0.08,
-    capeX: 0.12 + bounce * 0.06 + (isJumpingAcross ? 0.28 : 0),
+    rootRotX: isJumpingAcross ? -0.12 : 0,
+    rootRotY: pointer.x * 0.28 + (isJumpingAcross ? 0.35 : 0),
+    rootRotZ: pointer.x * -0.025,
+    torsoX: 0,
+    torsoY: 0,
+    torsoZ: 0,
+    headX: -pointer.y * 0.14,
+    headY: pointer.x * 0.26,
+    headZ: wave * 0.02,
+    leftArmX: -0.14 + wave * 0.08,
+    leftArmZ: 0.12,
+    rightArmX: 0.14 - wave * 0.08,
+    rightArmZ: -0.12,
+    leftLegX: isJumpingAcross ? -0.18 : 0,
+    rightLegX: isJumpingAcross ? 0.18 : 0,
+    capeX: 0.12 + bounce * 0.05 + (isJumpingAcross ? 0.28 : 0),
   };
 
   if (mood === 'wave') {
-    pose.rightArmX = -1.25 + Math.sin(elapsed * 6.4) * 0.28;
-    pose.rightArmZ = -0.26;
-    pose.leftArmX = -0.18;
-    pose.headY += 0.08;
+    pose.rightArmX = -2.28 + Math.sin(elapsed * 6.4) * 0.14;
+    pose.rightArmZ = -0.24 + Math.sin(elapsed * 6.4) * 0.2;
+    pose.leftArmX = -0.14;
+    pose.leftArmZ = 0.12;
+    pose.headY += 0.06;
   } else if (mood === 'builder') {
-    pose.torsoX = 0.1;
-    pose.rightArmX = -0.82 + Math.sin(elapsed * 4.2) * 0.18;
-    pose.leftArmX = -0.46 - Math.sin(elapsed * 4.2) * 0.14;
-    pose.leftLegX = 0.12;
-    pose.rightLegX = -0.12;
+    pose.rightArmX = -0.95 + Math.sin(elapsed * 4.2) * 0.18;
+    pose.leftArmX = -0.58 - Math.sin(elapsed * 4.2) * 0.14;
   } else if (mood === 'caller') {
-    pose.rightArmX = -1.08;
-    pose.rightArmZ = -0.18;
-    pose.leftArmX = 0.24 + Math.sin(elapsed * 3.4) * 0.12;
-    pose.headZ = -0.08;
+    pose.rightArmX = -1.45;
+    pose.rightArmZ = -0.22;
+    pose.leftArmX = 0.18 + Math.sin(elapsed * 3.4) * 0.12;
+    pose.headZ = -0.06;
   } else if (mood === 'commerce') {
-    pose.leftArmX = -0.76;
-    pose.rightArmX = -0.62 + Math.sin(elapsed * 3.8) * 0.12;
-    pose.torsoY += 0.12;
+    pose.leftArmX = -0.82;
+    pose.rightArmX = -0.68 + Math.sin(elapsed * 3.8) * 0.12;
   } else if (mood === 'architect') {
-    pose.leftArmX = -0.52;
-    pose.rightArmX = -0.52;
-    pose.torsoX = 0.06;
-    pose.headX -= 0.05;
+    pose.leftArmX = -0.62;
+    pose.rightArmX = -0.62;
+    pose.headX -= 0.04;
   } else if (mood === 'champion') {
-    pose.leftArmX = -1.36 + Math.sin(elapsed * 4.5) * 0.12;
-    pose.rightArmX = -1.36 - Math.sin(elapsed * 4.5) * 0.12;
-    pose.rootY += 0.05;
+    pose.leftArmX = -2.35 + Math.sin(elapsed * 4.5) * 0.12;
+    pose.rightArmX = -2.35 - Math.sin(elapsed * 4.5) * 0.12;
+    pose.leftArmZ = 0.24;
+    pose.rightArmZ = -0.24;
+    pose.rootY += 0.03;
   }
 
   if (isBatman) {
-    pose.torsoX += 0.05;
-    pose.capeX = 0.2 + Math.sin(elapsed * 3.2) * 0.08;
+    pose.capeX = 0.18 + Math.sin(elapsed * 3.2) * 0.07;
   }
 
   if (trickProgress > 0) {
     const arc = Math.sin(trickProgress * Math.PI);
     if (trickKind === 'backflip') {
-      pose.rootY += arc * 0.72;
+      pose.rootY += arc * 0.34;
       pose.rootRotX = -trickProgress * Math.PI * 2;
-      pose.leftArmX = -1.2;
-      pose.rightArmX = -1.2;
+      pose.leftArmX = -2.1;
+      pose.rightArmX = -2.1;
+      pose.leftLegX = -0.28 * arc;
+      pose.rightLegX = 0.28 * arc;
     } else if (trickKind === 'spin') {
-      pose.rootY += arc * 0.45;
+      pose.rootY += arc * 0.24;
       pose.rootRotY += trickProgress * Math.PI * 2;
-      pose.leftArmZ = 0.32;
-      pose.rightArmZ = -0.32;
+      pose.leftArmZ = 0.34;
+      pose.rightArmZ = -0.34;
     } else if (trickKind === 'superhero') {
-      pose.rootY += arc * 0.56;
-      pose.torsoX = 0.34 * arc;
-      pose.leftLegX = 0.38 * arc;
-      pose.rightLegX = -0.45 * arc;
-      pose.rightArmX = -1.45 * arc;
-      pose.leftArmX = 0.42 * arc;
+      pose.rootY += arc * 0.3;
+      pose.leftLegX = 0.36 * arc;
+      pose.rightLegX = -0.42 * arc;
+      pose.rightArmX = -2.25 * arc;
+      pose.leftArmX = 0.38 * arc;
     } else {
-      pose.rootY += arc * 0.36;
-      pose.rightArmX = -1.48;
-      pose.rightArmZ = -0.3 + Math.sin(trickProgress * Math.PI * 6) * 0.24;
+      pose.rootY += arc * 0.22;
+      pose.rightArmX = -2.32;
+      pose.rightArmZ = -0.26 + Math.sin(trickProgress * Math.PI * 6) * 0.22;
     }
   }
 
@@ -184,7 +182,7 @@ export default function Minifig({
     });
 
     const rest = {};
-    ['Hips', 'LegL', 'LegR', 'Torso', 'ArmL', 'ArmR', 'Head', 'BatmanCape'].forEach((name) => {
+    ['Hips', 'LegL', 'LegR', 'Torso', 'ArmL', 'ArmR', 'Head', 'Hair', 'BatmanHelmet', 'BatmanCape'].forEach((name) => {
       const node = nodes[name];
       if (node) {
         rest[name] = {
@@ -282,8 +280,8 @@ export default function Minifig({
     scalePulse.current = dampValue(scalePulse.current, 1, 9, delta);
 
     if (outerGroup.current) {
-      const targetY = (badgeMode ? -1.42 : -1.04) + pose.rootY;
-      const targetScale = (badgeMode ? 1.52 : 1.24) * scalePulse.current;
+      const targetY = (badgeMode ? -1.42 : -1.03) + pose.rootY;
+      const targetScale = (badgeMode ? 0.94 : 0.68) * scalePulse.current;
       outerGroup.current.position.y = dampValue(outerGroup.current.position.y, targetY, 8, delta);
       outerGroup.current.position.z = dampValue(outerGroup.current.position.z, pose.rootZ, 8, delta);
       outerGroup.current.rotation.x = dampValue(outerGroup.current.rotation.x, pose.rootRotX, 10, delta);
@@ -308,6 +306,14 @@ export default function Minifig({
       nodes.Head.rotation.x = dampValue(nodes.Head.rotation.x, rest.Head.rotation.x + pose.headX, 9, delta);
       nodes.Head.rotation.y = dampValue(nodes.Head.rotation.y, rest.Head.rotation.y + pose.headY, 9, delta);
       nodes.Head.rotation.z = dampValue(nodes.Head.rotation.z, rest.Head.rotation.z + pose.headZ, 9, delta);
+    }
+
+    if (nodes.Hair && rest.Hair && nodes.Head) {
+      nodes.Hair.rotation.copy(nodes.Head.rotation);
+    }
+
+    if (nodes.BatmanHelmet && rest.BatmanHelmet && nodes.Head) {
+      nodes.BatmanHelmet.rotation.copy(nodes.Head.rotation);
     }
 
     if (nodes.ArmL && rest.ArmL) {
@@ -341,7 +347,8 @@ export default function Minifig({
   return (
     <group
       ref={outerGroup}
-      position={[0, -1.04, 0]}
+      position={[0, -1.03, 0]}
+      scale={0.68}
       onClick={(event) => {
         event.stopPropagation();
         onCycleOutfit?.();
