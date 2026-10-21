@@ -12,14 +12,14 @@ import {
 } from './data/portfolioData';
 
 const STAGE_WAYPOINTS = [
-  { id: 'sec-0', left: 73, top: 53, scale: 1.0, badge: false, mood: 'wave', autoOutfit: 'classic', label: '00 // INTRO' },
-  { id: 'sec-1', left: 22, top: 53, scale: 1.0, badge: false, mood: 'builder', autoOutfit: 'doctor', label: '01 // MEDISTUDYGO' },
-  { id: 'sec-2', left: 78, top: 53, scale: 1.0, badge: false, mood: 'caller', autoOutfit: 'techy', label: '02 // PHONEY AI' },
-  { id: 'sec-3', left: 22, top: 53, scale: 1.0, badge: false, mood: 'commerce', autoOutfit: 'classic', label: '03 // TRUGIFTING' },
-  { id: 'sec-4', left: 78, top: 53, scale: 1.0, badge: false, mood: 'architect', autoOutfit: 'masterplayer', label: '04 // MASTERPLAYER' },
-  { id: 'sec-5', left: 22, top: 53, scale: 1.0, badge: false, mood: 'builder', autoOutfit: 'techy', label: '05 // OMNIROUTE OSS' },
+  { id: 'sec-0', left: 73, top: 56, scale: 1.0, badge: false, mood: 'wave', autoOutfit: 'classic', label: '00 // INTRO' },
+  { id: 'sec-1', left: 22, top: 56, scale: 1.0, badge: false, mood: 'builder', autoOutfit: 'doctor', label: '01 // MEDISTUDYGO' },
+  { id: 'sec-2', left: 78, top: 56, scale: 1.0, badge: false, mood: 'caller', autoOutfit: 'techy', label: '02 // PHONEY AI' },
+  { id: 'sec-3', left: 22, top: 56, scale: 1.0, badge: false, mood: 'commerce', autoOutfit: 'classic', label: '03 // TRUGIFTING' },
+  { id: 'sec-4', left: 78, top: 56, scale: 1.0, badge: false, mood: 'architect', autoOutfit: 'masterplayer', label: '04 // MASTERPLAYER' },
+  { id: 'sec-5', left: 22, top: 56, scale: 1.0, badge: false, mood: 'builder', autoOutfit: 'techy', label: '05 // OMNIROUTE OSS' },
   { id: 'sec-6', left: 7, top: 86, scale: 1.0, badge: true, mood: 'champion', autoOutfit: 'gotham', label: '06 // ARCHIVE & CERTS' },
-  { id: 'sec-7', left: 17, top: 54, scale: 0.78, badge: false, mood: 'wave', autoOutfit: 'classic', label: '07 // PHILOSOPHY' },
+  { id: 'sec-7', left: 17, top: 56, scale: 0.78, badge: false, mood: 'wave', autoOutfit: 'classic', label: '07 // PHILOSOPHY' },
   { id: 'sec-8', left: 84, top: 68, scale: 0.72, badge: false, mood: 'champion', autoOutfit: 'gotham', label: '08 // CONTACT' },
 ];
 
@@ -1012,8 +1012,9 @@ export default function App() {
       const cA = centers[i] || 0;
       const cB = centers[Math.min(i + 1, centers.length - 1)] || cA + 1;
       const rawT = cB > cA ? Math.min(1, Math.max(0, (scrollCenter - cA) / (cB - cA))) : 0;
-      // Smoothstep easing
-      const t = rawT * rawT * (3 - 2 * rawT);
+      // Hold station within each section; leap briskly across the boundary [0.35, 0.65]
+      const boundaryT = Math.min(1, Math.max(0, (rawT - 0.35) / 0.3));
+      const t = boundaryT * boundaryT * (3 - 2 * boundaryT);
 
       const interpLeft = wpA.left + (wpB.left - wpA.left) * t;
       const interpTop = wpA.top + (wpB.top - wpA.top) * t;
@@ -1021,7 +1022,7 @@ export default function App() {
 
       // Parabolic jump arc when crossing horizontally between Left & Right columns
       const horizontalDelta = Math.abs(wpB.left - wpA.left);
-      const isCrossJump = horizontalDelta > 28 && rawT > 0.08 && rawT < 0.92;
+      const isCrossJump = horizontalDelta > 28 && boundaryT > 0.05 && boundaryT < 0.95;
       const jumpArcVh = horizontalDelta > 28 ? -Math.sin(t * Math.PI) * 9.5 : 0;
 
       if (isCrossJump !== isJumpingRef.current) {
