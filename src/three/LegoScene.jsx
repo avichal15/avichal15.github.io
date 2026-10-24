@@ -60,7 +60,7 @@ export default function LegoScene({
     <Canvas
       shadows
       dpr={[1, 2]}
-      camera={{ position: [0, 0.26, 3.35], fov: 31 }}
+      camera={{ position: [0, 0.05, 4.65], fov: 35 }}
       gl={{ antialias: true, alpha: true }}
     >
       <ambientLight intensity={isBatman ? 1.15 : 1.55} />
