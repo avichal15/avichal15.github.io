@@ -230,8 +230,10 @@ export default function App() {
   // ---------------------------------------------------------------------------
   useEffect(() => {
     let rafId = null;
+    let scrollIdleTimer = null;
+    let isActivelyScrolling = false;
 
-    const updateScrollChoreography = () => {
+    const updateScrollChoreography = (scrollingActive = isActivelyScrolling) => {
       const vh = window.innerHeight || 1;
       const scrollY = window.scrollY;
 
@@ -264,10 +266,11 @@ export default function App() {
           nextTop = 56;
 
           if (walkProgress < 0.98) {
-            // Character is actively walking from Right (73%) to Left (22%)
-            nextIsWalking = true;
+            // Character is in walk zone between Right (73%) and Left (22%)
+            // Only walk while actively scrolling!
+            nextIsWalking = scrollingActive;
             nextWalkDir = -1;
-            nextMood = 'wave';
+            nextMood = scrollingActive ? 'wave' : 'pointRight';
             nextSpeech = '';
             // STRICT RULE: Zero words lit before the character arrives at his station!
             if (prevAboutLitRef.current !== 0) {
@@ -395,9 +398,10 @@ export default function App() {
         nextTop = 72;
 
         if (enterRatio < 0.94 && Math.abs(targetLeft - prevLeft) > 8) {
-          nextIsWalking = true;
+          // Only walk across screen while actively scrolling!
+          nextIsWalking = scrollingActive;
           nextWalkDir = targetLeft > prevLeft ? 1 : -1;
-          nextMood = 'wave';
+          nextMood = scrollingActive ? 'wave' : (chapter.mascotSide === 'left' ? 'pointRight' : 'pointLeft');
           nextSpeech = '';
         } else {
           nextIsWalking = false;
@@ -476,15 +480,24 @@ export default function App() {
     };
 
     const onScroll = () => {
+      isActivelyScrolling = true;
+      if (scrollIdleTimer) clearTimeout(scrollIdleTimer);
+      scrollIdleTimer = setTimeout(() => {
+        isActivelyScrolling = false;
+        if (rafId) cancelAnimationFrame(rafId);
+        rafId = requestAnimationFrame(() => updateScrollChoreography(false));
+      }, 140);
+
       if (rafId) cancelAnimationFrame(rafId);
-      rafId = requestAnimationFrame(updateScrollChoreography);
+      rafId = requestAnimationFrame(() => updateScrollChoreography(true));
     };
 
-    updateScrollChoreography();
+    updateScrollChoreography(false);
     window.addEventListener('scroll', onScroll, { passive: true });
     window.addEventListener('resize', onScroll);
     return () => {
       if (rafId) cancelAnimationFrame(rafId);
+      if (scrollIdleTimer) clearTimeout(scrollIdleTimer);
       window.removeEventListener('scroll', onScroll);
       window.removeEventListener('resize', onScroll);
     };

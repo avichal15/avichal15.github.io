@@ -24,7 +24,8 @@ function getCharacterPose({
   trickKind,
   trickProgress,
   isBatman,
-  isWalking,
+  walkBlend = 0,
+  walkCycle = 0,
   walkDirection,
   isGrabbed,
 }) {
@@ -69,28 +70,7 @@ function getCharacterPose({
     return pose;
   }
 
-  // Real Walk / Run Cycle when traversing horizontally across the viewport
-  if (isWalking) {
-    const stride = Math.sin(elapsed * 15.5);
-    const bob = Math.abs(Math.cos(elapsed * 15.5));
-    const dir = walkDirection < 0 ? -1 : 1; // -1 = right-to-left, 1 = left-to-right
-    pose.rootY = bob * 0.075;
-    pose.rootRotY = dir * 0.62;
-    pose.rootRotX = 0.12;
-    pose.torsoX = 0.08;
-    pose.torsoY = dir * 0.12;
-    pose.headY = -dir * 0.22 + pointer.x * 0.15;
-    pose.leftLegX = stride * 0.72;
-    pose.rightLegX = -stride * 0.72;
-    pose.leftArmX = -stride * 0.62;
-    pose.rightArmX = stride * 0.62;
-    pose.leftArmZ = 0.08;
-    pose.rightArmZ = -0.08;
-    pose.capeX = 0.42 + bob * 0.16;
-    return pose;
-  }
-
-  // Contextual Mood Poses
+  // Contextual Mood Poses (idle gestures)
   if (mood === 'wave') {
     pose.rightArmX = -2.1 + Math.sin(elapsed * 5.2) * 0.14;
     pose.rightArmZ = -0.22 + Math.cos(elapsed * 5.2) * 0.16;
@@ -123,6 +103,41 @@ function getCharacterPose({
 
   if (isBatman) {
     pose.capeX = 0.16 + Math.sin(elapsed * 2.8) * 0.05;
+  }
+
+  // Real Walk / Run Cycle — smoothly blended via walkBlend (0 -> 1)
+  if (walkBlend > 0.001) {
+    const stride = Math.sin(walkCycle);
+    const bob = Math.abs(Math.cos(walkCycle));
+    const dir = walkDirection < 0 ? -1 : 1; // -1 = right-to-left, 1 = left-to-right
+
+    const walkRootY = bob * 0.075;
+    const walkRootRotY = dir * 0.62;
+    const walkRootRotX = 0.12;
+    const walkTorsoX = 0.08;
+    const walkTorsoY = dir * 0.12;
+    const walkHeadY = -dir * 0.22 + pointer.x * 0.15;
+    const walkLeftLegX = stride * 0.72;
+    const walkRightLegX = -stride * 0.72;
+    const walkLeftArmX = -stride * 0.62;
+    const walkRightArmX = stride * 0.62;
+    const walkLeftArmZ = 0.08;
+    const walkRightArmZ = -0.08;
+    const walkCapeX = 0.42 + bob * 0.16;
+
+    pose.rootY = THREE.MathUtils.lerp(pose.rootY, walkRootY, walkBlend);
+    pose.rootRotY = THREE.MathUtils.lerp(pose.rootRotY, walkRootRotY, walkBlend);
+    pose.rootRotX = THREE.MathUtils.lerp(pose.rootRotX, walkRootRotX, walkBlend);
+    pose.torsoX = THREE.MathUtils.lerp(pose.torsoX, walkTorsoX, walkBlend);
+    pose.torsoY = THREE.MathUtils.lerp(pose.torsoY, walkTorsoY, walkBlend);
+    pose.headY = THREE.MathUtils.lerp(pose.headY, walkHeadY, walkBlend);
+    pose.leftLegX = THREE.MathUtils.lerp(pose.leftLegX, walkLeftLegX, walkBlend);
+    pose.rightLegX = THREE.MathUtils.lerp(pose.rightLegX, walkRightLegX, walkBlend);
+    pose.leftArmX = THREE.MathUtils.lerp(pose.leftArmX, walkLeftArmX, walkBlend);
+    pose.rightArmX = THREE.MathUtils.lerp(pose.rightArmX, walkRightArmX, walkBlend);
+    pose.leftArmZ = THREE.MathUtils.lerp(pose.leftArmZ, walkLeftArmZ, walkBlend);
+    pose.rightArmZ = THREE.MathUtils.lerp(pose.rightArmZ, walkRightArmZ, walkBlend);
+    pose.capeX = THREE.MathUtils.lerp(pose.capeX, walkCapeX, walkBlend);
   }
 
   // Active Trick / Reaction Override
@@ -366,6 +381,8 @@ export default function Minifig({
   const rigRef = useRef(rig);
   const outerGroup = useRef(null);
   const scalePulse = useRef(1);
+  const walkBlendRef = useRef(0);
+  const walkCycleRef = useRef(0);
 
   useEffect(() => {
     rigRef.current = rig;
@@ -436,6 +453,12 @@ export default function Minifig({
 
     const pointer = globalPointerRef?.current ?? state.pointer;
 
+    const targetWalk = isWalking && !isGrabbed ? 1 : 0;
+    walkBlendRef.current = dampValue(walkBlendRef.current, targetWalk, 14, delta);
+    if (walkBlendRef.current > 0.001) {
+      walkCycleRef.current += delta * 15.5 * walkBlendRef.current;
+    }
+
     const pose = getCharacterPose({
       mood,
       elapsed,
@@ -443,7 +466,8 @@ export default function Minifig({
       trickKind,
       trickProgress,
       isBatman,
-      isWalking,
+      walkBlend: walkBlendRef.current,
+      walkCycle: walkCycleRef.current,
       walkDirection,
       isGrabbed,
     });

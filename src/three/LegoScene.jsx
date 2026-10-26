@@ -1,9 +1,10 @@
-import { Suspense, useMemo } from 'react';
-import { Canvas } from '@react-three/fiber';
+import { Suspense, useMemo, useRef } from 'react';
+import { Canvas, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import Minifig from './Minifig';
 
 function SoftContactShadow({ badgeMode = false, isWalking = false }) {
+  const meshRef = useRef(null);
   const shadowTexture = useMemo(() => {
     if (typeof document === 'undefined') return null;
     const canvas = document.createElement('canvas');
@@ -21,12 +22,21 @@ function SoftContactShadow({ badgeMode = false, isWalking = false }) {
     return tex;
   }, []);
 
+  useFrame((_, delta) => {
+    if (!meshRef.current) return;
+    const targetX = isWalking ? 1.35 : 1.22;
+    const targetY = isWalking ? 0.85 : 0.78;
+    meshRef.current.scale.x = THREE.MathUtils.damp(meshRef.current.scale.x, targetX, 10, delta);
+    meshRef.current.scale.y = THREE.MathUtils.damp(meshRef.current.scale.y, targetY, 10, delta);
+  });
+
   if (badgeMode || !shadowTexture) {
     return null;
   }
 
   return (
     <mesh
+      ref={meshRef}
       position={[0, -1.03, 0]}
       rotation={[-Math.PI / 2, 0, 0]}
       scale={isWalking ? [1.35, 0.85, 1] : [1.22, 0.78, 1]}
