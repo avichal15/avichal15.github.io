@@ -1,1055 +1,486 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import LegoScene from './three/LegoScene';
+import { soundEngine } from './utils/soundEngine';
 import {
+  ALL_PROJECTS,
   ALL_WORK_BY_SLUG,
-  ARCHIVE_PROJECTS,
   CERTIFICATIONS,
-  FEATURED_STORIES,
+  CERTIFICATIONS_BY_SLUG,
+  HERO_IDLE_QUIPS,
+  MASCOT_TRICKS,
   OUTFITS,
-  PROFILE,
-  ROLE_OUTFIT_RULES,
-  TRICKS,
+  OWNER_PROFILE,
+  PHONEY_AUDIO_EMOJIS,
+  TOUR_CHAPTERS,
+  getAdjacentProjects,
 } from './data/portfolioData';
 
-const STAGE_WAYPOINTS = [
-  { id: 'sec-0', left: 73, top: 56, scale: 1.0, badge: false, mood: 'wave', autoOutfit: 'classic', label: '00 // INTRO' },
-  { id: 'sec-1', left: 22, top: 56, scale: 1.0, badge: false, mood: 'builder', autoOutfit: 'doctor', label: '01 // MEDISTUDYGO' },
-  { id: 'sec-2', left: 78, top: 56, scale: 1.0, badge: false, mood: 'caller', autoOutfit: 'techy', label: '02 // PHONEY AI' },
-  { id: 'sec-3', left: 22, top: 56, scale: 1.0, badge: false, mood: 'commerce', autoOutfit: 'classic', label: '03 // TRUGIFTING' },
-  { id: 'sec-4', left: 78, top: 56, scale: 1.0, badge: false, mood: 'architect', autoOutfit: 'masterplayer', label: '04 // MASTERPLAYER' },
-  { id: 'sec-5', left: 22, top: 56, scale: 1.0, badge: false, mood: 'builder', autoOutfit: 'techy', label: '05 // OMNIROUTE OSS' },
-  { id: 'sec-6', left: 7, top: 86, scale: 1.0, badge: true, mood: 'champion', autoOutfit: 'gotham', label: '06 // ARCHIVE & CERTS' },
-  { id: 'sec-7', left: 17, top: 56, scale: 0.78, badge: false, mood: 'wave', autoOutfit: 'classic', label: '07 // PHILOSOPHY' },
-  { id: 'sec-8', left: 84, top: 68, scale: 0.72, badge: false, mood: 'champion', autoOutfit: 'gotham', label: '08 // CONTACT' },
-];
-
-const SECTION_THEMES = {
-  'sec-0': '#F5C518',
-  'sec-1': '#BAE6FD',
-  'sec-2': '#DDD6FE',
-  'sec-3': '#FED7AA',
-  'sec-4': '#BBF7D0',
-  'sec-5': '#A5F3FC',
-  'sec-6': '#FDE047',
-  'sec-7': '#FBCFE8',
-  'sec-8': '#E2E8F0',
-};
-
-const OMNIROUTE_SCENARIOS = [
-  {
-    name: 'Scenario 1: Private VLAN (10.24.0.18:5173)',
-    origin: 'http://10.24.0.18:5173',
-    cookie: 'SameSite=Lax; HttpOnly (Secure omitted for HTTP LAN)',
-    status: '200 OK · CSRF & Origin Validated · Session Persisted',
-  },
-  {
-    name: 'Scenario 2: Tailscale Mesh (100.88.14.9:3000)',
-    origin: 'http://100.88.14.9:3000',
-    cookie: 'SameSite=Lax; HttpOnly; Domain=100.88.14.9',
-    status: '200 OK · Multi-hop Loopback Handshake Complete',
-  },
-  {
-    name: 'Scenario 3: Reverse Proxy HTTPS (gateway.avichalgoyal.me)',
-    origin: 'https://gateway.avichalgoyal.me',
-    cookie: 'SameSite=Strict; Secure; HttpOnly',
-    status: '200 OK · TLS Detected · Strict Cookie Enforced',
-  },
-];
-
-const PREVIEW_CATALOG = {
-  medistudygo: {
-    title: 'MediStudyGo — Full-Stack EdTech & AI Dental Tutor',
-    tag: 'INTERACTIVE CASE STUDY · REACT 19 + FASTAPI',
-    liveUrl: 'https://www.medistudygo.com/',
-    repoUrl: 'https://github.com/avichal15',
-    routePath: '/work/medistudygo',
-    summary:
-      'Production medical & dental exam platform featuring 29,500+ flashcards, spaced-repetition scheduling, Razorpay checkout, and a multimodal AI tutor.',
-    metrics: [
-      { label: 'Active Flashcards & Notes', value: '29,500+' },
-      { label: 'Median API Latency', value: '62ms' },
-      { label: 'Payment Webhook Reliability', value: '99.98%' },
-    ],
-    highlights: [
-      'Built custom spaced-repetition deck engine with keyboard-first shortcuts and instant search across 29.5k cards.',
-      'Integrated Gemini & RAG context pipelines so dental students can query anatomy and pathology diagrams directly.',
-      'Shipped full Razorpay subscription lifecycle with idempotent webhook verification and instant entitlement unlocks.',
-    ],
-  },
-  phoney: {
-    title: 'Phoney — Real-Time AI Voice Agent & Android 15 Call Screening',
-    tag: 'ANDROID 15 IN-CALL SERVICE · WEBRTC + GEMINI LIVE',
-    liveUrl: 'https://github.com/avichal15/phoney-beta',
-    repoUrl: 'https://github.com/avichal15/phoney-beta',
-    routePath: '/work/phoney',
-    summary:
-      'Native Android CallScreeningService + InCallService voice agent that intercepts spam, transcribes callers in real time, and lets you inject live voice/soundboard responses.',
-    metrics: [
-      { label: 'End-to-End Voice Turnaround', value: '180ms' },
-      { label: 'Android Target SDK', value: 'API 35 (Android 15)' },
-      { label: 'Spam Interception Accuracy', value: '97.4%' },
-    ],
-    highlights: [
-      'Engineered native Kotlin telecom bridge binding Android InCallService audio streams to low-latency WebSockets.',
-      'Designed tactile glassmorphic call HUD with live transcript streaming, sentiment cues, and instant human takeover.',
-      'Added programmable soundboard & AI persona switching mid-call without dropping the telecom audio session.',
-    ],
-  },
-  trugifting: {
-    title: 'TruGifting — Enterprise Corporate Gifting & Catalog Platform',
-    tag: 'B2B COMMERCE ENGINE · CUSTOM QUOTE WORKFLOWS',
-    liveUrl: 'https://trugifting.com/',
-    repoUrl: 'https://github.com/avichal15',
-    routePath: '/work/trugifting',
-    summary:
-      'High-conversion B2B corporate gifting storefront and bulk quote engine serving enterprise procurement teams with custom MOQ pricing and branding previews.',
-    metrics: [
-      { label: 'Catalog SKUs Indexed', value: '850+' },
-      { label: 'Lighthouse Performance', value: '98 / 100' },
-      { label: 'Quote Turnaround Speed', value: '4x Faster' },
-    ],
-    highlights: [
-      'Architected tiered MOQ pricing calculators and multi-SKU corporate hamper builders with instant PDF/WhatsApp quote dispatch.',
-      'Optimized image delivery pipeline and category filtering for zero-layout-shift browsing on mobile and desktop.',
-      'Built admin inventory & inquiry pipeline for rapid B2B fulfillment tracking.',
-    ],
-  },
-  masterplayer: {
-    title: 'Masterplayer — Custom Jersey & Sublimation Print Studio',
-    tag: 'SPORTS APPAREL CONFIGURATOR · PRODUCTION PIPELINE',
-    liveUrl: 'https://github.com/avichal15/masterplayer-printing-and-design',
-    repoUrl: 'https://github.com/avichal15/masterplayer-printing-and-design',
-    routePath: '/work/masterplayer',
-    summary:
-      'End-to-end custom sportswear and sublimation printing platform managing team roster sizing, fabric selection, vector artwork proofing, and factory job tickets.',
-    metrics: [
-      { label: 'Custom Roster Configurations', value: 'Unlimited' },
-      { label: 'Print Spec Error Reduction', value: '-78%' },
-      { label: 'Order-to-Press Handoff', value: '< 5 mins' },
-    ],
-    highlights: [
-      'Replaced manual WhatsApp spreadsheet chaos with structured team roster tables (player name, number, size, sleeve cut, GSM fabric).',
-      'Automated print-ready job sheet generation for sublimation heat-press operators.',
-      'Built interactive kit preview cards with real-time fabric and collar telemetry.',
-    ],
-  },
-  omniroute: {
-    title: 'OmniRoute — Open-Source Multi-Provider LLM Gateway (PR #13127)',
-    tag: 'OPEN SOURCE CONTRIBUTION · SESSION & LAN AUTH BRIDGE',
-    liveUrl: 'https://github.com/diegosouzapw/OmniRoute',
-    repoUrl: 'https://github.com/diegosouzapw/OmniRoute',
-    routePath: '/work',
-    summary:
-      'Resolved cross-subnet session drops and cookie rejection when self-hosting OmniRoute across private LANs, Docker bridges, and Tailscale nodes without TLS termination.',
-    metrics: [
-      { label: 'Upstream PR Reference', value: 'PR #13127' },
-      { label: 'Providers Routed', value: '13+ Frontier APIs' },
-      { label: 'Failover Overhead', value: '< 12ms' },
-    ],
-    highlights: [
-      'Diagnosed RFC-1918 & CGNAT Tailscale origin mismatches that caused silent 401 session loops on headless Linux deployments.',
-      'Implemented protocol-aware SameSite/Secure cookie negotiation and dynamic origin allowlisting.',
-      'Added automated regression tests covering localhost, LAN IPv4, Docker bridge, and HTTPS reverse-proxy topologies.',
-    ],
-  },
-  microcoach: {
-    title: 'MicroCoach AI — Classroom Observation & Rubric Copilot',
-    tag: 'AI PEDAGOGY ENGINE · REAL-TIME RUBRIC SCORING',
-    liveUrl: 'https://github.com/avichal15/MicroCoach-AI',
-    repoUrl: 'https://github.com/avichal15/MicroCoach-AI',
-    routePath: '/work/microcoach-ai',
-    summary:
-      'AI instructional coaching platform that converts classroom transcripts and observation notes into structured rubric scores and actionable micro-feedback.',
-    metrics: [
-      { label: 'Coaching Turnaround', value: 'Under 30s' },
-      { label: 'Rubric Dimensions', value: '12+ Pedagogical Axes' },
-      { label: 'Feedback Specificity', value: 'Citation-Grounded' },
-    ],
-    highlights: [
-      'Designed multi-stage LLM evaluation pipeline that cites exact classroom dialogue timestamps for every rubric score.',
-      'Built clean dashboard for school leaders to track teacher growth trajectories across semesters.',
-    ],
-  },
-  chanakya: {
-    title: 'Chanakya Reel AI — Autonomous Short-Form Video Synthesis Pipeline',
-    tag: 'GENERATIVE MEDIA PIPELINE · FFMPEG + MULTIMODAL AI',
-    liveUrl: 'https://github.com/avichal15',
-    repoUrl: 'https://github.com/avichal15',
-    routePath: '/work/chanakya-reel-ai',
-    summary:
-      'Automated script-to-reel production harness combining LLM storyboarding, voice synthesis, dynamic word-level captions, and FFmpeg motion compositing.',
-    metrics: [
-      { label: 'Render Aspect Ratio', value: '9:16 @ 60fps' },
-      { label: 'Pipeline Automation', value: 'End-to-End' },
-      { label: 'Caption Sync Drift', value: '< 15ms' },
-    ],
-    highlights: [
-      'Orchestrated scene generation, character consistency prompts, TTS audio timing, and ASS/FFmpeg subtitle burn-in.',
-      'Reduced manual short-form video editing time from hours to a single CLI run.',
-    ],
-  },
-  mahadev: {
-    title: 'Mahadev Plywood — Architectural Material Catalog & Dealer Portal',
-    tag: 'B2B SHOWCASE · HIGH-SPEED PRODUCT DISCOVERY',
-    liveUrl: 'https://github.com/avichal15/Mahadev-plywood',
-    repoUrl: 'https://github.com/avichal15/Mahadev-plywood',
-    routePath: '/work/mahadev-plywood',
-    summary:
-      'Digital catalog and specification portal for architectural plywood, laminates, and veneers with instant dealer inquiry routing.',
-    metrics: [
-      { label: 'Material Categories', value: '6+ Core Lines' },
-      { label: 'Mobile First Load', value: '0.9s' },
-      { label: 'Inquiry Conversion', value: 'Direct WhatsApp + Lead API' },
-    ],
-    highlights: [
-      'Built tactile material comparison cards showcasing thickness tolerances, core grades, and finish textures.',
-      'Engineered SEO-friendly product taxonomy for regional B2B contractors and interior designers.',
-    ],
-  },
-  cert_oci_genai: {
-    title: 'Oracle Cloud Infrastructure 2025 Certified Generative AI Professional',
-    tag: 'OFFICIAL ORACLE CERTIFICATION · LLM & RAG ARCHITECTURE',
-    liveUrl: 'https://www.linkedin.com/in/avichalgoyal007/',
-    repoUrl: '/media/certs/oci-genai-prof.pdf',
-    routePath: '/certifications/oci-genai-professional',
-    summary:
-      'Validated expertise in designing, fine-tuning, and deploying enterprise Large Language Models, RAG pipelines, and semantic vector search on Oracle Cloud Infrastructure.',
-    metrics: [
-      { label: 'Issuing Authority', value: 'Oracle University' },
-      { label: 'Year Earned', value: '2025' },
-      { label: 'Credential Scope', value: 'Professional Tier' },
-    ],
-    highlights: [
-      'Covers OCI Generative AI Service, dedicated AI clusters, LangChain/LlamaIndex orchestration, and enterprise guardrails.',
-      'Verified production competency in embedding models, chunking strategies, and vector database indexing.',
-    ],
-  },
-  cert_oci_ds: {
-    title: 'Oracle Cloud Infrastructure 2025 Certified Data Science Professional',
-    tag: 'OFFICIAL ORACLE CERTIFICATION · MLOPS & MODEL DEPLOYMENT',
-    liveUrl: 'https://www.linkedin.com/in/avichalgoyal007/',
-    repoUrl: '/media/certs/oci-data-science-prof.pdf',
-    routePath: '/certifications/oci-data-science-professional',
-    summary:
-      'Certified proficiency in end-to-end machine learning lifecycles, feature stores, model catalog governance, and scalable inference pipelines on OCI.',
-    metrics: [
-      { label: 'Issuing Authority', value: 'Oracle University' },
-      { label: 'Year Earned', value: '2025' },
-      { label: 'Credential Scope', value: 'Professional Tier' },
-    ],
-    highlights: [
-      'Demonstrated mastery of automated ML pipelines, distributed training, model evaluation, and drift monitoring.',
-    ],
-  },
-  cert_stanford_ml: {
-    title: 'Machine Learning Specialization — Stanford Online & DeepLearning.AI',
-    tag: 'ANDREW NG SPECIALIZATION · SUPERVISED & UNSUPERVISED ML',
-    liveUrl: 'https://www.linkedin.com/in/avichalgoyal007/',
-    repoUrl: '/media/certs/coursera-ml-stanford.pdf',
-    routePath: '/certifications/stanford-ml-specialization',
-    summary:
-      'Foundational and advanced specialization taught by Andrew Ng covering supervised learning, neural networks, decision trees, recommender systems, and reinforcement learning.',
-    metrics: [
-      { label: 'Instructors', value: 'Andrew Ng / Stanford' },
-      { label: 'Core Modules', value: '3-Course Track' },
-      { label: 'Focus', value: 'First-Principles ML' },
-    ],
-    highlights: [
-      'Implemented gradient descent, regularized logistic regression, neural network backpropagation, and collaborative filtering from scratch.',
-    ],
-  },
-};
-
-function getPathname() {
-  return window.location.pathname.replace(/\/+$/, '') || '/';
+function clamp(val, min, max) {
+  return Math.max(min, Math.min(max, val));
 }
 
-function usePathname() {
-  const [pathname, setPathname] = useState(getPathname);
-
-  useEffect(() => {
-    const onPopState = () => setPathname(getPathname());
-    window.addEventListener('popstate', onPopState);
-    return () => window.removeEventListener('popstate', onPopState);
-  }, []);
-
-  const navigate = (to) => {
-    const normalized = to.replace(/\/+$/, '') || '/';
-    if (normalized === pathname) {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      return;
-    }
-    window.history.pushState({}, '', normalized);
-    setPathname(normalized);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  return [pathname, navigate];
-}
-
-function findOutfit(id) {
-  return OUTFITS.find((outfit) => outfit.id === id) ?? OUTFITS[0];
-}
-
-function resolveOutfitFromRole(text) {
-  const normalized = text.trim().toLowerCase();
-  if (!normalized) {
-    return null;
-  }
-
-  for (const rule of ROLE_OUTFIT_RULES) {
-    if (rule.keywords.some((keyword) => normalized.includes(keyword))) {
-      return rule;
-    }
-  }
-
-  return {
-    outfitId: 'techy',
-    message: `Mapped "${text.trim()}" to the Full-Stack Techy suit — shipping clean architecture and fast UX.`,
-  };
-}
-
-function ScrollSpeech({ text }) {
-  const words = useMemo(() => text.split(/\s+/).filter(Boolean), [text]);
-  return (
-    <span className="scroll-speech">
-      {words.map((word, index) => (
-        <span key={`${word}-${index}`} className="scroll-word">
-          {word}{' '}
-        </span>
-      ))}
-    </span>
-  );
-}
-
-function ScratchCard({ onComplete }) {
-  const canvasRef = useRef(null);
-  const [revealed, setRevealed] = useState(false);
-  const [percent, setPercent] = useState(0);
-  const isDrawingRef = useRef(false);
-
-  const initCanvas = () => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    const width = canvas.width;
-    const height = canvas.height;
-
-    ctx.globalCompositeOperation = 'source-over';
-    const grad = ctx.createLinearGradient(0, 0, width, height);
-    grad.addColorStop(0, '#F59E0B');
-    grad.addColorStop(0.5, '#FDE047');
-    grad.addColorStop(1, '#D97706');
-    ctx.fillStyle = grad;
-    ctx.fillRect(0, 0, width, height);
-
-    ctx.strokeStyle = 'rgba(15, 23, 42, 0.16)';
-    ctx.lineWidth = 2;
-    for (let x = -height; x < width; x += 18) {
-      ctx.beginPath();
-      ctx.moveTo(x, 0);
-      ctx.lineTo(x + height, height);
-      ctx.stroke();
-    }
-
-    ctx.fillStyle = '#0F172A';
-    ctx.font = '700 18px "Fredoka", sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText('✦ SCRATCH GOLD FOIL TO REVEAL MNEMONIC ✦', width / 2, height / 2 - 6);
-    ctx.font = '700 12px "Space Mono", monospace';
-    ctx.fillText('DRAG CURSOR OR FINGER ACROSS CARD', width / 2, height / 2 + 18);
-  };
-
-  useEffect(() => {
-    initCanvas();
-  }, []);
-
-  const scratchAt = (clientX, clientY) => {
-    const canvas = canvasRef.current;
-    if (!canvas || revealed) return;
-    const rect = canvas.getBoundingClientRect();
-    const scaleX = canvas.width / rect.width;
-    const scaleY = canvas.height / rect.height;
-    const x = (clientX - rect.left) * scaleX;
-    const y = (clientY - rect.top) * scaleY;
-
-    const ctx = canvas.getContext('2d');
-    ctx.globalCompositeOperation = 'destination-out';
-    ctx.beginPath();
-    ctx.arc(x, y, 28, 0, Math.PI * 2);
-    ctx.fill();
-
-    const img = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
-    let transparent = 0;
-    const total = img.length / 4;
-    for (let i = 3; i < img.length; i += 16) {
-      if (img[i] < 128) transparent += 1;
-    }
-    const ratio = Math.min(100, Math.round((transparent / (total / 4)) * 100));
-    setPercent(ratio);
-    if (ratio >= 45 && !revealed) {
-      setRevealed(true);
-      onComplete?.();
-    }
-  };
-
-  const handleReset = () => {
-    setRevealed(false);
-    setPercent(0);
-    initCanvas();
-  };
-
-  return (
-    <div className="scratch-widget">
-      <div className="scratch-header">
-        <span className="font-mono">HIGH-YIELD DENTAL ANATOMY CARD #402</span>
-        <div className="scratch-actions">
-          <span className="scratch-pct">{revealed ? '100% UNLOCKED' : `${percent}% SCRATCHED`}</span>
-          <button type="button" className="scratch-reset-btn" onClick={handleReset}>
-            Reset Foil
-          </button>
-        </div>
-      </div>
-      <div className="scratch-stage">
-        <div className="scratch-answer">
-          <p className="scratch-kicker">CRANIAL NERVE VII (FACIAL NERVE) BRANCHES:</p>
-          <h4>“To Zanzibar By Motor Car”</h4>
-          <p>
-            <strong>T</strong>emporal · <strong>Z</strong>ygomatic · <strong>B</strong>uccal ·{' '}
-            <strong>M</strong>arginal Mandibular · <strong>C</strong>ervical
-          </p>
-        </div>
-        <canvas
-          ref={canvasRef}
-          width={520}
-          height={148}
-          className={`scratch-canvas ${revealed ? 'is-cleared' : ''}`}
-          onPointerDown={(e) => {
-            isDrawingRef.current = true;
-            scratchAt(e.clientX, e.clientY);
-          }}
-          onPointerMove={(e) => {
-            if (isDrawingRef.current) scratchAt(e.clientX, e.clientY);
-          }}
-          onPointerUp={() => {
-            isDrawingRef.current = false;
-          }}
-          onPointerLeave={() => {
-            isDrawingRef.current = false;
-          }}
-        />
-      </div>
-    </div>
-  );
-}
-
-function PhoneyCallDeck({ onEmojiPulse }) {
-  const [callState, setCallState] = useState('screening');
-  const [seconds, setSeconds] = useState(14);
-  const [activeFeed, setActiveFeed] = useState(
-    'AI Screening Agent: “Hello! Avichal is currently shipping production code. State your inquiry and I will route or summarize it live.”'
-  );
-
-  useEffect(() => {
-    const timer = window.setInterval(() => {
-      setSeconds((s) => (s + 1) % 3600);
-    }, 1000);
-    return () => window.clearInterval(timer);
-  }, []);
-
-  const playTone = (freq1, freq2) => {
-    try {
-      const AudioCtx = window.AudioContext || window.webkitAudioContext;
-      if (!AudioCtx) return;
-      const ctx = new AudioCtx();
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = 'triangle';
-      osc.frequency.setValueAtTime(freq1, ctx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(freq2, ctx.currentTime + 0.18);
-      gain.gain.setValueAtTime(0.08, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.2);
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.start();
-      osc.stop(ctx.currentTime + 0.2);
-    } catch {
-      // Ignore audio errors if blocked by browser autoplay policy
-    }
-  };
-
-  const triggerSoundboard = (emoji, text, f1, f2) => {
-    playTone(f1, f2);
-    setActiveFeed(text);
-    onEmojiPulse?.(emoji);
-  };
-
-  const mm = String(Math.floor(seconds / 60)).padStart(2, '0');
-  const ss = String(seconds % 60).padStart(2, '0');
-
-  return (
-    <div className="phoney-deck">
-      <div className="phoney-statusbar">
-        <span>ANDROID 15 · INCALLSERVICE</span>
-        <span className="phoney-timer">
-          ● {callState.toUpperCase()} · {mm}:{ss}
-        </span>
-      </div>
-      <div className="phoney-caller">
-        <div>
-          <p className="phoney-caller-tag">INCOMING TELECOM STREAM</p>
-          <h4>+91 (800) 555-0199 · Unknown Enterprise Lead</h4>
-        </div>
-        <span className="phoney-badge">180ms WebRTC</span>
-      </div>
-      <div className="phoney-transcript">{activeFeed}</div>
-      <div className="phoney-soundboard">
-        <button
-          type="button"
-          onClick={() =>
-            triggerSoundboard(
-              '🤖',
-              'AI Persona [Executive Gatekeeper]: “Verified caller intent: B2B Engineering Contract. Forwarding transcript to Avichal.”',
-              520,
-              780
-            )
-          }
-        >
-          🤖 AI Gatekeeper
-        </button>
-        <button
-          type="button"
-          onClick={() =>
-            triggerSoundboard(
-              '⚡',
-              'Soundboard [Instant Pitch]: “Avichal builds high-velocity full-stack & AI products. Press 1 to book a technical deep-dive.”',
-              640,
-              960
-            )
-          }
-        >
-          ⚡ Pitch Drop
-        </button>
-        <button
-          type="button"
-          onClick={() =>
-            triggerSoundboard(
-              '🛡️',
-              'Spam Shield Triggered: “Robocall fingerprint matched. Call sandboxed and logged with zero ring interruption.”',
-              420,
-              260
-            )
-          }
-        >
-          🛡️ Block Spam
-        </button>
-      </div>
-      <div className="phoney-controls">
-        <button
-          type="button"
-          className={`phoney-btn ${callState === 'answered' ? 'is-green' : ''}`}
-          onClick={() => {
-            setCallState('answered');
-            playTone(440, 880);
-            setActiveFeed('Live Takeover Active: Direct duplex audio bridged to Android 15 handset.');
-          }}
-        >
-          📞 Answer / Takeover
-        </button>
-        <button
-          type="button"
-          className={`phoney-btn ${callState === 'screening' ? 'is-purple' : ''}`}
-          onClick={() => {
-            setCallState('screening');
-            playTone(580, 690);
-            setActiveFeed('AI Screening Resumed: Gemini Live streaming real-time caller intent analysis.');
-          }}
-        >
-          🧠 Auto-Screen
-        </button>
-      </div>
-    </div>
-  );
-}
-
-function AllWorkView({ navigate }) {
-  const [activeCategory, setActiveCategory] = useState('All');
-
-  const allItems = useMemo(() => {
-    const featured = FEATURED_STORIES.map((s) => ({
-      slug: s.slug,
-      title: s.title,
-      subtitle: s.subtitle,
-      category: 'Featured Flagship',
-      period: s.year,
-      summary: s.summary,
-      stack: s.stack || [],
-      image: s.media?.desktop || null,
-      liveUrl: s.liveUrl,
-      repoUrl: s.repoUrl,
-    }));
-    const archive = ARCHIVE_PROJECTS.map((p) => ({
-      slug: p.slug,
-      title: p.title,
-      subtitle: p.category,
-      category: p.category,
-      period: p.period,
-      summary: p.summary,
-      stack: p.stack || [],
-      image: typeof p.media === 'string' ? p.media : p.media?.desktop || null,
-      liveUrl: p.liveUrl,
-      repoUrl: p.repoUrl,
-    }));
-    return [...featured, ...archive];
-  }, []);
-
-  const categories = useMemo(() => {
-    const unique = new Set(allItems.map((project) => project.category));
-    return ['All', ...unique];
-  }, [allItems]);
-
-  const filteredProjects = useMemo(() => {
-    if (activeCategory === 'All') {
-      return allItems;
-    }
-    return allItems.filter((project) => project.category === activeCategory);
-  }, [activeCategory, allItems]);
-
-  return (
-    <main className="subpage-shell">
-      <div className="subpage-header pixel-shadow-box">
-        <div>
-          <p className="eyebrow">COMPLETE ENGINEERING ARCHIVE · {allItems.length} SYSTEMS</p>
-          <h1 className="subpage-title">All Deployed Products, AI Systems &amp; Client Work</h1>
-          <p className="subpage-lead">
-            Every flagship platform, client storefront, AI agent harness, and utility built and maintained by Avichal
-            Goyal. Click any card for the full architecture breakdown, verified status, and live links.
-          </p>
-        </div>
-        <div className="subpage-actions">
-          <button type="button" className="neo-btn neo-btn-yellow" onClick={() => navigate('/')}>
-            ← Back to 3D Interactive Stage
-          </button>
-          <button type="button" className="neo-btn" onClick={() => navigate('/certifications')}>
-            View Certifications ({CERTIFICATIONS.length})
-          </button>
-        </div>
-      </div>
-
-      <div className="filter-row" role="tablist" aria-label="Filter projects by category">
-        {categories.map((category) => (
-          <button
-            key={category}
-            type="button"
-            className={`nav-chip ${activeCategory === category ? 'active' : ''}`}
-            onClick={() => setActiveCategory(category)}
-          >
-            {category}
-          </button>
-        ))}
-      </div>
-
-      <div className="archive-grid">
-        {filteredProjects.map((project) => (
-          <article key={project.slug} className="archive-card pixel-shadow-box">
-            {project.image ? (
-              <div className="archive-card-media" onClick={() => navigate(`/work/${project.slug}`)}>
-                <img src={project.image} alt={project.title} loading="lazy" />
-              </div>
-            ) : null}
-            <div className="archive-card-top">
-              <span className="pill-badge">{project.category}</span>
-              <span className="archive-period">{project.period}</span>
-            </div>
-            <h2>{project.title}</h2>
-            <p className="archive-subtitle">{project.subtitle}</p>
-            <p className="archive-summary">{project.summary}</p>
-            <div className="stack-tags">
-              {project.stack.map((tech) => (
-                <span key={tech} className="stack-tag">
-                  {tech}
-                </span>
-              ))}
-            </div>
-            <div className="archive-card-actions">
-              <button
-                type="button"
-                className="neo-btn neo-btn-yellow"
-                onClick={() => navigate(`/work/${project.slug}`)}
-              >
-                Read Case Study →
-              </button>
-              {project.liveUrl ? (
-                <a className="neo-btn" href={project.liveUrl} target="_blank" rel="noreferrer">
-                  Live Site ↗
-                </a>
-              ) : null}
-              {project.repoUrl ? (
-                <a className="neo-btn" href={project.repoUrl} target="_blank" rel="noreferrer">
-                  GitHub ↗
-                </a>
-              ) : null}
-            </div>
-          </article>
-        ))}
-      </div>
-    </main>
-  );
-}
-
-function ProjectDetailView({ slug, navigate }) {
-  const project = ALL_WORK_BY_SLUG.get(slug);
-
-  if (!project) {
-    return (
-      <main className="subpage-shell">
-        <div className="subpage-header pixel-shadow-box">
-          <div>
-            <p className="eyebrow">PROJECT NOT FOUND</p>
-            <h1 className="subpage-title">That project slug doesn&apos;t exist</h1>
-          </div>
-          <button type="button" className="neo-btn neo-btn-yellow" onClick={() => navigate('/work')}>
-            ← Back to All Work
-          </button>
-        </div>
-      </main>
-    );
-  }
-
-  const heroImg = typeof project.media === 'string' ? project.media : project.media?.desktop || null;
-  const highlights = project.whatIBuiltAndOwned || (project.solution ? [project.solution] : []);
-
-  return (
-    <main className="subpage-shell">
-      <div className="subpage-header pixel-shadow-box">
-        <div>
-          <p className="eyebrow">
-            {project.category || project.relationshipBadge} · {project.period || project.year}
-          </p>
-          <h1 className="subpage-title">{project.title}</h1>
-          <p className="subpage-lead">{project.subtitle || project.summary}</p>
-        </div>
-        <div className="subpage-actions">
-          <button type="button" className="neo-btn" onClick={() => navigate('/work')}>
-            ← All Work
-          </button>
-          <button type="button" className="neo-btn" onClick={() => navigate('/')}>
-            3D Stage
-          </button>
-          {project.liveUrl ? (
-            <a className="neo-btn neo-btn-yellow" href={project.liveUrl} target="_blank" rel="noreferrer">
-              Visit Live Deployment ↗
-            </a>
-          ) : null}
-          {project.repoUrl ? (
-            <a className="neo-btn" href={project.repoUrl} target="_blank" rel="noreferrer">
-              Source Repository ↗
-            </a>
-          ) : null}
-        </div>
-      </div>
-
-      {heroImg ? (
-        <div className="detail-hero-media pixel-shadow-box">
-          <img src={heroImg} alt={project.title} />
-        </div>
-      ) : null}
-
-      <div className="detail-columns">
-        <section className="detail-panel pixel-shadow-box">
-          <h2>System Overview</h2>
-          <p>{project.summary}</p>
-          {project.problem ? (
-            <>
-              <h3>Problem Statement</h3>
-              <p>{project.problem}</p>
-            </>
-          ) : null}
-          {highlights.length > 0 ? (
-            <>
-              <h3>Engineering Highlights &amp; Ownership</h3>
-              <ul className="detail-list">
-                {highlights.map((item) => (
-                  <li key={item}>{item}</li>
-                ))}
-              </ul>
-            </>
-          ) : null}
-        </section>
-
-        <aside className="detail-panel pixel-shadow-box">
-          <h3>Technology Stack</h3>
-          <div className="stack-tags">
-            {(project.stack || []).map((tech) => (
-              <span key={tech} className="stack-tag">
-                {tech}
-              </span>
-            ))}
-          </div>
-        </aside>
-      </div>
-    </main>
-  );
-}
-
-function CertificationsView({ navigate }) {
-  return (
-    <main className="subpage-shell">
-      <div className="subpage-header pixel-shadow-box">
-        <div>
-          <p className="eyebrow">VERIFIED CREDENTIALS &amp; TECHNICAL TRAINING</p>
-          <h1 className="subpage-title">Certifications &amp; Academic Credentials</h1>
-          <p className="subpage-lead">
-            Verified credentials across Business Intelligence, Full-Stack MERN Engineering, and Data Structures &amp;
-            Algorithms.
-          </p>
-        </div>
-        <div className="subpage-actions">
-          <button type="button" className="neo-btn neo-btn-yellow" onClick={() => navigate('/')}>
-            ← Back to 3D Stage
-          </button>
-          <button type="button" className="neo-btn" onClick={() => navigate('/work')}>
-            Explore All Projects
-          </button>
-        </div>
-      </div>
-
-      <div className="archive-grid">
-        {CERTIFICATIONS.map((cert) => (
-          <article key={cert.slug} className="archive-card pixel-shadow-box">
-            <div className="archive-card-top">
-              <span className="pill-badge">{cert.issuer}</span>
-              <span className="archive-period">{cert.issueDate}</span>
-            </div>
-            <h2>{cert.title}</h2>
-            <p className="archive-subtitle">{cert.category}</p>
-            <p className="archive-summary">{cert.summary}</p>
-            <div className="stack-tags">
-              {(cert.skills || []).map((skill) => (
-                <span key={skill} className="stack-tag">
-                  {skill}
-                </span>
-              ))}
-            </div>
-            <div className="archive-card-actions">
-              <button
-                type="button"
-                className="neo-btn neo-btn-yellow"
-                onClick={() => navigate(`/certifications/${cert.slug}`)}
-              >
-                Inspect Credential →
-              </button>
-              {cert.verifyUrl ? (
-                <a className="neo-btn" href={cert.verifyUrl}>
-                  {cert.verifyLabel || 'Verify'} ↗
-                </a>
-              ) : null}
-            </div>
-          </article>
-        ))}
-      </div>
-    </main>
-  );
-}
-
-function CertificationDetailView({ slug, navigate }) {
-  const cert = CERTIFICATIONS.find((item) => item.slug === slug);
-
-  if (!cert) {
-    return (
-      <main className="subpage-shell">
-        <div className="subpage-header pixel-shadow-box">
-          <div>
-            <p className="eyebrow">CREDENTIAL NOT FOUND</p>
-            <h1 className="subpage-title">That certification slug doesn&apos;t exist</h1>
-          </div>
-          <button type="button" className="neo-btn neo-btn-yellow" onClick={() => navigate('/certifications')}>
-            ← Back to Certifications
-          </button>
-        </div>
-      </main>
-    );
-  }
-
-  return (
-    <main className="subpage-shell">
-      <div className="subpage-header pixel-shadow-box">
-        <div>
-          <p className="eyebrow">
-            {cert.issuer} · {cert.issueDate}
-          </p>
-          <h1 className="subpage-title">{cert.title}</h1>
-          <p className="subpage-lead">{cert.summary}</p>
-        </div>
-        <div className="subpage-actions">
-          <button type="button" className="neo-btn" onClick={() => navigate('/certifications')}>
-            ← All Certifications
-          </button>
-          {cert.verifyUrl ? (
-            <a className="neo-btn neo-btn-yellow" href={cert.verifyUrl}>
-              {cert.verifyLabel || 'Request Verification'} ↗
-            </a>
-          ) : null}
-        </div>
-      </div>
-
-      <div className="detail-columns">
-        <section className="detail-panel pixel-shadow-box">
-          <h2>Applied in Production Work</h2>
-          <p>{cert.appliedInWork}</p>
-          <h3>Verification Note</h3>
-          <p>{cert.verificationNote}</p>
-        </section>
-
-        <aside className="detail-panel pixel-shadow-box">
-          <h2>Verified Competencies</h2>
-          <div className="stack-tags">
-            {(cert.skills || []).map((skill) => (
-              <span key={skill} className="stack-tag">
-                {skill}
-              </span>
-            ))}
-          </div>
-        </aside>
-      </div>
-    </main>
-  );
+function lerp(a, b, t) {
+  return a + (b - a) * t;
 }
 
 export default function App() {
-  const [pathname, navigate] = usePathname();
-  const [activeWaypointIdx, setActiveWaypointIdx] = useState(0);
-  const [outfitId, setOutfitId] = useState('classic');
-  const [manualOutfitLock, setManualOutfitLock] = useState(false);
-  const [angleIndex, setAngleIndex] = useState(0);
-  const [trickState, setTrickState] = useState({ kind: 'wave', startedAt: 0 });
-  const [roleQuery, setRoleQuery] = useState('');
-  const [roleFeedback, setRoleFeedback] = useState(
-    'Try typing "doctor", "payment", "security", "jersey", or "founder" — or use the 3D controls on the floating LEGO character!'
-  );
-  const [morphActive, setMorphActive] = useState(false);
+  // ---------------------------------------------------------------------------
+  // Core Portfolio & Character State
+  // ---------------------------------------------------------------------------
+  const [batmanMode, setBatmanMode] = useState(false);
+  const [manualOutfit, setManualOutfit] = useState(null);
+  const [autoOutfit, setAutoOutfit] = useState('classic');
+  const [trickState, setTrickState] = useState({ name: null, nonce: 0 });
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [soundMuted, setSoundMuted] = useState(false);
+  const [speechText, setSpeechText] = useState(HERO_IDLE_QUIPS[0]);
+  const [speechOverride, setSpeechOverride] = useState(null);
   const [floatingEmoji, setFloatingEmoji] = useState(null);
-  const [omniScenarioIdx, setOmniScenarioIdx] = useState(0);
-  const [previewKey, setPreviewKey] = useState(null);
+  const [playingEmojiId, setPlayingEmojiId] = useState(null);
+  const [emailCopied, setEmailCopied] = useState(false);
 
-  const stageRef = useRef(null);
-  const trickIndexRef = useRef(0);
-  const isJumpingRef = useRef(false);
-  const [isJumpingAcross, setIsJumpingAcross] = useState(false);
+  // In-website Project / Certification Window state
+  const [activeWindowSlug, setActiveWindowSlug] = useState(null);
+  const [activeWindowType, setActiveWindowType] = useState('project'); // 'project' | 'cert'
+  const [windowCommentIdx, setWindowCommentIdx] = useState(0);
 
-  const isBatmanMode = outfitId === 'gotham';
+  // Scroll-choreographed Character Stage & Word Highlighting State
+  const [stageState, setStageState] = useState({
+    leftPercent: 73,
+    topPercent: 54,
+    isBadge: false,
+    isWalking: false,
+    walkDirection: -1,
+    mood: 'wave',
+  });
+  const [aboutLitCount, setAboutLitCount] = useState(0);
+  const [tourProgress, setTourProgress] = useState(() =>
+    Object.fromEntries(
+      TOUR_CHAPTERS.map((ch) => [
+        ch.id,
+        { activeStep: 0, bubbleLitCounts: ch.bubbles.map(() => 0) },
+      ])
+    )
+  );
 
-  // Sync Batman dark mode class onto document.body
-  useEffect(() => {
-    if (isBatmanMode) {
-      document.body.classList.add('batman-mode');
-    } else {
-      document.body.classList.remove('batman-mode');
+  // Grab & Drag + Cursor Tickle/Sneeze Tracking
+  const [isGrabbed, setIsGrabbed] = useState(false);
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  const dragStartRef = useRef({ x: 0, y: 0, lastX: 0, lastY: 0, shakeScore: 0 });
+  const hoverShakeRef = useRef({ lastX: 0, lastY: 0, score: 0, cooldownUntil: 0 });
+  const globalPointerRef = useRef({ x: 0, y: 0 });
+
+  // Section & Scroll Refs
+  const heroRef = useRef(null);
+  const aboutRef = useRef(null);
+  const chapterRefs = useRef({});
+  const bubbleRefs = useRef({});
+  const workRef = useRef(null);
+  const certsRef = useRef(null);
+  const footerRef = useRef(null);
+  const projectWindowRef = useRef(null);
+
+  // Audio Blip Deduplication Refs
+  const prevAboutLitRef = useRef(0);
+  const prevBubbleLitRef = useRef({});
+  const speechTimeoutRef = useRef(null);
+
+  const aboutWords = useMemo(() => OWNER_PROFILE.aboutText.split(' '), []);
+  const activeOutfitId = batmanMode ? 'gotham' : manualOutfit || autoOutfit;
+  const activeOutfitObj = useMemo(
+    () => OUTFITS.find((o) => o.id === activeOutfitId) || OUTFITS[0],
+    [activeOutfitId]
+  );
+
+  // ---------------------------------------------------------------------------
+  // Helper: Temporary Speech Cloud Override
+  // ---------------------------------------------------------------------------
+  const sayTemporarily = useCallback((text, durationMs = 4200) => {
+    setSpeechOverride(text);
+    if (speechTimeoutRef.current) {
+      clearTimeout(speechTimeoutRef.current);
     }
-  }, [isBatmanMode]);
+    speechTimeoutRef.current = setTimeout(() => {
+      setSpeechOverride(null);
+    }, durationMs);
+  }, []);
 
-  const triggerMorphFlash = () => {
-    setMorphActive(true);
-    window.setTimeout(() => setMorphActive(false), 560);
-  };
+  // ---------------------------------------------------------------------------
+  // Trigger Character Trick + Sound
+  // ---------------------------------------------------------------------------
+  const triggerTrick = useCallback(
+    (trickId, customMessage) => {
+      setTrickState((prev) => ({ name: trickId, nonce: prev.nonce + 1 }));
+      soundEngine.trick(trickId);
 
-  // Continuous Scroll Choreography: Parabolic Jump Arcs + Word-by-Word Reveal + Dynamic Section Background
+      const trickQuips = {
+        dance: '🕺 Watch the footwork! Shipping code at 120 BPM.',
+        backflip: '🤸 Alley-oop! Zero-downtime deployment flip!',
+        spin: '🌀 360° full-stack rotation!',
+        superhero: '🦸 Superhero landing! Hard on the knees, great for production.',
+        panic: '😱 Wait—who force-pushed to main on a Friday?!',
+        fly: '🚀 Taking off to low-latency orbit!',
+        vanish: '🥷 Ninja mode activated. Poof!',
+        hiccup: '🫧 Hic! Excuse me—too much espresso.',
+        peekaboo: '🙈 Peekaboo! Still here.',
+        selfie: '📸 Say cheese! Capturing the viewport.',
+        dizzy: '😵‍💫 Whoa... everything is spinning!',
+        sneeze: '🤧 Achoo! Excuse me.',
+        sulk: '😤 Hmph. Fine, I’ll optimize the bundle myself.',
+      };
+
+      sayTemporarily(customMessage || trickQuips[trickId] || '✨ Ta-da!', 3800);
+    },
+    [sayTemporarily]
+  );
+
+  // ---------------------------------------------------------------------------
+  // Batman Nocturnal Mode Toggle
+  // ---------------------------------------------------------------------------
+  const toggleBatmanMode = useCallback(() => {
+    setBatmanMode((prev) => {
+      const next = !prev;
+      if (next) {
+        soundEngine.batmanTransform(true);
+        setTrickState((t) => ({ name: 'superhero', nonce: t.nonce + 1 }));
+        sayTemporarily("🦇 I'm Batman. Nocturnal production architecture engaged.", 4800);
+      } else {
+        soundEngine.batmanTransform(false);
+        setTrickState((t) => ({ name: 'spin', nonce: t.nonce + 1 }));
+        sayTemporarily('☀️ Back to daylight builder suit!', 3500);
+      }
+      return next;
+    });
+  }, [sayTemporarily]);
+
   useEffect(() => {
-    if (pathname !== '/') return undefined;
+    document.body.classList.toggle('batman-mode', batmanMode);
+  }, [batmanMode]);
 
+  useEffect(() => {
+    document.body.classList.toggle('window-open', Boolean(activeWindowSlug));
+  }, [activeWindowSlug]);
+
+  // ---------------------------------------------------------------------------
+  // Global Pointer Tracking for 3D Head/Torso Follow + Drag Handling
+  // ---------------------------------------------------------------------------
+  useEffect(() => {
+    const handlePointerMove = (e) => {
+      const nx = (e.clientX / window.innerWidth) * 2 - 1;
+      const ny = -((e.clientY / window.innerHeight) * 2 - 1);
+      globalPointerRef.current = { x: clamp(nx, -1, 1), y: clamp(ny, -1, 1) };
+
+      if (isGrabbed) {
+        const dx = e.clientX - dragStartRef.current.x;
+        const dy = e.clientY - dragStartRef.current.y;
+        const stepDx = Math.abs(e.clientX - dragStartRef.current.lastX);
+        const stepDy = Math.abs(e.clientY - dragStartRef.current.lastY);
+        dragStartRef.current.lastX = e.clientX;
+        dragStartRef.current.lastY = e.clientY;
+        dragStartRef.current.shakeScore = dragStartRef.current.shakeScore * 0.88 + stepDx + stepDy;
+
+        setDragOffset({
+          x: clamp(dx, -window.innerWidth * 0.42, window.innerWidth * 0.42),
+          y: clamp(dy, -window.innerHeight * 0.36, window.innerHeight * 0.36),
+        });
+      }
+    };
+
+    const handlePointerUp = () => {
+      if (!isGrabbed) return;
+      setIsGrabbed(false);
+      const shakeScore = dragStartRef.current.shakeScore;
+      dragStartRef.current.shakeScore = 0;
+      setDragOffset({ x: 0, y: 0 });
+
+      if (shakeScore > 260) {
+        soundEngine.dizzy();
+        setTrickState((prev) => ({ name: 'dizzy', nonce: prev.nonce + 1 }));
+        sayTemporarily('😵‍💫 Whoa, easy there! You shook me dizzy!', 4200);
+      } else {
+        soundEngine.drop();
+      }
+    };
+
+    window.addEventListener('pointermove', handlePointerMove, { passive: true });
+    window.addEventListener('pointerup', handlePointerUp);
+    return () => {
+      window.removeEventListener('pointermove', handlePointerMove);
+      window.removeEventListener('pointerup', handlePointerUp);
+    };
+  }, [isGrabbed, sayTemporarily]);
+
+  // ---------------------------------------------------------------------------
+  // Idle Hero Quip Rotation
+  // ---------------------------------------------------------------------------
+  useEffect(() => {
+    let idx = 0;
+    const interval = setInterval(() => {
+      idx = (idx + 1) % HERO_IDLE_QUIPS.length;
+      if (!activeWindowSlug && window.scrollY < window.innerHeight * 0.45) {
+        setSpeechText(HERO_IDLE_QUIPS[idx]);
+      }
+    }, 6200);
+    return () => clearInterval(interval);
+  }, [activeWindowSlug]);
+
+  // ---------------------------------------------------------------------------
+  // Scroll Choreography Engine (sebg.ch Right->Left Walk, Post-Arrival Word Blips,
+  // Sticky Tour Chapters, Bottom-Left Circular Badge, and Footer Return)
+  // ---------------------------------------------------------------------------
+  useEffect(() => {
     let rafId = null;
 
-    const updateChoreography = () => {
-      const vh = Math.max(window.innerHeight, 1);
-      const scrollCenter = window.scrollY + vh * 0.5;
+    const updateScrollChoreography = () => {
+      const vh = window.innerHeight || 1;
+      const scrollY = window.scrollY;
 
-      // 1. Word-by-word progressive reveal (.scroll-word)
-      const wordNodes = document.querySelectorAll('.scroll-word');
-      wordNodes.forEach((wordEl) => {
-        const rect = wordEl.getBoundingClientRect();
-        const triggerPoint = vh * 0.86;
-        if (rect.top < triggerPoint) {
-          wordEl.classList.add('lit');
+      const aboutEl = aboutRef.current;
+      const workEl = workRef.current;
+      const footerEl = footerRef.current;
+
+      const aboutRect = aboutEl ? aboutEl.getBoundingClientRect() : null;
+      const workRect = workEl ? workEl.getBoundingClientRect() : null;
+      const footerRect = footerEl ? footerEl.getBoundingClientRect() : null;
+
+      // 1. Determine About Section Walk Progress & STRICT Post-Arrival Word Highlighting
+      let nextLeft = 73;
+      let nextTop = 54;
+      let nextIsBadge = false;
+      let nextIsWalking = false;
+      let nextWalkDir = -1;
+      let nextMood = 'wave';
+      let nextAutoOutfit = 'classic';
+      let nextSpeech = HERO_IDLE_QUIPS[0];
+      let nextSectionMode = 'hero'; // 'hero' | 'about' | 'tour' | 'bento' | 'footer'
+
+      if (aboutRect) {
+        // Walk progress: starts as About enters viewport (top = vh * 0.92 -> top = vh * 0.25)
+        const walkProgress = clamp((vh * 0.92 - aboutRect.top) / (vh * 0.67), 0, 1);
+
+        if (walkProgress > 0 && aboutRect.bottom > vh * 0.2) {
+          nextSectionMode = 'about';
+          nextLeft = lerp(73, 22, walkProgress);
+          nextTop = 56;
+
+          if (walkProgress < 0.98) {
+            // Character is actively walking from Right (73%) to Left (22%)
+            nextIsWalking = true;
+            nextWalkDir = -1;
+            nextMood = 'wave';
+            nextSpeech = '';
+            // STRICT RULE: Zero words lit before the character arrives at his station!
+            if (prevAboutLitRef.current !== 0) {
+              prevAboutLitRef.current = 0;
+              setAboutLitCount(0);
+            }
+          } else {
+            // Character has arrived at left station (22%) -> points finger & lights words as user scrolls!
+            nextIsWalking = false;
+            nextMood = 'pointRight';
+            const readSpan = Math.max(aboutRect.height - vh * 0.55, vh * 0.45);
+            const scrolledPastArrival = Math.max(0, vh * 0.25 - aboutRect.top);
+            const readRatio = clamp(scrolledPastArrival / readSpan, 0, 1);
+            const litCount = Math.round(readRatio * aboutWords.length);
+
+            if (litCount !== prevAboutLitRef.current) {
+              if (litCount > prevAboutLitRef.current) {
+                soundEngine.blip(litCount);
+              }
+              prevAboutLitRef.current = litCount;
+              setAboutLitCount(litCount);
+            }
+            nextSpeech = '';
+          }
+        } else if (aboutRect.top >= vh * 0.92) {
+          if (prevAboutLitRef.current !== 0) {
+            prevAboutLitRef.current = 0;
+            setAboutLitCount(0);
+          }
+        } else if (aboutRect.bottom <= vh * 0.2) {
+          nextSectionMode = 'tour';
+          nextLeft = 18;
+          nextTop = 64;
+          nextMood = 'pointRight';
+          nextSpeech = '';
+          if (prevAboutLitRef.current !== aboutWords.length) {
+            prevAboutLitRef.current = aboutWords.length;
+            setAboutLitCount(aboutWords.length);
+          }
+        }
+      }
+
+      // 2. Guided Tour Chapters (3 Sticky Split-Screen Chapters)
+      const nextTourProgress = {};
+      let activeChapter = null;
+
+      TOUR_CHAPTERS.forEach((ch, chIdx) => {
+        const chEl = chapterRefs.current[ch.id];
+        if (!chEl) return;
+        const chRect = chEl.getBoundingClientRect();
+
+        // Check bubble word lighting & active slide step
+        let activeStep = 0;
+        const bubbleVisible = [];
+        const bubbleLitCounts = ch.bubbles.map((text, bIdx) => {
+          const bKey = `${ch.id}-${bIdx}`;
+          const bEl = bubbleRefs.current[bKey];
+          const wordCount = text.split(' ').length;
+          if (!bEl) {
+            bubbleVisible.push(bIdx === 0);
+            return 0;
+          }
+
+          const bRect = bEl.getBoundingClientRect();
+          const isVis = bIdx === 0 || bRect.top <= vh * 0.44;
+          bubbleVisible.push(isVis);
+
+          // Bubble lights up in the clear zone above the character's head
+          const startTop = bIdx === 0 ? vh * 0.76 : vh * 0.44;
+          const span = bIdx === 0 ? vh * 0.42 : vh * 0.34;
+          const ratio = isVis ? clamp((startTop - bRect.top) / span, 0, 1) : 0;
+          const lit = Math.round(ratio * wordCount);
+
+          if (isVis && bRect.top < vh * 0.5) {
+            activeStep = bIdx;
+          }
+
+          const prevLit = prevBubbleLitRef.current[bKey] || 0;
+          if (lit !== prevLit) {
+            if (lit > prevLit && chRect.top < vh && chRect.bottom > 0) {
+              soundEngine.blip(lit + bIdx * 7);
+            }
+            prevBubbleLitRef.current[bKey] = lit;
+          }
+          return lit;
+        });
+
+        nextTourProgress[ch.id] = { activeStep, bubbleLitCounts, bubbleVisible };
+
+        if (chRect.top < vh * 0.82 && chRect.bottom > vh * 0.18) {
+          activeChapter = { chapter: ch, index: chIdx, rect: chRect, activeStep };
+        }
+      });
+
+      setTourProgress((prev) => {
+        let changed = false;
+        for (const ch of TOUR_CHAPTERS) {
+          const nextCh = nextTourProgress[ch.id];
+          const prevCh = prev[ch.id];
+          if (!nextCh || !prevCh) continue;
+          if (
+            nextCh.activeStep !== prevCh.activeStep ||
+            nextCh.bubbleLitCounts.some((v, i) => v !== prevCh.bubbleLitCounts[i]) ||
+            (nextCh.bubbleVisible &&
+              (!prevCh.bubbleVisible ||
+                nextCh.bubbleVisible.some((v, i) => v !== prevCh.bubbleVisible[i])))
+          ) {
+            changed = true;
+            break;
+          }
+        }
+        return changed ? nextTourProgress : prev;
+      });
+
+      if (activeChapter) {
+        const { chapter, index, rect } = activeChapter;
+        nextSectionMode = 'tour';
+        nextAutoOutfit = chapter.outfit;
+        const targetLeft = chapter.mascotSide === 'left' ? 18 : 82;
+        const prevLeft = index === 0 ? 22 : TOUR_CHAPTERS[index - 1].mascotSide === 'left' ? 18 : 82;
+
+        // Walk transition when entering chapter (top between vh * 0.82 and vh * 0.25)
+        const enterRatio = clamp((vh * 0.82 - rect.top) / (vh * 0.52), 0, 1);
+        nextLeft = lerp(prevLeft, targetLeft, enterRatio);
+        nextTop = 72;
+
+        if (enterRatio < 0.94 && Math.abs(targetLeft - prevLeft) > 8) {
+          nextIsWalking = true;
+          nextWalkDir = targetLeft > prevLeft ? 1 : -1;
+          nextMood = 'wave';
+          nextSpeech = '';
         } else {
-          wordEl.classList.remove('lit');
+          nextIsWalking = false;
+          nextMood = chapter.mascotSide === 'left' ? 'pointRight' : 'pointLeft';
+          nextSpeech = '';
         }
-      });
 
-      // 2. Measure section centers
-      const centers = STAGE_WAYPOINTS.map((wp) => {
-        const el = document.getElementById(wp.id);
-        if (!el) return 0;
-        const rect = el.getBoundingClientRect();
-        return window.scrollY + rect.top + rect.height * 0.5;
-      });
-
-      // Find nearest active section
-      let closestIdx = 0;
-      let minDist = Infinity;
-      centers.forEach((c, idx) => {
-        const d = Math.abs(scrollCenter - c);
-        if (d < minDist) {
-          minDist = d;
-          closestIdx = idx;
+        // Dynamic chapter background tint (when not in Batman dark mode)
+        if (!document.body.classList.contains('batman-mode')) {
+          document.documentElement.style.setProperty('--bg-active', chapter.bgLight);
         }
-      });
-
-      setActiveWaypointIdx((prev) => (prev !== closestIdx ? closestIdx : prev));
-
-      // Update section background color variable
-      const activeId = STAGE_WAYPOINTS[closestIdx]?.id || 'sec-0';
-      const activeBg = SECTION_THEMES[activeId] || '#F5C518';
-      document.documentElement.style.setProperty('--bg-active', activeBg);
-
-      // Interpolate between waypoint i and i+1
-      let i = 0;
-      while (i < centers.length - 1 && scrollCenter > centers[i + 1]) {
-        i += 1;
+      } else if (!document.body.classList.contains('batman-mode')) {
+        document.documentElement.style.setProperty('--bg-active', '#F6F2E9');
       }
 
-      const wpA = STAGE_WAYPOINTS[i];
-      const wpB = STAGE_WAYPOINTS[Math.min(i + 1, STAGE_WAYPOINTS.length - 1)];
-      const cA = centers[i] || 0;
-      const cB = centers[Math.min(i + 1, centers.length - 1)] || cA + 1;
-      const rawT = cB > cA ? Math.min(1, Math.max(0, (scrollCenter - cA) / (cB - cA))) : 0;
-      // Hold station within each section; leap briskly across the boundary [0.35, 0.65]
-      const boundaryT = Math.min(1, Math.max(0, (rawT - 0.35) / 0.3));
-      const t = boundaryT * boundaryT * (3 - 2 * boundaryT);
-
-      const interpLeft = wpA.left + (wpB.left - wpA.left) * t;
-      const interpTop = wpA.top + (wpB.top - wpA.top) * t;
-      const interpScale = wpA.scale + (wpB.scale - wpA.scale) * t;
-
-      // Parabolic jump arc when crossing horizontally between Left & Right columns
-      const horizontalDelta = Math.abs(wpB.left - wpA.left);
-      const isCrossJump = horizontalDelta > 28 && boundaryT > 0.05 && boundaryT < 0.95;
-      const jumpArcVh = horizontalDelta > 28 ? -Math.sin(t * Math.PI) * 9.5 : 0;
-
-      if (isCrossJump !== isJumpingRef.current) {
-        isJumpingRef.current = isCrossJump;
-        setIsJumpingAcross(isCrossJump);
-      }
-
-      if (stageRef.current && window.innerWidth > 1024) {
-        const inBadge = STAGE_WAYPOINTS[closestIdx]?.badge;
-        if (inBadge) {
-          stageRef.current.style.left = '7%';
-          stageRef.current.style.top = '86%';
-          stageRef.current.style.transform = 'translate(-50%, -50%) scale(1)';
+      // 3. All Work (#work — 18 Projects) & Certifications (#certifications — 6 Certs):
+      // Character morphs into circular badge in bottom-left corner
+      if (workRect && workRect.top < vh * 0.58) {
+        const inFooter = footerRect && footerRect.top < vh * 0.55;
+        if (!inFooter) {
+          nextSectionMode = 'bento';
+          nextIsBadge = true;
+          nextIsWalking = false;
+          nextMood = 'champion';
+          const inCerts = certsRef.current && certsRef.current.getBoundingClientRect().top < vh * 0.55;
+          nextSpeech = inCerts
+            ? '6 verified credentials! Click any card to inspect or verify on LinkedIn.'
+            : 'All 18 projects in a Bento box! Click any project to open it right inside the site.';
         } else {
-          stageRef.current.style.left = `${interpLeft.toFixed(2)}%`;
-          stageRef.current.style.top = `${(interpTop + jumpArcVh).toFixed(2)}%`;
-          stageRef.current.style.transform = `translate(-50%, -50%) scale(${interpScale.toFixed(3)})`;
+          // 4. Footer (#contact): Character returns to full size on the right side
+          nextSectionMode = 'footer';
+          nextIsBadge = false;
+          nextIsWalking = false;
+          nextLeft = 75;
+          nextTop = 58;
+          nextMood = 'wave';
+          nextSpeech = "Got a project? Click my email to copy it or let's connect on LinkedIn & GitHub!";
         }
       }
+
+      // If in-website Project/Certification Window is open, lock character in bottom-left badge mode
+      if (activeWindowSlug) {
+        nextSectionMode = 'bento';
+        nextIsBadge = true;
+        nextIsWalking = false;
+        nextMood = 'champion';
+      }
+
+      setAutoOutfit((prev) => (prev !== nextAutoOutfit ? nextAutoOutfit : prev));
+      if (scrollY >= vh * 0.35 || activeWindowSlug) {
+        setSpeechText(nextSpeech);
+      }
+
+      setStageState((prev) => {
+        if (
+          Math.abs(prev.leftPercent - nextLeft) < 0.1 &&
+          Math.abs(prev.topPercent - nextTop) < 0.1 &&
+          prev.isBadge === nextIsBadge &&
+          prev.isWalking === nextIsWalking &&
+          prev.walkDirection === nextWalkDir &&
+          prev.mood === nextMood &&
+          prev.sectionMode === nextSectionMode
+        ) {
+          return prev;
+        }
+        return {
+          leftPercent: nextLeft,
+          topPercent: nextTop,
+          isBadge: nextIsBadge,
+          isWalking: nextIsWalking,
+          walkDirection: nextWalkDir,
+          mood: nextMood,
+          sectionMode: nextSectionMode,
+        };
+      });
     };
 
     const onScroll = () => {
       if (rafId) cancelAnimationFrame(rafId);
-      rafId = requestAnimationFrame(updateChoreography);
+      rafId = requestAnimationFrame(updateScrollChoreography);
     };
 
-    updateChoreography();
+    updateScrollChoreography();
     window.addEventListener('scroll', onScroll, { passive: true });
     window.addEventListener('resize', onScroll);
     return () => {
@@ -1057,780 +488,1110 @@ export default function App() {
       window.removeEventListener('scroll', onScroll);
       window.removeEventListener('resize', onScroll);
     };
-  }, [pathname]);
+  }, [aboutWords.length, activeWindowSlug]);
 
-  // Auto-morph outfit on section change unless user manually locked an outfit
+  // ---------------------------------------------------------------------------
+  // Play Phoney Audio Emoji (Chapter 2 Interactive 6-Button Quick Tray)
+  // ---------------------------------------------------------------------------
+  const handlePlayPhoneyEmoji = useCallback(
+    (emojiItem) => {
+      soundEngine.playPhoneyEmoji(emojiItem.id);
+      setPlayingEmojiId(emojiItem.id);
+      setFloatingEmoji(emojiItem.emoji);
+      setTrickState((prev) => ({
+        name: emojiItem.id === 'cheer' || emojiItem.id === 'yay' ? 'dance' : 'spin',
+        nonce: prev.nonce + 1,
+      }));
+      sayTemporarily(emojiItem.quip, 4200);
+
+      setTimeout(() => {
+        setPlayingEmojiId((curr) => (curr === emojiItem.id ? null : curr));
+      }, 650);
+      setTimeout(() => {
+        setFloatingEmoji((curr) => (curr === emojiItem.emoji ? null : curr));
+      }, 1150);
+    },
+    [sayTemporarily]
+  );
+
+  // ---------------------------------------------------------------------------
+  // Open / Close In-Website Project or Certification Window
+  // ---------------------------------------------------------------------------
+  const openProjectWindow = useCallback((slug, type = 'project') => {
+    soundEngine.openWindow();
+    setActiveWindowType(type);
+    setActiveWindowSlug(slug);
+    setWindowCommentIdx(0);
+    setMenuOpen(false);
+    requestAnimationFrame(() => {
+      if (projectWindowRef.current) {
+        projectWindowRef.current.scrollTo({ top: 0, behavior: 'instant' });
+      }
+    });
+  }, []);
+
+  const closeProjectWindow = useCallback(() => {
+    soundEngine.closeWindow();
+    setActiveWindowSlug(null);
+  }, []);
+
+  // Close window on Escape key
   useEffect(() => {
-    if (manualOutfitLock) return;
-    const wp = STAGE_WAYPOINTS[activeWaypointIdx];
-    if (wp?.autoOutfit && wp.autoOutfit !== outfitId) {
-      setOutfitId(wp.autoOutfit);
-      triggerMorphFlash();
+    const onKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        if (activeWindowSlug) closeProjectWindow();
+        if (menuOpen) setMenuOpen(false);
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [activeWindowSlug, closeProjectWindow, menuOpen]);
+
+  // Update bottom-left character commentary bubble as user scrolls inside .project-window
+  const handleProjectWindowScroll = useCallback((e) => {
+    const el = e.currentTarget;
+    const maxScroll = Math.max(1, el.scrollHeight - el.clientHeight);
+    const ratio = clamp(el.scrollTop / maxScroll, 0, 1);
+    const nextIdx = ratio < 0.34 ? 0 : ratio < 0.72 ? 1 : 2;
+    setWindowCommentIdx((prev) => {
+      if (prev !== nextIdx) {
+        soundEngine.blip(nextIdx + 2);
+      }
+      return nextIdx;
+    });
+  }, []);
+
+  // ---------------------------------------------------------------------------
+  // Character Hover Tickle / Sneeze + Grab Start
+  // ---------------------------------------------------------------------------
+  const handleCharacterPointerMove = useCallback(
+    (e) => {
+      if (isGrabbed || stageState.isBadge) return;
+      const now = performance.now();
+      if (now < hoverShakeRef.current.cooldownUntil) return;
+
+      const dx = Math.abs(e.clientX - hoverShakeRef.current.lastX);
+      const dy = Math.abs(e.clientY - hoverShakeRef.current.lastY);
+      hoverShakeRef.current.lastX = e.clientX;
+      hoverShakeRef.current.lastY = e.clientY;
+
+      if (dx + dy < 120) {
+        hoverShakeRef.current.score = hoverShakeRef.current.score * 0.9 + (dx + dy);
+      }
+
+      if (hoverShakeRef.current.score > 460) {
+        hoverShakeRef.current.score = 0;
+        hoverShakeRef.current.cooldownUntil = now + 4500;
+        if (Math.random() > 0.35) {
+          soundEngine.giggle();
+          setTrickState((prev) => ({ name: 'dance', nonce: prev.nonce + 1 }));
+          sayTemporarily("😆 Stop, stop! I'm ticklish!", 3600);
+        } else {
+          soundEngine.sneeze();
+          setTrickState((prev) => ({ name: 'sneeze', nonce: prev.nonce + 1 }));
+          sayTemporarily('🤧 Achoo! Sorry, cursor dust.', 3600);
+        }
+      }
+    },
+    [isGrabbed, sayTemporarily, stageState.isBadge]
+  );
+
+  const handleCharacterPointerDown = useCallback(
+    (e) => {
+      if (stageState.isBadge) {
+        setMenuOpen((prev) => !prev);
+        soundEngine.pop();
+        return;
+      }
+      setIsGrabbed(true);
+      soundEngine.grab();
+      dragStartRef.current = {
+        x: e.clientX - dragOffset.x,
+        y: e.clientY - dragOffset.y,
+        lastX: e.clientX,
+        lastY: e.clientY,
+        shakeScore: 0,
+      };
+    },
+    [dragOffset.x, dragOffset.y, stageState.isBadge]
+  );
+
+  const handleCopyEmail = useCallback(() => {
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(OWNER_PROFILE.email).catch(() => {});
     }
-  }, [activeWaypointIdx, manualOutfitLock]);
+    soundEngine.Sparkle();
+    setEmailCopied(true);
+    sayTemporarily(`📋 Copied ${OWNER_PROFILE.email}! Talk soon.`, 4200);
+    setTimeout(() => setEmailCopied(false), 3200);
+  }, [sayTemporarily]);
 
-  const currentWaypoint = STAGE_WAYPOINTS[activeWaypointIdx] ?? STAGE_WAYPOINTS[0];
-  const currentOutfit = findOutfit(outfitId);
-
-  const cycleOutfit = () => {
-    const currentIndex = OUTFITS.findIndex((item) => item.id === outfitId);
-    const nextOutfit = OUTFITS[(currentIndex + 1) % OUTFITS.length];
-    setManualOutfitLock(true);
-    setOutfitId(nextOutfit.id);
-    triggerMorphFlash();
-    setTrickState({ kind: 'spin', startedAt: performance.now() });
-    setRoleFeedback(`Switched to ${nextOutfit.label} — ${nextOutfit.tagline}`);
-  };
-
-  const triggerTrick = (customKind) => {
-    const kind = customKind ?? TRICKS[trickIndexRef.current % TRICKS.length];
-    trickIndexRef.current += 1;
-    setTrickState({ kind, startedAt: performance.now() });
-  };
-
-  const toggleBatmanMode = () => {
-    setManualOutfitLock(true);
-    if (outfitId === 'gotham') {
-      setOutfitId('classic');
-      triggerMorphFlash();
-      setTrickState({ kind: 'spin', startedAt: performance.now() });
-      setRoleFeedback('Exited Gotham Night Protocol — Back to Classic Builder Yellow.');
-    } else {
-      setOutfitId('gotham');
-      triggerMorphFlash();
-      setTrickState({ kind: 'superhero', startedAt: performance.now() });
-      setRoleFeedback('🦇 I AM VENGEANCE. Gotham Dark Mode & Tactical Cape Activated.');
+  // Active Window Data Resolution
+  const activeWindowItem = useMemo(() => {
+    if (!activeWindowSlug) return null;
+    if (activeWindowType === 'cert') {
+      return CERTIFICATIONS_BY_SLUG.get(activeWindowSlug) || null;
     }
-  };
+    return ALL_WORK_BY_SLUG.get(activeWindowSlug) || null;
+  }, [activeWindowSlug, activeWindowType]);
 
-  const handleRoleSubmit = (event) => {
-    event.preventDefault();
-    const match = resolveOutfitFromRole(roleQuery);
-    if (!match) {
-      setRoleFeedback('Enter any role or keyword (e.g. "doctor", "fintech", "android", "security") to morph the rig.');
-      return;
+  const adjacentWindowProjects = useMemo(() => {
+    if (!activeWindowSlug || activeWindowType !== 'project') return null;
+    return getAdjacentProjects(activeWindowSlug);
+  }, [activeWindowSlug, activeWindowType]);
+
+  // Determine live speech bubble text (override > project window commentary > scroll state)
+  const displayedSpeech = useMemo(() => {
+    if (speechOverride) return speechOverride;
+    if (activeWindowItem) {
+      if (activeWindowType === 'project' && activeWindowItem.commentary?.length) {
+        const idx = clamp(windowCommentIdx, 0, activeWindowItem.commentary.length - 1);
+        return activeWindowItem.commentary[idx];
+      }
+      if (activeWindowType === 'cert') {
+        return activeWindowItem.appliedInWork || activeWindowItem.summary;
+      }
     }
-    setManualOutfitLock(true);
-    setOutfitId(match.outfitId);
-    triggerMorphFlash();
-    setTrickState({ kind: 'superhero', startedAt: performance.now() });
-    setRoleFeedback(match.message);
-  };
+    return speechText;
+  }, [activeWindowItem, activeWindowType, speechOverride, speechText, windowCommentIdx]);
 
-  const scrollToSection = (id) => {
-    if (pathname !== '/') {
-      navigate('/');
-      window.setTimeout(() => {
-        document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
-      }, 90);
-      return;
-    }
-    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
-  };
-
-  const pulseEmoji = (emoji) => {
-    setFloatingEmoji(emoji);
-    triggerTrick('wave');
-    window.setTimeout(() => setFloatingEmoji(null), 1400);
-  };
-
-  // Subpage routes (/work, /work/:slug, /certifications, /certifications/:slug)
-  if (pathname === '/work') {
-    return <AllWorkView navigate={navigate} />;
-  }
-  if (pathname.startsWith('/work/')) {
-    const slug = pathname.replace('/work/', '');
-    return <ProjectDetailView slug={slug} navigate={navigate} />;
-  }
-  if (pathname === '/certifications') {
-    return <CertificationsView navigate={navigate} />;
-  }
-  if (pathname.startsWith('/certifications/')) {
-    const slug = pathname.replace('/certifications/', '');
-    return <CertificationDetailView slug={slug} navigate={navigate} />;
-  }
-
-  const activePreview = previewKey ? PREVIEW_CATALOG[previewKey] : null;
-  const activeOmni = OMNIROUTE_SCENARIOS[omniScenarioIdx] ?? OMNIROUTE_SCENARIOS[0];
+  // Compute Mascot Stage fixed position style
+  const mascotStageStyle = stageState.isBadge
+    ? {
+        left: '74px',
+        top: 'calc(100vh - 78px)',
+        transform: 'translate(-50%, -50%)',
+      }
+    : {
+        left: `${stageState.leftPercent}%`,
+        top: `${stageState.topPercent}%`,
+        transform: `translate(calc(-50% + ${dragOffset.x}px), calc(-50% + ${dragOffset.y}px))`,
+        transition: isGrabbed
+          ? 'none'
+          : 'left 0.28s cubic-bezier(0.22, 1, 0.36, 1), top 0.28s cubic-bezier(0.22, 1, 0.36, 1)',
+      };
 
   return (
-    <div className="lego-portfolio-root">
-      {/* Whole-Site Tactile 3D LEGO Stud Baseplate Matrix */}
+    <>
+      {/* Whole-Viewport 3D LEGO Baseplate Stud Matrix + Batman Nocturnal Glow */}
       <div id="lego-stud-bg" aria-hidden="true" />
       <div id="batsignal-glow" aria-hidden="true" />
 
-      {/* Top Sticky Pill Navigation */}
-      <header className="top-nav">
-        <button type="button" className="brand-chip" onClick={() => scrollToSection('sec-0')}>
-          <span className="brand-stud" />
-          <strong>AVICHAL.GOYAL</strong>
+      {/* Floating Sound Toggle (Bottom Right) */}
+      <div className="floating-controls">
+        <button
+          type="button"
+          className="button button--small sound-toggle"
+          onClick={() => {
+            const muted = soundEngine.toggleMute();
+            setSoundMuted(muted);
+            if (!muted) soundEngine.pop();
+          }}
+          title={soundMuted ? 'Unmute interactive sound effects' : 'Mute interactive sound effects'}
+          aria-label="Toggle sound effects"
+        >
+          {soundMuted ? '🔇' : '🔊'}
         </button>
+      </div>
 
-        <nav className="top-nav-links" aria-label="Storybook slides">
-          <button
-            type="button"
-            className={`nav-chip ${activeWaypointIdx === 0 ? 'active' : ''}`}
-            onClick={() => scrollToSection('sec-0')}
-          >
-            Intro
-          </button>
-          <button
-            type="button"
-            className={`nav-chip ${activeWaypointIdx === 1 ? 'active' : ''}`}
-            onClick={() => scrollToSection('sec-1')}
-          >
-            01 MediStudyGo
-          </button>
-          <button
-            type="button"
-            className={`nav-chip ${activeWaypointIdx === 2 ? 'active' : ''}`}
-            onClick={() => scrollToSection('sec-2')}
-          >
-            02 Phoney AI
-          </button>
-          <button
-            type="button"
-            className={`nav-chip ${activeWaypointIdx === 3 ? 'active' : ''}`}
-            onClick={() => scrollToSection('sec-3')}
-          >
-            03 TruGifting
-          </button>
-          <button
-            type="button"
-            className={`nav-chip ${activeWaypointIdx === 4 ? 'active' : ''}`}
-            onClick={() => scrollToSection('sec-4')}
-          >
-            04 Masterplayer
-          </button>
-          <button
-            type="button"
-            className={`nav-chip ${activeWaypointIdx === 5 ? 'active' : ''}`}
-            onClick={() => scrollToSection('sec-5')}
-          >
-            05 OmniRoute
-          </button>
-          <button
-            type="button"
-            className={`nav-chip ${activeWaypointIdx === 6 ? 'active' : ''}`}
-            onClick={() => scrollToSection('sec-6')}
-          >
-            All Work &amp; Certs
-          </button>
-          <button
-            type="button"
-            className={`nav-chip ${activeWaypointIdx >= 7 ? 'active' : ''}`}
-            onClick={() => scrollToSection('sec-8')}
-          >
-            Contact
-          </button>
-        </nav>
-
-        <div className="top-nav-actions">
-          <button type="button" className="nav-chip" onClick={cycleOutfit}>
-            👕 Dress ({currentOutfit.shortLabel})
-          </button>
-          <button
-            type="button"
-            className={`nav-chip bat-toggle-chip ${isBatmanMode ? 'active' : ''}`}
-            onClick={toggleBatmanMode}
-          >
-            🦇 {isBatmanMode ? 'Exit Batman' : 'Batman Mode'}
-          </button>
-        </div>
-      </header>
-
-      {/* Floating 3D LEGO Character Stage — Choreographed across Left, Right & Circular Badge */}
+      {/* Choreographed 3D LEGO Character Stage (Tracks Cursor, Walks R->L, Points, Morphs to Badge) */}
       <div
-        id="character-stage"
-        ref={stageRef}
-        className={`${currentWaypoint.badge ? 'badge-mode' : ''}`}
-        onClick={() => {
-          if (currentWaypoint.badge) {
-            scrollToSection('sec-7');
-          }
-        }}
-        title={currentWaypoint.badge ? 'Click to summon 3D Minifig back to full size!' : undefined}
+        className={`mascot-stage ${stageState.isBadge ? 'is-badge' : ''} ${
+          isGrabbed ? 'is-grabbing' : ''
+        }`}
+        style={mascotStageStyle}
       >
-        <div id="morph-ring" className={morphActive ? 'active' : ''} />
+        {/* Speech Cloud Over/Beside Character */}
+        {displayedSpeech && !menuOpen && (
+          <div
+            className="mascot-bubble"
+            onClick={() => {
+              soundEngine.pop();
+              setMenuOpen(true);
+            }}
+            title="Click to open tricks & outfits"
+          >
+            {displayedSpeech}
+          </div>
+        )}
 
-        <div id="pointing-badge">
-          {isBatmanMode ? '🦇 GOTHAM KNIGHT // ' : '⚡ '}
-          {currentWaypoint.label}
-        </div>
+        {/* Floating Audio Emoji Burst */}
+        {floatingEmoji && <div className="floating-emoji-burst">{floatingEmoji}</div>}
 
-        {floatingEmoji ? <div className="floating-emoji-burst">{floatingEmoji}</div> : null}
+        {/* Trick & Dress-Up Popover Menu (.mascot-menu) */}
+        {menuOpen && (
+          <div className="mascot-menu" role="dialog" aria-label="Character tricks and outfits">
+            <div className="mascot-menu__header">
+              <span>What should I do?</span>
+              <button
+                type="button"
+                className="mascot-menu__close"
+                onClick={() => setMenuOpen(false)}
+                aria-label="Close menu"
+              >
+                ✕
+              </button>
+            </div>
 
-        <div className="three-canvas-holder">
+            <div className="mascot-menu__section-label">Do a trick</div>
+            <div className="mascot-menu__grid">
+              {MASCOT_TRICKS.map((trick) => (
+                <button
+                  key={trick.id}
+                  type="button"
+                  className="mascot-menu__btn"
+                  onClick={() => {
+                    triggerTrick(trick.id);
+                    setMenuOpen(false);
+                  }}
+                >
+                  {trick.label}
+                </button>
+              ))}
+            </div>
+
+            <div className="mascot-menu__section-label">Dress me up</div>
+            <div className="mascot-menu__grid">
+              {OUTFITS.map((outfit) => (
+                <button
+                  key={outfit.id}
+                  type="button"
+                  className={`mascot-menu__btn ${activeOutfitId === outfit.id ? 'is-active' : ''}`}
+                  onClick={() => {
+                    soundEngine.pop();
+                    if (outfit.id === 'gotham') {
+                      if (!batmanMode) toggleBatmanMode();
+                    } else {
+                      if (batmanMode) setBatmanMode(false);
+                      setManualOutfit(outfit.id);
+                      sayTemporarily(`👕 Switched to ${outfit.label}! ${outfit.tagline}`, 3800);
+                    }
+                    setMenuOpen(false);
+                  }}
+                >
+                  {outfit.shortLabel}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* 3D WebGL Minifigure Canvas */}
+        <div
+          className="mascot-canvas-wrap"
+          onPointerMove={handleCharacterPointerMove}
+          onPointerDown={handleCharacterPointerDown}
+          onDoubleClick={() => {
+            soundEngine.pop();
+            setMenuOpen((prev) => !prev);
+          }}
+        >
           <LegoScene
-            outfitId={outfitId}
-            mood={currentWaypoint.mood}
-            accent={currentOutfit.accent}
+            outfitId={activeOutfitId}
+            mood={stageState.mood}
+            accent={activeOutfitObj.accent}
             trickState={trickState}
-            onCycleOutfit={cycleOutfit}
-            angleIndex={angleIndex}
-            isJumpingAcross={isJumpingAcross}
-            badgeMode={currentWaypoint.badge}
+            onCharacterClick={() => {
+              if (!isGrabbed) {
+                soundEngine.pop();
+                setMenuOpen((prev) => !prev);
+              }
+            }}
+            isWalking={stageState.isWalking}
+            walkDirection={stageState.walkDirection}
+            isGrabbed={isGrabbed}
+            badgeMode={stageState.isBadge}
+            globalPointerRef={globalPointerRef}
           />
         </div>
 
-        {/* 4-Angle Camera View Switcher */}
-        <div className="angle-bar" role="group" aria-label="3D Minifigure viewing angle">
-          {['Front', '3/4 View', 'Side', 'Back'].map((label, idx) => (
-            <button
-              key={label}
-              type="button"
-              className={`angle-pill ${angleIndex === idx ? 'active' : ''}`}
-              onClick={(e) => {
-                e.stopPropagation();
-                setAngleIndex(idx);
-              }}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
-
-        {/* Character Action Dock */}
-        <div className="char-dock">
-          <button type="button" className="dock-btn" onClick={cycleOutfit}>
-            👕 Dress me up
-          </button>
-          <button type="button" className="dock-btn" onClick={() => triggerTrick()}>
-            🤸 Do a trick
-          </button>
-          <button type="button" className="dock-btn dock-btn-bat" onClick={toggleBatmanMode}>
-            🦇 {isBatmanMode ? 'Builder Mode' : 'Transform'}
-          </button>
-        </div>
+        {/* Under-Character Quick Controls (Dress me up / Do a trick) */}
+        {!stageState.isBadge &&
+          (!stageState.sectionMode ||
+            stageState.sectionMode === 'hero' ||
+            stageState.sectionMode === 'footer') && (
+            <div className="mascot-controls">
+              <button
+                type="button"
+                className="mascot-chip"
+                onClick={() => {
+                  soundEngine.pop();
+                  setMenuOpen((prev) => !prev);
+                }}
+              >
+                ✨ Do a trick
+              </button>
+              <button
+                type="button"
+                className="mascot-chip"
+                onClick={() => {
+                  soundEngine.pop();
+                  const currIdx = OUTFITS.findIndex((o) => o.id === activeOutfitId);
+                  const nextOutfit = OUTFITS[(currIdx + 1) % OUTFITS.length];
+                  if (nextOutfit.id === 'gotham') {
+                    toggleBatmanMode();
+                  } else {
+                    if (batmanMode) setBatmanMode(false);
+                    setManualOutfit(nextOutfit.id);
+                    sayTemporarily(`👕 Dressed in ${nextOutfit.label}!`, 3500);
+                  }
+                }}
+              >
+                👕 Dress me up ({activeOutfitObj.shortLabel})
+              </button>
+            </div>
+          )}
       </div>
 
-      {/* Choreographed Story Sections (sec-0 to sec-8) */}
-      <main className="choreo-main">
-        {/* SLIDE 00: HERO INTRO (Card Left, 3D Minifig Right) */}
-        <section id="sec-0" className="story-section align-left">
-          <div className="story-card pixel-shadow-box">
-            <div className="card-kicker-row">
-              <span className="pill-badge">⚡ AVAILABLE FOR HIGH-IMPACT FULL-STACK &amp; AI ROLES</span>
-              <span className="font-mono">JAIPUR / REMOTE</span>
-            </div>
-
-            <h1 className="hero-headline">
-              Hi, I&apos;m <span className="highlight-underline">Avichal Goyal</span> —{' '}
-              <ScrollSpeech text="a product-minded software engineer turning complex AI, telecom, and commerce problems into tactile, zero-latency software." />{' '}
-              And occasionally, I&apos;m{' '}
-              <span className="bat-highlight" onClick={toggleBatmanMode} role="button" tabIndex={0}>
-                Batman
-              </span>
-              .
+      {/* =====================================================================
+          MAIN PORTFOLIO PAGE
+          ===================================================================== */}
+      <main className="portfolio-page">
+        {/* 1. HERO SECTION — Top-Left Name/Role, Top-Right Get in Touch, Plain Text on LEGO Studs */}
+        <section id="hero" className="hero" ref={heroRef}>
+          <header className="hero__header">
+            <h1 className="hero__name">
+              <span className="hero__name-primary">{OWNER_PROFILE.name}</span>
+              <span className="hero__name-sub">{OWNER_PROFILE.roleTitle}</span>
             </h1>
 
-            <p className="story-lead">
-              <ScrollSpeech text="Scroll down to watch my rigged 3D LEGO minifigure leap across the screen, switch suits for each domain, and walk you through 10+ production platforms." />
-            </p>
+            <div className="hero__header-actions">
+              <a
+                href="#contact"
+                className="button button--yellow"
+                onClick={() => soundEngine.pop()}
+              >
+                Get in touch
+              </a>
+            </div>
+          </header>
 
-            {/* Interactive Role-to-Suit Matcher */}
-            <form className="role-matcher-box" onSubmit={handleRoleSubmit}>
-              <label htmlFor="role-input" className="font-mono">
-                🎯 TYPE YOUR TEAM OR DOMAIN TO MORPH MY 3D SUIT:
-              </label>
-              <div className="role-input-row">
-                <input
-                  id="role-input"
-                  type="text"
-                  value={roleQuery}
-                  onChange={(e) => setRoleQuery(e.target.value)}
-                  placeholder="e.g. HealthTech, Android Voice AI, Payments, Security, Batman..."
-                />
-                <button type="submit" className="neo-btn neo-btn-yellow">
-                  Morph Rig →
+          <div className="hero__body">
+            <div className="hero__copy">
+              <h2 className="hero__headline">
+                {OWNER_PROFILE.heroLeadBeforeBatman}
+                <button
+                  type="button"
+                  className="batman-trigger"
+                  onClick={toggleBatmanMode}
+                  title="Click to transform into Batman"
+                >
+                  {OWNER_PROFILE.heroBatmanWord}
+                </button>
+                .
+              </h2>
+            </div>
+          </div>
+
+          <div className="hero__scroll-cue">
+            <span>↓ Scroll for the guided tour</span>
+            <span>·</span>
+            <span>Drag me, tickle me, or double-click for a trick</span>
+          </div>
+        </section>
+
+        {/* 2. ABOUT SECTION — Character Walks Right -> Left, Then Points & Highlights Each Word with Blip Sound */}
+        <section id="about" className="about" ref={aboutRef}>
+          <div className="about__content">
+            <span className="about__kicker">01 // GUIDED TOUR</span>
+            <p className="about__text" aria-label={OWNER_PROFILE.aboutText}>
+              {aboutWords.map((word, idx) => (
+                <span key={idx}>
+                  <span className={`about__word ${idx < aboutLitCount ? 'is-lit' : ''}`}>
+                    {word}
+                  </span>
+                  {idx < aboutWords.length - 1 ? ' ' : ''}
+                </span>
+              ))}
+            </p>
+          </div>
+        </section>
+
+        {/* 3. GUIDED TOUR CHAPTERS (3 Sticky Split-Screen Chapters + Phoney 6 Default Audio Emojis) */}
+        <section id="tour" className="tour">
+          {TOUR_CHAPTERS.map((chapter, chapterIdx) => {
+            const chState = tourProgress[chapter.id] || {
+              activeStep: 0,
+              bubbleLitCounts: chapter.bubbles.map(() => 0),
+            };
+            const currentStep = chState.activeStep;
+
+            return (
+              <article
+                key={chapter.id}
+                id={chapter.id}
+                ref={(el) => {
+                  chapterRefs.current[chapter.id] = el;
+                }}
+                className={`tour__chapter tour__chapter--mascot-${chapter.mascotSide}`}
+              >
+                {/* Chapter Title Header + View Project Button */}
+                <div className="tour__header">
+                  <h2 className="tour__title" aria-label={chapter.title}>
+                    {chapter.title.split('').map((ch, cIdx) => (
+                      <span
+                        key={cIdx}
+                        className="tour__char"
+                        style={{ transitionDelay: `${cIdx * 18}ms` }}
+                      >
+                        {ch === ' ' ? '\u00A0' : ch}
+                      </span>
+                    ))}
+                  </h2>
+
+                  <div className="tour__header-actions">
+                    <button
+                      type="button"
+                      className="button button--yellow"
+                      onClick={() => openProjectWindow(chapter.projectSlug, 'project')}
+                    >
+                      View project
+                    </button>
+                    {chapter.hosts?.[0] && (
+                      <a
+                        href={chapter.hosts[0].url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="button"
+                        onClick={() => soundEngine.pop()}
+                      >
+                        Visit {chapter.hosts[0].label} ↗
+                      </a>
+                    )}
+                  </div>
+                </div>
+
+                {/* Sticky Split-Screen Body: Scrolling Speech Bubbles + Sticky Desktop/Mobile Frames */}
+                <div className="tour__body">
+                  {/* Scrolling Speech Bubbles Column */}
+                  <div className="tour__steps">
+                    {chapter.bubbles.map((bubbleText, bIdx) => {
+                      const words = bubbleText.split(' ');
+                      const litWords = chState.bubbleLitCounts[bIdx] || 0;
+                      const isBubbleVisible =
+                        bIdx === 0 || (chState.bubbleVisible && chState.bubbleVisible[bIdx]);
+                      const bKey = `${chapter.id}-${bIdx}`;
+
+                      return (
+                        <div
+                          key={bKey}
+                          ref={(el) => {
+                            bubbleRefs.current[bKey] = el;
+                          }}
+                          className={`tour__bubble ${isBubbleVisible ? 'is-visible' : ''}`}
+                        >
+                          <span className="tour__bubble-step">
+                            0{chapterIdx + 1}.0{bIdx + 1} // TOUR NOTE
+                          </span>
+                          <div>
+                            {words.map((word, wIdx) => (
+                              <span key={wIdx}>
+                                <span
+                                  className={`tour__word ${wIdx < litWords ? 'is-lit' : ''}`}
+                                >
+                                  {word}
+                                </span>
+                                {wIdx < words.length - 1 ? ' ' : ''}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* Sticky Desktop Browser + Mobile Phone Frame + Phoney 6-Emoji Quick Tray */}
+                  <div className="tour__stage">
+                    <div className="tour__devices">
+                      {/* Desktop Browser Frame */}
+                      <div className="tour__browser">
+                        <div className="tour__browser-bar">
+                          <div className="tour__traffic" aria-hidden="true">
+                            <span className="tour__dot tour__dot--red" />
+                            <span className="tour__dot tour__dot--yellow" />
+                            <span className="tour__dot tour__dot--green" />
+                          </div>
+
+                          <div className="tour__hosts">
+                            {chapter.hosts.map((host) => {
+                              const isHostActive =
+                                !host.activeOnSteps || host.activeOnSteps.includes(currentStep);
+                              return (
+                                <a
+                                  key={host.label}
+                                  href={host.url}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className={`tour__host-pill ${isHostActive ? 'is-active' : ''}`}
+                                >
+                                  🔒 {host.label} ↗
+                                </a>
+                              );
+                            })}
+                          </div>
+
+                          <div className="tour__hosts">
+                            {[0, 1, 2].map((sIdx) => (
+                              <button
+                                key={sIdx}
+                                type="button"
+                                className={`tour__host-pill ${
+                                  currentStep === sIdx ? 'is-active' : ''
+                                }`}
+                                onClick={() => {
+                                  soundEngine.pop();
+                                  const targetBubble =
+                                    bubbleRefs.current[`${chapter.id}-${sIdx}`];
+                                  if (targetBubble) {
+                                    targetBubble.scrollIntoView({
+                                      behavior: 'smooth',
+                                      block: 'center',
+                                    });
+                                  }
+                                }}
+                              >
+                                {sIdx + 1}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Vertical Sliding Desktop Screen Track */}
+                        <div className="tour__viewport">
+                          <div
+                            className="tour__screen-track"
+                            style={{ '--step': currentStep }}
+                          >
+                            {chapter.desktopSlides.map((slide, sIdx) => (
+                              <div key={sIdx} className="tour__screen">
+                                <img src={slide.src} alt={slide.alt} loading="lazy" />
+                                <div className="tour__screen-overlay">
+                                  <span className="tour__screen-badge">{slide.badge}</span>
+                                  <p className="tour__screen-caption">{slide.caption}</p>
+
+                                  {slide.overlayPills && (
+                                    <div className="tour__overlay-pills">
+                                      {slide.overlayPills.map((pill) => (
+                                        <span key={pill} className="tour__overlay-pill">
+                                          {pill}
+                                        </span>
+                                      ))}
+                                    </div>
+                                  )}
+
+                                  {slide.overlayStats && (
+                                    <div className="tour__overlay-stats">
+                                      {slide.overlayStats.map((st) => (
+                                        <div key={st.label} className="tour__overlay-stat">
+                                          <strong>{st.value}</strong>
+                                          <span>{st.label}</span>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Overlapping Mobile Phone Frame */}
+                      <div className="tour__phone">
+                        <div className="tour__phone-inner">
+                          <div className="tour__phone-statusbar" aria-hidden="true">
+                            <span>9:41</span>
+                            <span className="tour__phone-island" />
+                            <span>5G 100%</span>
+                          </div>
+                          <div className="tour__phone-viewport">
+                            <div
+                              className="tour__phone-track"
+                              style={{ '--step': currentStep }}
+                            >
+                              {chapter.mobileSlides.map((mSlide, mIdx) => (
+                                <div key={mIdx} className="tour__phone-screen">
+                                  <img src={mSlide.src} alt={mSlide.alt} loading="lazy" />
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Phoney's 6 Default Audio Emojis Interactive Soundboard (Chapter 2) */}
+                    {chapter.hasPhoneySoundboard && (
+                      <div className="phoney-tray">
+                        <div className="phoney-tray__header">
+                          <span className="phoney-tray__title">
+                            🔊 Phoney Quick Tray · 6 Default Audio Emojis
+                          </span>
+                          <span className="phoney-tray__hint">
+                            Press any button to hear that Audio Emoji!
+                          </span>
+                        </div>
+                        <div className="phoney-tray__grid">
+                          {PHONEY_AUDIO_EMOJIS.map((item) => (
+                            <button
+                              key={item.id}
+                              type="button"
+                              className={`phoney-emoji-btn ${
+                                playingEmojiId === item.id ? 'is-playing' : ''
+                              }`}
+                              onClick={() => handlePlayPhoneyEmoji(item)}
+                            >
+                              <span className="phoney-emoji-btn__icon">{item.emoji}</span>
+                              <span className="phoney-emoji-btn__label">{item.label}</span>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </article>
+            );
+          })}
+        </section>
+
+        {/* 4. ALL WORK SECTION (#work — 18 Verified Projects in Variable-Span 12-Col Bento Grid) */}
+        <section id="work" className="bento-section" ref={workRef}>
+          <div className="bento-section__header">
+            <h2 className="bento-section__title">All work</h2>
+            <span className="bento-section__count">{ALL_PROJECTS.length} projects</span>
+          </div>
+
+          <div className="bento-grid">
+            {ALL_PROJECTS.map((project) => (
+              <article
+                key={project.slug}
+                className={`bento-card ${project.bentoSpan || 'col-4'}`}
+                style={{ '--card-tint': project.surfaceTint }}
+                onClick={() => openProjectWindow(project.slug, 'project')}
+              >
+                <div className="bento-card__media">
+                  {project.coverImage ? (
+                    <img src={project.coverImage} alt={project.title} loading="lazy" />
+                  ) : (
+                    <div className="bento-card__spec-preview">
+                      <span className="bento-card__badge">
+                        #{project.number} · {project.category}
+                      </span>
+                      <pre className="bento-card__spec-code">{project.previewCode}</pre>
+                    </div>
+                  )}
+                </div>
+
+                <div className="bento-card__body">
+                  <div className="bento-card__meta">
+                    <span className="bento-card__badge">
+                      #{project.number} · {project.category}
+                    </span>
+                    <span className="bento-card__year">{project.year}</span>
+                  </div>
+
+                  <h3 className="bento-card__title">{project.title}</h3>
+                  <p className="bento-card__subtitle">{project.subtitle}</p>
+
+                  <div className="bento-card__stack">
+                    {project.stack.slice(0, 4).map((tech) => (
+                      <span key={tech} className="bento-card__tag">
+                        {tech}
+                      </span>
+                    ))}
+                  </div>
+
+                  <div className="bento-card__footer">
+                    <span className="bento-card__open">Open in-site window →</span>
+                    <a
+                      href={project.liveUrl || project.repoUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="bento-card__ext"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        soundEngine.pop();
+                      }}
+                    >
+                      {project.liveLabel || 'Visit ↗'}
+                    </a>
+                  </div>
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        {/* 5. CERTIFICATIONS SECTION (#certifications — 6 Verified Credentials in Bento Grid) */}
+        <section id="certifications" className="bento-section" ref={certsRef}>
+          <div className="bento-section__header">
+            <h2 className="bento-section__title">Certifications</h2>
+            <span className="bento-section__count">{CERTIFICATIONS.length} credentials</span>
+          </div>
+
+          <div className="bento-grid">
+            {CERTIFICATIONS.map((cert) => (
+              <article
+                key={cert.slug}
+                className={`bento-card ${cert.bentoSpan || 'col-6'}`}
+                style={{ '--card-tint': cert.surfaceTint }}
+                onClick={() => openProjectWindow(cert.slug, 'cert')}
+              >
+                <div className="bento-card__body">
+                  <div className="bento-card__meta">
+                    <span className="bento-card__badge">
+                      {cert.number} · {cert.issuer}
+                    </span>
+                    <span className="bento-card__year">{cert.issueDate}</span>
+                  </div>
+
+                  <h3 className="bento-card__title">{cert.title}</h3>
+                  <p className="bento-card__subtitle">{cert.summary}</p>
+
+                  <div className="bento-card__stack">
+                    {cert.skills.map((skill) => (
+                      <span key={skill} className="bento-card__tag">
+                        {skill}
+                      </span>
+                    ))}
+                  </div>
+
+                  <div className="bento-card__footer">
+                    <span className="bento-card__open">Inspect credential →</span>
+                    <a
+                      href={cert.verifyUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="bento-card__ext"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        soundEngine.pop();
+                      }}
+                    >
+                      {cert.verifyLabel}
+                    </a>
+                  </div>
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        {/* 6. FOOTER (#contact — sebg.ch Outro Parity + Full-Size LEGO Character on Right) */}
+        <footer id="contact" className="footer" ref={footerRef}>
+          <div className="footer__inner">
+            <div className="footer__top">
+              <div className="footer__name">
+                <strong>{OWNER_PROFILE.name}</strong>
+                <span>{OWNER_PROFILE.roleTitle}</span>
+              </div>
+
+              <button
+                type="button"
+                className="button button--small"
+                onClick={() => {
+                  soundEngine.pop();
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
+              >
+                ↑ Back to top
+              </button>
+            </div>
+
+            <div className="footer__main">
+              <h2 className="footer__title">Got a project?</h2>
+              <p className="footer__subtitle">I’m taking on new work.</p>
+
+              <div className="footer__email-row">
+                <button
+                  type="button"
+                  className="footer__email-btn"
+                  onClick={handleCopyEmail}
+                  title="Click to copy email address"
+                >
+                  {emailCopied ? '✓ Copied avichalgoyal15@gmail.com' : OWNER_PROFILE.email}
                 </button>
               </div>
-              <p className="role-feedback">{roleFeedback}</p>
-            </form>
 
-            {/* Outfit Switcher Chips */}
-            <div className="suit-selector-row">
-              {OUTFITS.map((item) => (
+              <div className="footer__links">
+                <a
+                  href={OWNER_PROFILE.githubUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="footer__link"
+                >
+                  GitHub (avichal15) ↗
+                </a>
+                <a
+                  href={OWNER_PROFILE.linkedinUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="footer__link"
+                >
+                  LinkedIn (avichalgoyal007) ↗
+                </a>
+                <a href={`mailto:${OWNER_PROFILE.email}`} className="footer__link">
+                  Send Email ↗
+                </a>
+                <a
+                  href={OWNER_PROFILE.resumeUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="footer__link"
+                >
+                  Resume PDF ↗
+                </a>
+              </div>
+            </div>
+
+            <div className="footer__bottom">
+              <span>© 2026 {OWNER_PROFILE.name} · Built with Three.js & WebAudio</span>
+
+              <div className="footer__bottom-actions">
                 <button
-                  key={item.id}
                   type="button"
-                  className={`suit-chip ${outfitId === item.id ? 'active' : ''}`}
+                  className="footer__action-btn"
                   onClick={() => {
-                    setManualOutfitLock(true);
-                    setOutfitId(item.id);
-                    triggerMorphFlash();
-                    setTrickState({ kind: 'spin', startedAt: performance.now() });
+                    soundEngine.pop();
+                    setMenuOpen(true);
                   }}
                 >
-                  <span className="suit-dot" style={{ background: item.accent }} />
-                  {item.shortLabel}
+                  👕 Dress me up
                 </button>
-              ))}
-            </div>
-
-            <div className="hero-cta-row">
-              <button type="button" className="neo-btn neo-btn-yellow" onClick={() => scrollToSection('sec-1')}>
-                Start Guided Tour ↓
-              </button>
-              <button type="button" className="neo-btn" onClick={() => navigate('/work')}>
-                Full Archive ({ARCHIVE_PROJECTS.length} Projects)
-              </button>
-              <a className="neo-btn" href={PROFILE.resumeUrl} target="_blank" rel="noreferrer">
-                Resume PDF ↗
-              </a>
-            </div>
-          </div>
-        </section>
-
-        {/* SLIDE 01: MEDISTUDYGO (3D Minifig Jumps Left -> Card Right) */}
-        <section id="sec-1" className="story-section align-right">
-          <div className="story-card pixel-shadow-box">
-            <div className="card-kicker-row">
-              <span className="pill-badge">01 // HEALTH &amp; EDTECH PLATFORM</span>
-              <span className="font-mono">REACT 19 · FASTAPI · RAZORPAY · RAG</span>
-            </div>
-
-            <h2 className="section-title">MediStudyGo — 29,500+ Medical Flashcards &amp; AI Tutor</h2>
-
-            <p className="story-lead">
-              <ScrollSpeech text="Medical and dental students were drowning in static PDFs. I architected a high-speed study engine with 29,500+ active-recall cards, AI RAG tutoring, and verified Razorpay checkout." />
-            </p>
-
-            <div className="project-showcase-media">
-              <img
-                src="/media/projects/medistudygo-desktop.png"
-                alt="MediStudyGo platform screenshot"
-                loading="lazy"
-              />
-            </div>
-
-            {/* Interactive Gold Foil Scratch Card */}
-            <ScratchCard onComplete={() => pulseEmoji('🦷')} />
-
-            <div className="metric-strip">
-              <div>
-                <strong>29,500+</strong>
-                <span>Flashcards &amp; Notes</span>
-              </div>
-              <div>
-                <strong>62ms</strong>
-                <span>Median Search Latency</span>
-              </div>
-              <div>
-                <strong>99.98%</strong>
-                <span>Razorpay Webhook Sync</span>
-              </div>
-            </div>
-
-            <div className="card-action-row">
-              <a className="neo-btn neo-btn-yellow" href="https://www.medistudygo.com/" target="_blank" rel="noreferrer">
-                Visit medistudygo.com ↗
-              </a>
-              <button type="button" className="neo-btn" onClick={() => setPreviewKey('medistudygo')}>
-                Quick Spec Preview
-              </button>
-              <button type="button" className="neo-btn" onClick={() => navigate('/work/medistudygo')}>
-                Full Case Study →
-              </button>
-            </div>
-          </div>
-        </section>
-
-        {/* SLIDE 02: PHONEY AI (3D Minifig Jumps Right -> Card Left) */}
-        <section id="sec-2" className="story-section align-left">
-          <div className="story-card pixel-shadow-box">
-            <div className="card-kicker-row">
-              <span className="pill-badge">02 // ANDROID 15 TELECOM &amp; VOICE AI</span>
-              <span className="font-mono">KOTLIN · INCALLSERVICE · GEMINI LIVE</span>
-            </div>
-
-            <h2 className="section-title">Phoney — Real-Time AI Call Screening &amp; In-Call Agent</h2>
-
-            <p className="story-lead">
-              <ScrollSpeech text="Why let unknown numbers hijack your focus? Phoney binds directly to Android 15 CallScreeningService and InCallService to intercept spam, stream live transcripts, and talk back in 180ms." />
-            </p>
-
-            {/* Live Interactive Android 15 In-Call Deck */}
-            <PhoneyCallDeck onEmojiPulse={pulseEmoji} />
-
-            <div className="card-action-row">
-              <a
-                className="neo-btn neo-btn-yellow"
-                href="https://github.com/avichal15/phoney-beta"
-                target="_blank"
-                rel="noreferrer"
-              >
-                Inspect Android Repo ↗
-              </a>
-              <button type="button" className="neo-btn" onClick={() => setPreviewKey('phoney')}>
-                Quick Spec Preview
-              </button>
-              <button type="button" className="neo-btn" onClick={() => navigate('/work/phoney')}>
-                Full Case Study →
-              </button>
-            </div>
-          </div>
-        </section>
-
-        {/* SLIDE 03: TRUGIFTING (3D Minifig Jumps Left -> Card Right) */}
-        <section id="sec-3" className="story-section align-right">
-          <div className="story-card pixel-shadow-box">
-            <div className="card-kicker-row">
-              <span className="pill-badge">03 // B2B CORPORATE COMMERCE</span>
-              <span className="font-mono">NEXT.JS · TAILWIND · BULK QUOTE ENGINE</span>
-            </div>
-
-            <h2 className="section-title">TruGifting — Enterprise Corporate Gifting Storefront</h2>
-
-            <p className="story-lead">
-              <ScrollSpeech text="Enterprise procurement teams needed custom MOQ pricing, logo personalization previews, and instant multi-SKU quote generation across 850+ curated corporate gifts." />
-            </p>
-
-            <div className="project-showcase-media">
-              <img
-                src="/media/projects/trugifting-desktop.png"
-                alt="TruGifting corporate storefront"
-                loading="lazy"
-              />
-            </div>
-
-            <div className="metric-strip">
-              <div>
-                <strong>850+</strong>
-                <span>Curated B2B SKUs</span>
-              </div>
-              <div>
-                <strong>98 / 100</strong>
-                <span>Lighthouse Score</span>
-              </div>
-              <div>
-                <strong>4x Faster</strong>
-                <span>Bulk Quote Dispatch</span>
-              </div>
-            </div>
-
-            <div className="card-action-row">
-              <a className="neo-btn neo-btn-yellow" href="https://trugifting.com/" target="_blank" rel="noreferrer">
-                Visit trugifting.com ↗
-              </a>
-              <button type="button" className="neo-btn" onClick={() => setPreviewKey('trugifting')}>
-                Quick Spec Preview
-              </button>
-              <button type="button" className="neo-btn" onClick={() => navigate('/work/trugifting')}>
-                Full Case Study →
-              </button>
-            </div>
-          </div>
-        </section>
-
-        {/* SLIDE 04: MASTERPLAYER (3D Minifig Jumps Right -> Card Left) */}
-        <section id="sec-4" className="story-section align-left">
-          <div className="story-card pixel-shadow-box">
-            <div className="card-kicker-row">
-              <span className="pill-badge">04 // CUSTOM APPAREL &amp; PRINT PIPELINE</span>
-              <span className="font-mono">REACT · SUBLIMATION WORKFLOW · B2B</span>
-            </div>
-
-            <h2 className="section-title">Masterplayer — Custom Sportswear &amp; Print Studio</h2>
-
-            <p className="story-lead">
-              <ScrollSpeech text="Turned chaotic WhatsApp jersey orders into a structured sublimation production studio — capturing player rosters, GSM fabric specs, collar cuts, and print-ready factory tickets." />
-            </p>
-
-            <div className="project-showcase-media">
-              <img
-                src="/media/projects/masterplayer-desktop.png"
-                alt="Masterplayer custom jersey studio"
-                loading="lazy"
-              />
-            </div>
-
-            <div className="metric-strip">
-              <div>
-                <strong>-78%</strong>
-                <span>Print Spec Errors</span>
-              </div>
-              <div>
-                <strong>&lt; 5 min</strong>
-                <span>Order-to-Press Ticket</span>
-              </div>
-              <div>
-                <strong>100%</strong>
-                <span>Roster Size Validation</span>
-              </div>
-            </div>
-
-            <div className="card-action-row">
-              <a
-                className="neo-btn neo-btn-yellow"
-                href="https://github.com/avichal15/masterplayer-printing-and-design"
-                target="_blank"
-                rel="noreferrer"
-              >
-                Explore Repository ↗
-              </a>
-              <button type="button" className="neo-btn" onClick={() => setPreviewKey('masterplayer')}>
-                Quick Spec Preview
-              </button>
-              <button type="button" className="neo-btn" onClick={() => navigate('/work/masterplayer')}>
-                Full Case Study →
-              </button>
-            </div>
-          </div>
-        </section>
-
-        {/* SLIDE 05: OMNIROUTE OSS CONTRIBUTION (3D Minifig Jumps Left -> Card Right) */}
-        <section id="sec-5" className="story-section align-right">
-          <div className="story-card pixel-shadow-box">
-            <div className="card-kicker-row">
-              <span className="pill-badge">05 // OPEN-SOURCE INFRASTRUCTURE · PR #13127</span>
-              <span className="font-mono">NODE.JS · MULTI-LLM GATEWAY · LAN AUTH</span>
-            </div>
-
-            <h2 className="section-title">OmniRoute Session Sync — Private LAN &amp; Tailscale Auth Fix</h2>
-
-            <p className="story-lead">
-              <ScrollSpeech text="Self-hosted engineers running OmniRoute across private LANs and Tailscale subnets hit silent 401 cookie drops over HTTP. I engineered protocol-aware session negotiation in PR #13127." />
-            </p>
-
-            {/* Interactive Loopback & Subnet Handshake Simulator */}
-            <div className="omni-sim-box">
-              <div className="omni-tabs">
-                {OMNIROUTE_SCENARIOS.map((item, idx) => (
-                  <button
-                    key={item.name}
-                    type="button"
-                    className={`omni-tab ${omniScenarioIdx === idx ? 'active' : ''}`}
-                    onClick={() => {
-                      setOmniScenarioIdx(idx);
-                      pulseEmoji('🔌');
-                    }}
-                  >
-                    {item.name}
-                  </button>
-                ))}
-              </div>
-              <div className="omni-terminal">
-                <div>
-                  <span>ORIGIN HEADER:</span> <code>{activeOmni.origin}</code>
-                </div>
-                <div>
-                  <span>SET-COOKIE POLICY:</span> <code>{activeOmni.cookie}</code>
-                </div>
-                <div className="omni-status">
-                  <span>GATEWAY VERDICT:</span> <strong>{activeOmni.status}</strong>
-                </div>
-              </div>
-            </div>
-
-            <div className="card-action-row">
-              <a
-                className="neo-btn neo-btn-yellow"
-                href="https://github.com/diegosouzapw/OmniRoute"
-                target="_blank"
-                rel="noreferrer"
-              >
-                View OmniRoute Upstream ↗
-              </a>
-              <button type="button" className="neo-btn" onClick={() => setPreviewKey('omniroute')}>
-                Inspect PR #13127 Architecture
-              </button>
-            </div>
-          </div>
-        </section>
-
-        {/* SLIDE 06: FULL BENTO ARCHIVE & CERTIFICATIONS (3D Minifig Morphs into Bottom-Left Circular Badge!) */}
-        <section id="sec-6" className="story-section align-full">
-          <div className="story-card story-card-wide pixel-shadow-box">
-            <div className="card-kicker-row">
-              <span className="pill-badge">06 // FULL ARCHIVE, MORE SHIPPED BUILDS &amp; ORACLE / STANFORD CERTS</span>
-              <span className="font-mono">CLICK ANY TILE FOR INSTANT IN-PAGE PREVIEW</span>
-            </div>
-
-            <h2 className="section-title">More Production Systems &amp; Verified Qualifications</h2>
-
-            <p className="story-lead">
-              <ScrollSpeech text="Notice how my 3D minifigure docked into a live circular badge at the bottom-left so this full-width Bento grid has room to breathe! Click any project or certification below to inspect its specs right here." />
-            </p>
-
-            <div className="bento-showcase-grid">
-              <div className="bento-tile" onClick={() => setPreviewKey('microcoach')}>
-                <span className="pill-badge">AI EDTECH</span>
-                <h3>MicroCoach AI — Classroom Rubric Copilot</h3>
-                <p>Timestamp-grounded instructional coaching &amp; automated rubric evaluation for educators.</p>
-                <span className="tile-cta">Open Interactive Preview →</span>
-              </div>
-
-              <div className="bento-tile" onClick={() => setPreviewKey('chanakya')}>
-                <span className="pill-badge">GENERATIVE VIDEO</span>
-                <h3>Chanakya Reel AI — Autonomous Video Synth</h3>
-                <p>End-to-end 9:16 storyboarding, TTS voice synthesis, and FFmpeg word-level caption rendering.</p>
-                <span className="tile-cta">Open Interactive Preview →</span>
-              </div>
-
-              <div className="bento-tile" onClick={() => setPreviewKey('mahadev')}>
-                <span className="pill-badge">B2B CATALOG</span>
-                <h3>Mahadev Plywood — Architectural Portal</h3>
-                <p>High-speed B2B specification portal for architectural plywood, veneers, and dealer routing.</p>
-                <span className="tile-cta">Open Interactive Preview →</span>
-              </div>
-
-              <div className="bento-tile bento-tile-cert" onClick={() => setPreviewKey('cert_oci_genai')}>
-                <span className="pill-badge">ORACLE CERTIFIED 2025</span>
-                <h3>OCI Generative AI Professional</h3>
-                <p>Enterprise LLM orchestration, RAG pipelines, semantic search &amp; vector indexing on OCI.</p>
-                <span className="tile-cta">Verify Credential →</span>
-              </div>
-
-              <div className="bento-tile bento-tile-cert" onClick={() => setPreviewKey('cert_oci_ds')}>
-                <span className="pill-badge">ORACLE CERTIFIED 2025</span>
-                <h3>OCI Data Science Professional</h3>
-                <p>Production MLOps, model catalog governance, feature stores &amp; scalable cloud inference.</p>
-                <span className="tile-cta">Verify Credential →</span>
-              </div>
-
-              <div className="bento-tile bento-tile-cert" onClick={() => setPreviewKey('cert_stanford_ml')}>
-                <span className="pill-badge">STANFORD &amp; DEEPLEARNING.AI</span>
-                <h3>Machine Learning Specialization (Andrew Ng)</h3>
-                <p>Supervised learning, neural networks, decision trees, recommender systems &amp; RL.</p>
-                <span className="tile-cta">Verify Credential →</span>
-              </div>
-            </div>
-
-            <div className="card-action-row" style={{ marginTop: '1.5rem' }}>
-              <button type="button" className="neo-btn neo-btn-yellow" onClick={() => navigate('/work')}>
-                Browse All {ARCHIVE_PROJECTS.length} Project Case Studies →
-              </button>
-              <button type="button" className="neo-btn" onClick={() => navigate('/certifications')}>
-                Browse All {CERTIFICATIONS.length} Verified Certificates →
-              </button>
-            </div>
-          </div>
-        </section>
-
-        {/* SLIDE 07: ENGINEERING PHILOSOPHY (3D Minifig Pops Back Out to Left -> Card Right) */}
-        <section id="sec-7" className="story-section align-right">
-          <div className="story-card pixel-shadow-box">
-            <div className="card-kicker-row">
-              <span className="pill-badge">07 // HOW I BUILD &amp; SHIP</span>
-              <span className="font-mono">FIRST PRINCIPLES · ZERO FLUFF</span>
-            </div>
-
-            <h2 className="section-title">Built Brick by Brick — With Obsessive Craft</h2>
-
-            <p className="story-lead">
-              <ScrollSpeech text="Whether I am wiring a low-latency Android 15 telecom socket, tuning a multi-model LLM gateway, or crafting a 3D WebGL interface, I optimize for two things: immediate user delight and rock-solid production reliability." />
-            </p>
-
-            <div className="philosophy-grid">
-              <div className="phil-item">
-                <h4>01. Product-First Engineering</h4>
-                <p>Code only matters when it solves a real bottleneck—faster checkouts, clearer medical recall, or zero-drop calls.</p>
-              </div>
-              <div className="phil-item">
-                <h4>02. Full-Stack Ownership</h4>
-                <p>From PostgreSQL schemas and FastAPI/Node workers right up to Three.js shaders and native Kotlin services.</p>
-              </div>
-              <div className="phil-item">
-                <h4>03. AI That Actually Ships</h4>
-                <p>Grounded RAG pipelines, deterministic tool-calling, and sub-200ms voice streaming instead of fragile demos.</p>
+                <button
+                  type="button"
+                  className="footer__action-btn"
+                  onClick={() => {
+                    const randomTrick =
+                      MASCOT_TRICKS[Math.floor(Math.random() * MASCOT_TRICKS.length)];
+                    triggerTrick(randomTrick.id);
+                  }}
+                >
+                  ✨ Do a trick
+                </button>
+                <button
+                  type="button"
+                  className="footer__action-btn"
+                  onClick={toggleBatmanMode}
+                >
+                  {batmanMode ? '☀️ Daylight Mode' : '🦇 Batman Mode'}
+                </button>
               </div>
             </div>
           </div>
-        </section>
-
-        {/* SLIDE 08: GIANT CTA FOOTER (Card Left, 3D Minifig Right) */}
-        <section id="sec-8" className="story-section align-left">
-          <div className="story-card pixel-shadow-box footer-cta-card">
-            <div className="card-kicker-row">
-              <span className="pill-badge">08 // LET&apos;S BUILD SOMETHING ICONIC</span>
-              <span className="font-mono">DIRECT RESPONSE &lt; 12 HOURS</span>
-            </div>
-
-            <h2 className="section-title">Ready to Ship Your Next Flagship Product?</h2>
-
-            <p className="story-lead">
-              <ScrollSpeech text="Drop me an email or connect on LinkedIn and GitHub. Whether it's a founding engineer role, an AI systems contract, or a wild product idea — let's build it." />
-            </p>
-
-            <a className="giant-email-cta" href="mailto:avichalgoyal15@gmail.com">
-              avichalgoyal15@gmail.com ↗
-            </a>
-
-            <div className="hero-cta-row" style={{ marginTop: '1.5rem' }}>
-              <a
-                className="neo-btn neo-btn-yellow"
-                href="https://www.linkedin.com/in/avichalgoyal007/"
-                target="_blank"
-                rel="noreferrer"
-              >
-                LinkedIn (avichalgoyal007) ↗
-              </a>
-              <a className="neo-btn" href="https://github.com/avichal15" target="_blank" rel="noreferrer">
-                GitHub (avichal15) ↗
-              </a>
-              <a className="neo-btn" href={PROFILE.resumeUrl} target="_blank" rel="noreferrer">
-                Download Resume PDF ↗
-              </a>
-            </div>
-          </div>
-        </section>
+        </footer>
       </main>
 
-      {/* Clickable In-Website Preview Modal (Slide 06 & Quick Spec Previews) */}
-      {activePreview ? (
-        <div className="preview-modal-backdrop" onClick={() => setPreviewKey(null)} role="dialog" aria-modal="true">
-          <div className="preview-modal-card pixel-shadow-box" onClick={(e) => e.stopPropagation()}>
-            <div className="preview-modal-header">
-              <div>
-                <span className="pill-badge">{activePreview.tag}</span>
-                <h3>{activePreview.title}</h3>
-              </div>
-              <button type="button" className="modal-close-btn" onClick={() => setPreviewKey(null)}>
-                ✕ Close
+      {/* =====================================================================
+          IN-WEBSITE PROJECT & CREDENTIAL WINDOW (.project-window)
+          Opens inside the site with circular flood transition, Year/Role/Stack,
+          animated visual slides, bottom-left character commentary, and Next Project!
+          ===================================================================== */}
+      {activeWindowItem && (
+        <div
+          className="project-window"
+          ref={projectWindowRef}
+          onScroll={handleProjectWindowScroll}
+          role="dialog"
+          aria-modal="true"
+          aria-label={activeWindowItem.title}
+        >
+          <div className="project-window__inner">
+            {/* Sticky Top Bar: Back Button + External Visit Links */}
+            <div className="project-window__topbar">
+              <button type="button" className="button" onClick={closeProjectWindow}>
+                ← Back to portfolio
               </button>
+
+              <div className="project-window__actions">
+                {activeWindowType === 'project' ? (
+                  <>
+                    {activeWindowItem.liveUrl && (
+                      <a
+                        href={activeWindowItem.liveUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="button button--yellow"
+                        onClick={() => soundEngine.pop()}
+                      >
+                        {activeWindowItem.liveLabel || 'Visit website ↗'}
+                      </a>
+                    )}
+                    {activeWindowItem.repoUrl &&
+                      activeWindowItem.repoUrl !== activeWindowItem.liveUrl && (
+                        <a
+                          href={activeWindowItem.repoUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="button"
+                          onClick={() => soundEngine.pop()}
+                        >
+                          {activeWindowItem.repoLabel || 'View GitHub ↗'}
+                        </a>
+                      )}
+                  </>
+                ) : (
+                  <a
+                    href={activeWindowItem.verifyUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="button button--yellow"
+                    onClick={() => soundEngine.pop()}
+                  >
+                    {activeWindowItem.verifyLabel}
+                  </a>
+                )}
+              </div>
             </div>
 
-            <p className="preview-modal-summary">{activePreview.summary}</p>
+            {/* Project / Credential Hero Metadata Card (Year, Role, Tech Stack) */}
+            <div className="project-window__hero">
+              <div className="project-window__kicker">
+                {activeWindowType === 'project'
+                  ? `PROJECT #${activeWindowItem.number} · ${activeWindowItem.category}`
+                  : `CREDENTIAL ${activeWindowItem.number} · ${activeWindowItem.category}`}
+              </div>
+              <h2 className="project-window__title">{activeWindowItem.title}</h2>
+              <p className="project-window__subtitle">
+                {activeWindowItem.subtitle || activeWindowItem.summary}
+              </p>
 
-            <div className="metric-strip">
-              {activePreview.metrics.map((m) => (
-                <div key={m.label}>
-                  <strong>{m.value}</strong>
-                  <span>{m.label}</span>
+              <div className="project-window__facts">
+                <div>
+                  <span className="project-window__fact-label">Year</span>
+                  <span className="project-window__fact-value">
+                    {activeWindowItem.year || activeWindowItem.issueDate}
+                  </span>
                 </div>
-              ))}
+                <div>
+                  <span className="project-window__fact-label">
+                    {activeWindowType === 'project' ? 'Role' : 'Issuing Organization'}
+                  </span>
+                  <span className="project-window__fact-value">
+                    {activeWindowItem.role || activeWindowItem.issuer}
+                  </span>
+                </div>
+                <div>
+                  <span className="project-window__fact-label">
+                    {activeWindowType === 'project' ? 'Tech Stack' : 'Verified Skills'}
+                  </span>
+                  <div className="project-window__stack">
+                    {(activeWindowItem.stack || activeWindowItem.skills || []).map((t) => (
+                      <span key={t} className="bento-card__tag">
+                        {t}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </div>
             </div>
 
-            <ul className="detail-list">
-              {activePreview.highlights.map((h) => (
-                <li key={h}>{h}</li>
-              ))}
-            </ul>
+            {/* Animated Visual Slides */}
+            {activeWindowType === 'project' && activeWindowItem.slides?.length > 0 && (
+              <div className="project-window__slides">
+                {activeWindowItem.slides.map((slide, sIdx) => (
+                  <figure
+                    key={sIdx}
+                    className="project-window__slide"
+                    style={{ animationDelay: `${sIdx * 90}ms` }}
+                  >
+                    <img src={slide.src} alt={slide.caption} loading="lazy" />
+                    <figcaption className="project-window__slide-caption">
+                      0{sIdx + 1} // {slide.caption}
+                    </figcaption>
+                  </figure>
+                ))}
+              </div>
+            )}
 
-            <div className="card-action-row" style={{ marginTop: '1.5rem' }}>
-              {activePreview.liveUrl ? (
-                <a className="neo-btn neo-btn-yellow" href={activePreview.liveUrl} target="_blank" rel="noreferrer">
-                  Open Live Link / Credential ↗
-                </a>
-              ) : null}
-              {activePreview.routePath ? (
-                <button
-                  type="button"
-                  className="neo-btn"
-                  onClick={() => {
-                    const target = activePreview.routePath;
-                    setPreviewKey(null);
-                    navigate(target);
-                  }}
+            {/* Engineering Architecture & Key Highlights */}
+            <div className="project-window__details">
+              <h3>
+                {activeWindowType === 'project'
+                  ? 'Architecture & Key Outcomes'
+                  : 'Credential Scope & Production Application'}
+              </h3>
+              <p>{activeWindowItem.summary}</p>
+
+              {activeWindowItem.previewCode && (
+                <pre
+                  className="bento-card__spec-code"
+                  style={{ marginBottom: '20px', fontSize: '0.84rem' }}
                 >
-                  Open Dedicated Case Study Page →
-                </button>
-              ) : null}
+                  {activeWindowItem.previewCode}
+                </pre>
+              )}
+
+              {activeWindowItem.highlights?.length > 0 && (
+                <ul className="project-window__highlights">
+                  {activeWindowItem.highlights.map((item, hIdx) => (
+                    <li key={hIdx}>{item}</li>
+                  ))}
+                </ul>
+              )}
+
+              {activeWindowItem.appliedInWork && (
+                <p style={{ marginTop: '16px', fontWeight: 600 }}>
+                  {activeWindowItem.appliedInWork}
+                </p>
+              )}
             </div>
+
+            {/* Interactive Phoney Soundboard inside Phoney's Project Window too! */}
+            {activeWindowItem.slug === 'phoney' && (
+              <div className="phoney-tray" style={{ marginBottom: '42px' }}>
+                <div className="phoney-tray__header">
+                  <span className="phoney-tray__title">
+                    🔊 Try Phoney’s 6 Default Audio Emojis Live
+                  </span>
+                  <span className="phoney-tray__hint">Tap any emoji button to hear it</span>
+                </div>
+                <div className="phoney-tray__grid">
+                  {PHONEY_AUDIO_EMOJIS.map((item) => (
+                    <button
+                      key={item.id}
+                      type="button"
+                      className={`phoney-emoji-btn ${
+                        playingEmojiId === item.id ? 'is-playing' : ''
+                      }`}
+                      onClick={() => handlePlayPhoneyEmoji(item)}
+                    >
+                      <span className="phoney-emoji-btn__icon">{item.emoji}</span>
+                      <span className="phoney-emoji-btn__label">{item.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Bottom "Next Project" Smooth Window Transition */}
+            {activeWindowType === 'project' && adjacentWindowProjects?.next && (
+              <div
+                className="project-window__next"
+                onClick={() => openProjectWindow(adjacentWindowProjects.next.slug, 'project')}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    openProjectWindow(adjacentWindowProjects.next.slug, 'project');
+                  }
+                }}
+              >
+                <div>
+                  <span className="project-window__next-kicker">
+                    NEXT PROJECT (#{adjacentWindowProjects.next.number} OF {ALL_PROJECTS.length})
+                  </span>
+                  <div className="project-window__next-title">
+                    {adjacentWindowProjects.next.title} — {adjacentWindowProjects.next.subtitle}
+                  </div>
+                </div>
+                <span className="button">Open next project →</span>
+              </div>
+            )}
           </div>
         </div>
-      ) : null}
-    </div>
+      )}
+    </>
   );
 }
