@@ -266,9 +266,35 @@ class SoundEngine {
     }
     this.ensureContext();
 
+    const fileMap = {
+      cheer: '/media/sounds/phoney/cheer.wav',
+      faaah: '/media/sounds/phoney/faaah.wav',
+      fart: '/media/sounds/phoney/fart.wav',
+      wompwomp: '/media/sounds/phoney/womp-womp.wav',
+      womp: '/media/sounds/phoney/womp-womp.wav',
+      wow: '/media/sounds/phoney/wow.wav',
+      yay: '/media/sounds/phoney/yay.wav',
+    };
+
+    const soundUrl = fileMap[id];
+    if (soundUrl && typeof Audio !== 'undefined') {
+      try {
+        const audio = new Audio(soundUrl);
+        audio.volume = Math.min(1, this.volume * 1.2);
+        audio.play().catch(() => {
+          this.synthesizePhoneyEmoji(id);
+        });
+        return;
+      } catch {
+        // Fall back to synthesis
+      }
+    }
+    this.synthesizePhoneyEmoji(id);
+  }
+
+  synthesizePhoneyEmoji(id) {
     switch (id) {
       case 'cheer': {
-        // 1: 👏 Cheer — warm crowd applause claps + bright celebration chord
         for (let i = 0; i < 9; i += 1) {
           this.noise(0.055, 0.075, i * 0.048, 1500 + (i % 3) * 350, 'bandpass');
         }
@@ -278,15 +304,13 @@ class SoundEngine {
         break;
       }
       case 'faaah': {
-        // 2: 😱 Faaah — dramatic reverberant vocal-like descending "FAAAAH!"
-        this.noise(0.12, 0.08, 0, 1800, 'highpass'); // initial "Fff"
+        this.noise(0.12, 0.08, 0, 1800, 'highpass');
         this.tone(620, 0.52, 'sawtooth', 0.065, 0.05, 290);
         this.tone(930, 0.48, 'triangle', 0.05, 0.06, 435);
         this.tone(310, 0.55, 'sine', 0.07, 0.05, 165);
         break;
       }
       case 'fart': {
-        // 3: 💨 Fart — cheeky low-frequency brassy raspberry flutter
         this.tone(135, 0.36, 'sawtooth', 0.095, 0, 62);
         for (let i = 0; i < 7; i += 1) {
           this.tone(115 - i * 6, 0.045, 'square', 0.06, i * 0.045, 72);
@@ -294,8 +318,8 @@ class SoundEngine {
         this.noise(0.32, 0.065, 0.02, 260, 'lowpass');
         break;
       }
-      case 'wompwomp': {
-        // 4: 😑 Womp Womp — classic sad trombone 4-note descending slide (Bb -> A -> Ab -> G)
+      case 'wompwomp':
+      case 'womp': {
         const notes = [
           { f1: 466.16, f2: 446.0, d: 0.22, t: 0 },
           { f1: 440.0, f2: 420.0, d: 0.22, t: 0.24 },
@@ -309,7 +333,6 @@ class SoundEngine {
         break;
       }
       case 'wow': {
-        // 5: 🤩 Wow — expressive upward-then-downward vocal formant sweep + sparkle
         this.tone(260, 0.22, 'triangle', 0.085, 0, 680);
         this.tone(680, 0.26, 'triangle', 0.08, 0.2, 340);
         this.tone(1046.5, 0.14, 'sine', 0.055, 0.15, 1318.5);
@@ -318,7 +341,6 @@ class SoundEngine {
       }
       case 'yay':
       default: {
-        // 6: 🙌 Yay! — jubilant ascending fanfare + confetti shimmer
         const arp = [523.25, 659.25, 783.99, 1046.5, 1318.5];
         arp.forEach((f, idx) => {
           this.tone(f, 0.16, 'triangle', 0.075, idx * 0.055, f * 1.06);
