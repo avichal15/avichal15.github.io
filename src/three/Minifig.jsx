@@ -158,13 +158,32 @@ function getCharacterPose({
         pose.leftArmZ = 0.32;
         pose.rightArmZ = -0.32;
         break;
-      case 'superhero':
-        pose.rootY += arc * 0.34;
-        pose.leftLegX = 0.38 * arc;
-        pose.rightLegX = -0.44 * arc;
-        pose.rightArmX = -2.35 * arc;
-        pose.leftArmX = 0.38 * arc;
+      case 'superhero': {
+        // Dramatic superhero leap & 3-point superhero ground-punch landing
+        if (trickProgress < 0.42) {
+          const leap = Math.sin((trickProgress / 0.42) * Math.PI);
+          pose.rootY += leap * 0.48;
+          pose.headX = -0.35 * leap;
+          pose.rightArmX = -2.4 * leap;
+          pose.leftArmX = -2.4 * leap;
+          pose.capeX = 0.52 * leap;
+        } else {
+          const landProg = (trickProgress - 0.42) / 0.58;
+          const punch = Math.sin(landProg * Math.PI);
+          pose.rootY -= 0.14 * punch;
+          pose.torsoX = 0.35 * punch;
+          pose.headX = -0.42 * punch; // Head looks up fiercely at viewer!
+          pose.headY = pointer.x * 0.15;
+          pose.rightArmX = -0.75 * punch; // Right fist hits ground!
+          pose.rightArmZ = 0.18 * punch;
+          pose.leftArmX = -1.95 * punch; // Left arm swept back!
+          pose.leftArmZ = 0.35 * punch;
+          pose.leftLegX = 0.58 * punch; // Hero crouch
+          pose.rightLegX = -0.62 * punch;
+          pose.capeX = 0.45 * punch;
+        }
         break;
+      }
       case 'dance': {
         const beat = Math.sin(trickProgress * Math.PI * 8);
         pose.rootY += Math.abs(beat) * 0.16;
@@ -383,6 +402,19 @@ export default function Minifig({
   const scalePulse = useRef(1);
   const walkBlendRef = useRef(0);
   const walkCycleRef = useRef(0);
+  const activeTrickRef = useRef({ nonce: 0, startedAt: 0, kind: null, duration: 1.35 });
+
+  // Initialize trick start time in effect to avoid calling performance.now() during render
+  useEffect(() => {
+    if (trickState && trickState.nonce !== activeTrickRef.current.nonce && (trickState.kind || trickState.name)) {
+      activeTrickRef.current = {
+        nonce: trickState.nonce,
+        startedAt: trickState.startedAt || performance.now(),
+        kind: trickState.kind || trickState.name,
+        duration: trickState.duration || 1.35,
+      };
+    }
+  }, [trickState]);
 
   useEffect(() => {
     rigRef.current = rig;
@@ -442,12 +474,12 @@ export default function Minifig({
 
     let trickProgress = 0;
     let trickKind = null;
-    if (trickState?.startedAt) {
-      const duration = trickState.duration || 1.05;
-      const raw = (performance.now() - trickState.startedAt) / (duration * 1000);
+    const curTrick = activeTrickRef.current;
+    if (curTrick.kind && curTrick.startedAt > 0) {
+      const raw = (performance.now() - curTrick.startedAt) / (curTrick.duration * 1000);
       if (raw >= 0 && raw <= 1) {
         trickProgress = raw;
-        trickKind = trickState.kind;
+        trickKind = curTrick.kind;
       }
     }
 
