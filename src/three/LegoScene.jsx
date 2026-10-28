@@ -1,58 +1,53 @@
 import { Suspense, useMemo } from 'react';
 import { Canvas } from '@react-three/fiber';
+import * as THREE from 'three';
 import Minifig from './Minifig';
 
-function BrickPedestal({ accent = '#F5C518', isBatman = false, badgeMode = false }) {
-  const studs = useMemo(() => {
-    const items = [];
-    for (let x = -1.5; x <= 1.5; x += 1) {
-      for (let z = -0.5; z <= 0.5; z += 1) {
-        items.push([x * 0.42, -1.01, z * 0.42]);
-      }
-    }
-    return items;
+function SoftContactShadow({ badgeMode = false, isWalking = false }) {
+  const shadowTexture = useMemo(() => {
+    if (typeof document === 'undefined') return null;
+    const canvas = document.createElement('canvas');
+    canvas.width = 128;
+    canvas.height = 128;
+    const ctx = canvas.getContext('2d');
+    const grad = ctx.createRadialGradient(64, 64, 8, 64, 64, 60);
+    grad.addColorStop(0, 'rgba(15, 23, 42, 0.34)');
+    grad.addColorStop(0.55, 'rgba(15, 23, 42, 0.14)');
+    grad.addColorStop(1, 'rgba(15, 23, 42, 0)');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, 128, 128);
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.needsUpdate = true;
+    return tex;
   }, []);
 
-  if (badgeMode) {
+  if (badgeMode || !shadowTexture) {
     return null;
   }
 
-  const plateColor = isBatman ? '#1E293B' : '#FFFFFF';
-  const rimColor = isBatman ? '#F5C518' : accent;
-
   return (
-    <group>
-      {/* Floating LEGO 4x2 Baseplate under the Minifigure */}
-      <mesh position={[0, -1.14, 0]} receiveShadow castShadow>
-        <boxGeometry args={[2.05, 0.22, 1.28]} />
-        <meshStandardMaterial color={plateColor} roughness={0.28} metalness={0.05} />
-      </mesh>
-
-      {/* Accent trim under plate */}
-      <mesh position={[0, -1.27, 0]} receiveShadow>
-        <boxGeometry args={[2.12, 0.08, 1.34]} />
-        <meshStandardMaterial color={rimColor} roughness={0.32} metalness={0.08} />
-      </mesh>
-
-      {studs.map(([x, y, z]) => (
-        <mesh key={`${x}-${z}`} position={[x, y, z]} castShadow receiveShadow>
-          <cylinderGeometry args={[0.13, 0.13, 0.08, 24]} />
-          <meshStandardMaterial color={rimColor} roughness={0.25} metalness={0.08} />
-        </mesh>
-      ))}
-    </group>
+    <mesh
+      position={[0, -1.03, 0]}
+      rotation={[-Math.PI / 2, 0, 0]}
+      scale={isWalking ? [1.35, 0.85, 1] : [1.22, 0.78, 1]}
+    >
+      <planeGeometry args={[1.55, 1.55]} />
+      <meshBasicMaterial map={shadowTexture} transparent depthWrite={false} />
+    </mesh>
   );
 }
 
 export default function LegoScene({
   outfitId,
   mood,
-  accent,
+  accent = '#F5C518',
   trickState,
-  onCycleOutfit,
-  angleIndex = 0,
-  isJumpingAcross = false,
+  onCharacterClick,
+  isWalking = false,
+  walkDirection = -1,
+  isGrabbed = false,
   badgeMode = false,
+  globalPointerRef,
 }) {
   const isBatman = outfitId === 'gotham';
 
@@ -60,37 +55,50 @@ export default function LegoScene({
     <Canvas
       shadows
       dpr={[1, 2]}
-      camera={{ position: [0, 0.05, 4.65], fov: 35 }}
-      gl={{ antialias: true, alpha: true }}
+      resize={{ scroll: false, debounce: { scroll: 0, resize: 0 } }}
+      camera={{ position: [0, -0.02, 6.75], fov: 22 }}
+      gl={{
+        antialias: true,
+        alpha: true,
+        toneMapping: THREE.ACESFilmicToneMapping,
+        toneMappingExposure: 1.04,
+      }}
     >
-      <ambientLight intensity={isBatman ? 1.15 : 1.55} />
+      {/* Balanced Studio Lighting for Matte-Satin Designer Vinyl Finish */}
+      <hemisphereLight
+        skyColor={isBatman ? '#e2e8f0' : '#fffbeb'}
+        groundColor={isBatman ? '#1e293b' : '#d6d3d1'}
+        intensity={isBatman ? 1.35 : 1.75}
+      />
       <directionalLight
-        position={[3.4, 5.2, 4.2]}
-        intensity={isBatman ? 2.2 : 2.5}
-        color={isBatman ? '#fef08a' : '#fff7ed'}
+        position={[2.8, 4.2, 5.4]}
+        intensity={isBatman ? 1.35 : 1.05}
+        color={isBatman ? '#fef08a' : '#fffdf7'}
         castShadow
       />
       <directionalLight
-        position={[-3.2, 2.2, 2.5]}
-        intensity={isBatman ? 1.1 : 0.95}
-        color={isBatman ? '#60a5fa' : '#e0f2fe'}
+        position={[-3.2, 2.2, 3.6]}
+        intensity={isBatman ? 0.75 : 0.48}
+        color={isBatman ? '#60a5fa' : '#f1f5f9'}
       />
       <pointLight
-        position={[0, 1.4, -2.1]}
-        intensity={isBatman ? 1.65 : 0.9}
+        position={[0, 1.6, -2.6]}
+        intensity={isBatman ? 1.1 : 0.42}
         color={isBatman ? '#facc15' : accent}
       />
 
       <Suspense fallback={null}>
-        <BrickPedestal accent={accent} isBatman={isBatman} badgeMode={badgeMode} />
+        <SoftContactShadow badgeMode={badgeMode} isWalking={isWalking} />
         <Minifig
           outfitId={outfitId}
           mood={mood}
           trickState={trickState}
-          onCycleOutfit={onCycleOutfit}
-          angleIndex={angleIndex}
-          isJumpingAcross={isJumpingAcross}
+          onCharacterClick={onCharacterClick}
+          isWalking={isWalking}
+          walkDirection={walkDirection}
+          isGrabbed={isGrabbed}
           badgeMode={badgeMode}
+          globalPointerRef={globalPointerRef}
         />
       </Suspense>
     </Canvas>
