@@ -1,6 +1,6 @@
 export const OWNER_PROFILE = {
   name: 'Avichal Goyal',
-  roleTitle: 'Software Developer',
+  roleTitle: 'Software Engineer',
   heroLeadBeforeBatman:
     'I’m a product-minded software engineer who builds web products, AI tools, and automations that make real-world work easier. And occasionally, I’m ',
   heroBatmanWord: 'Batman',
@@ -8,7 +8,7 @@ export const OWNER_PROFILE = {
     "Over the last 3 years, I've built full-stack web products, AI tools, Android telecom apps, and 7-platform operations engines for 50,000+ learners and enterprise teams. Here are a few of my favorites...",
   location: 'New Delhi / NCR, India',
   email: 'avichalgoyal15@gmail.com',
-  phone: '+91 9667665882',
+  phone: '+91 79833 61511',
   resumeUrl: '/resume.pdf',
   githubUrl: 'https://github.com/avichal15',
   linkedinUrl: 'https://www.linkedin.com/in/avichalgoyal007/',
@@ -272,16 +272,15 @@ export const TOUR_CHAPTERS = [
     ],
   },
   {
-    id: 'tour-commerce',
+    id: 'tour-masterplayer',
     projectSlug: 'masterplayer-designs-and-printing',
-    title: 'Masterplayer & TruGifting',
+    title: 'Masterplayer Prints',
     mascotSide: 'left', // Character runs from right -> left, stands on left pointing right
     outfit: 'masterplayer',
     bgLight: '#F7ECE4',
     bgDark: '#1A1215',
     hosts: [
-      { label: 'masterplayerprints.com', url: 'https://masterplayerprints.com/', activeOnSteps: [0, 1] },
-      { label: 'trugiftingsolutions.com', url: 'https://trugiftingsolutions.com/', activeOnSteps: [2] },
+      { label: 'masterplayerprints.com', url: 'https://masterplayerprints.com/' },
     ],
     desktopSlides: [
       {
@@ -304,10 +303,10 @@ export const TOUR_CHAPTERS = [
         ],
       },
       {
-        src: '/media/projects/trugifting-desktop.png',
-        alt: 'TruGifting Solutions B2B corporate gifting and 360+ brand vouchers platform',
-        badge: 'TRUGIFTINGSOLUTIONS.COM · 360+ BRAND VOUCHERS',
-        caption: 'Enterprise corporate gifting, employee R&R rewards, and instant B2B voucher quote flows.',
+        src: '/media/projects/masterplayer-desktop.png',
+        alt: 'Masterplayer high-resolution garment render & proof approval pipeline',
+        badge: 'CMYK PRINT PIPELINE · AUTOMATED PROOFS',
+        caption: 'Vector PDF separation, Pantone color match calibration, and instant client production proofs.',
       },
     ],
     mobileSlides: [
@@ -320,14 +319,14 @@ export const TOUR_CHAPTERS = [
         alt: 'Masterplayer mobile print slot selector',
       },
       {
-        src: '/media/projects/trugifting-mobile.png',
-        alt: 'TruGifting Solutions mobile storefront',
+        src: '/media/projects/masterplayer-mobile.png',
+        alt: 'Masterplayer mobile quote builder',
       },
     ],
     bubbles: [
-      'Third: Masterplayer Prints and TruGifting Solutions — two B2B commerce platforms I architected end to end.',
-      "In Masterplayer's 360° WebGL Studio, buyers spin 240 GSM apparel in 3D, snap logos onto print slots, and calculate 18% GST bulk quotes.",
-      'And on TruGifting Solutions, HR and procurement teams browse 360+ brand vouchers and dispatch enterprise R&R orders in seconds.',
+      'Third: Masterplayer Designs & Printing — a WebGL 3D customization studio I built for custom apparel and merch.',
+      "In the 360° WebGL Studio, buyers rotate garments in 3D, snap logos onto 5 print slots, and preview CMYK proofs in real time.",
+      'The platform automatically strips image backgrounds, calculates tiered 18% GST bulk quotes, and dispatches job tickets to the factory.',
     ],
   },
 ];
@@ -338,7 +337,6 @@ export const TOUR_CHAPTERS = [
 // multi-slide gallery, and 3 character commentary bubbles for the Project Window.
 // ============================================================================
 export const ALL_PROJECTS = [
-  // ROW 1: 6 + 6 = 12
   {
     number: '01',
     slug: 'medistudygo',
@@ -388,6 +386,7 @@ export const ALL_PROJECTS = [
       },
     ],
   },
+
   {
     number: '02',
     slug: 'phoney',
@@ -444,7 +443,6 @@ export const ALL_PROJECTS = [
     ],
   },
 
-  // ROW 2: 6 + 6 = 12
   {
     number: '03',
     slug: 'masterplayer-designs-and-printing',
@@ -492,6 +490,7 @@ export const ALL_PROJECTS = [
       },
     ],
   },
+
   {
     number: '04',
     slug: 'trugifting-solutions',
@@ -539,9 +538,40 @@ export const ALL_PROJECTS = [
     ],
   },
 
-  // ROW 3: 4 + 4 + 4 = 12
   {
     number: '05',
+    slug: 'omniroute-session-sync',
+    title: 'OmniRoute Session Sync',
+    subtitle: 'Zero-Dependency Browser Cookie & Token Sync Bridge for Local AI Gateways',
+    category: 'Open Source · Developer Tooling',
+    year: '2026',
+    role: 'Creator & Maintainer',
+    bentoSpan: 'col-6',
+    accentColor: '#4F46E5',
+    surfaceTint: '#E0E7FF',
+    liveUrl: 'https://github.com/avichal15/session-sync',
+    liveLabel: 'View on GitHub ↗',
+    repoUrl: 'https://github.com/avichal15/session-sync',
+    repoLabel: 'GitHub (session-sync)',
+    coverImage: null,
+    previewCode:
+      'OMNIROUTE-SESSION-SYNC · CLI & EXTENSION\n• Zero-Dependency Node.js Companion\n• Auto-Syncs Provider Cookies to 127.0.0.1:20128\n• Eliminates Manual DevTools Token Copy-Paste',
+    stack: ['JavaScript (Node.js)', 'Chrome Extension APIs', 'Local HTTP Bridge', 'CLI Automation'],
+    summary:
+      'Independent zero-dependency companion utility that automatically synchronizes authenticated browser sessions into a local OmniRoute AI gateway instance.',
+    highlights: [
+      'Eliminated manual DevTools token copy-pasting across provider tabs with an automated local session bridge.',
+      'Published as a clean, auditable zero-dependency open-source package on GitHub.',
+    ],
+    commentary: [
+      'Copying session cookies out of Chrome DevTools every time an AI provider token rotates is painful.',
+      'OmniRoute Session Sync automates that handshake locally with zero third-party dependencies.',
+    ],
+    slides: [],
+  },
+
+  {
+    number: '06',
     slug: 'mahadev-plywood',
     title: 'Mahadev Plywood',
     subtitle: 'Architectural Material Catalog, Laminate Specs & Dealer Portal',
@@ -570,8 +600,9 @@ export const ALL_PROJECTS = [
     ],
     slides: [],
   },
+
   {
-    number: '06',
+    number: '07',
     slug: 'dhuri-hoon-mai',
     title: 'Dhuri Hoon Mai',
     subtitle: 'Community Social Impact, Volunteer Mobilization & NGO Platform',
@@ -600,8 +631,73 @@ export const ALL_PROJECTS = [
     ],
     slides: [],
   },
+
   {
-    number: '07',
+    number: '08',
+    slug: 'insta-manager',
+    title: 'Insta Manager',
+    subtitle: 'Local-First Creator Outreach CRM & Browser Automation Bridge',
+    category: 'Open Source · Desktop CRM',
+    year: '2026',
+    role: 'Creator & Full-Stack Engineer',
+    bentoSpan: 'col-4',
+    accentColor: '#DB2777',
+    surfaceTint: '#FCE7F3',
+    liveUrl: 'https://github.com/avichal15/Insta-manager',
+    liveLabel: 'View on GitHub ↗',
+    repoUrl: 'https://github.com/avichal15/Insta-manager',
+    repoLabel: 'GitHub (Insta-manager)',
+    coverImage: null,
+    previewCode:
+      'INSTA MANAGER · CREATOR CRM\n• Local-First Prospect & Reel Tracking\n• Human-in-the-Loop Browser Bridge\n• Structured DM Follow-Up Queues',
+    stack: ['React', 'Node.js', 'SQLite / Local State', 'Browser Acceptance Bridge'],
+    summary:
+      'Local-first desktop workspace and browser bridge for organizing creator outreach, DM follow-ups, Reel discovery, and content operations.',
+    highlights: [
+      'Replaced scattered spreadsheets and open social tabs with structured lead stages and template queues.',
+      'Built a deterministic human-in-the-loop browser bridge for safe, repeatable creator workflows.',
+    ],
+    commentary: [
+      'Managing high-volume creator collaborations inside raw Instagram tabs leads to lost threads and duplicate DMs.',
+      'Insta Manager gives operators a local-first CRM with structured pipeline stages and browser automation helpers.',
+    ],
+    slides: [],
+  },
+
+  {
+    number: '09',
+    slug: 'chanakya-reel-ai',
+    title: 'Chanakya Reel AI',
+    subtitle: 'Autonomous 9:16 Short-Form Video Synthesis & FFmpeg Caption Pipeline',
+    category: 'Generative Media Pipeline',
+    year: '2026',
+    role: 'Creator & AI Pipeline Engineer',
+    bentoSpan: 'col-4',
+    accentColor: '#9333EA',
+    surfaceTint: '#F3E8FF',
+    liveUrl: 'https://github.com/avichal15',
+    liveLabel: 'View GitHub Profile ↗',
+    repoUrl: 'https://github.com/avichal15',
+    repoLabel: 'GitHub (avichal15)',
+    coverImage: null,
+    previewCode:
+      'CHANAKYA REEL AI · 9:16 VIDEO SYNTH\n• LLM Storyboard & Character Continuity\n• TTS Voice + <15ms Word-Level Captions\n• Automated 60fps FFmpeg Render Pipeline',
+    stack: ['Python / Node.js', 'FFmpeg Compositing', 'Multimodal AI', 'ASS Word-Level Subtitles', 'TTS Synthesis'],
+    summary:
+      'Automated script-to-reel production harness combining LLM storyboarding, character-consistent visual prompts, voice synthesis, and FFmpeg 9:16 motion compositing.',
+    highlights: [
+      'Automated scene generation, TTS audio timing, and dynamic word-by-word subtitle burn-in with under 15ms drift.',
+      'Compressed hours of manual short-form video editing into a repeatable CLI pipeline.',
+    ],
+    commentary: [
+      'Producing high-retention 9:16 storytelling reels manually takes hours of keyframing and caption syncing.',
+      'Chanakya Reel AI automates the entire pipeline from script to 60fps rendered vertical video.',
+    ],
+    slides: [],
+  },
+
+  {
+    number: '10',
     slug: 'microcoach-ai',
     title: 'MicroCoach AI',
     subtitle: 'Habit Streak Companion & Classroom Observation AI Copilot',
@@ -635,104 +731,139 @@ export const ALL_PROJECTS = [
     ],
   },
 
-  // ROW 4: 6 + 6 = 12
   {
-    number: '08',
-    slug: 'omniroute-upstream',
-    title: 'OmniRoute LLM Gateway (PR #13127)',
-    subtitle: 'Open-Source Multi-Provider AI Gateway · Private LAN & Tailscale Auth Fix',
-    category: 'Open Source · AI Infrastructure',
-    year: '2026',
-    role: 'Open-Source Contributor',
-    bentoSpan: 'col-6',
-    accentColor: '#0284C7',
-    surfaceTint: '#E0F2FE',
-    liveUrl: 'https://github.com/diegosouzapw/OmniRoute',
-    liveLabel: 'View Upstream Repo ↗',
-    repoUrl: 'https://github.com/diegosouzapw/OmniRoute',
-    repoLabel: 'GitHub (diegosouzapw/OmniRoute)',
-    coverImage: null,
-    previewCode:
-      'UPSTREAM PR #13127 · LAN & TAILSCALE AUTH\n• Fixed HTTP 401 Cookie Drops on RFC-1918 & CGNAT\n• Protocol-Aware SameSite/Secure Negotiation\n• 13+ Frontier LLM Providers Unified',
-    stack: ['Node.js', 'Multi-LLM Routing', 'HTTP Cookie Security', 'Tailscale / Private LAN', 'Docker'],
-    summary:
-      'Resolved cross-subnet session drops and cookie rejection when self-hosting the OmniRoute multi-provider LLM gateway across private LANs, Docker bridges, and Tailscale nodes without TLS termination.',
-    highlights: [
-      'Diagnosed RFC-1918 and CGNAT Tailscale origin mismatches that caused silent 401 login loops on headless deployments.',
-      'Implemented protocol-aware SameSite/Secure cookie negotiation and dynamic origin validation.',
-    ],
-    commentary: [
-      'When self-hosting OmniRoute across a private LAN or Tailscale mesh over plain HTTP, strict Secure cookie flags silently dropped authentication sessions.',
-      'I engineered protocol-aware cookie negotiation so local and mesh operators get reliable authentication without weakening HTTPS deployments.',
-    ],
-    slides: [],
-  },
-  {
-    number: '09',
-    slug: 'omniroute-session-sync',
-    title: 'OmniRoute Session Sync',
-    subtitle: 'Zero-Dependency Browser Cookie & Token Sync Bridge for Local AI Gateways',
-    category: 'Open Source · Developer Tooling',
-    year: '2026',
-    role: 'Creator & Maintainer',
-    bentoSpan: 'col-6',
-    accentColor: '#4F46E5',
-    surfaceTint: '#E0E7FF',
-    liveUrl: 'https://github.com/avichal15/omniroute-session-sync',
+    number: '11',
+    slug: 'sigmagpt-and-vision-suite',
+    title: 'SigmaGPT & Browser Vision Suite',
+    subtitle: 'Full-Stack Conversational AI Workspace + TensorFlow.js Object Detection',
+    category: 'AI & WebML Suite',
+    year: '2024 – 2025',
+    role: 'Full-Stack Engineer',
+    bentoSpan: 'col-4',
+    accentColor: '#B45309',
+    surfaceTint: '#FEF3C7',
+    liveUrl: 'https://github.com/avichal15',
     liveLabel: 'View on GitHub ↗',
-    repoUrl: 'https://github.com/avichal15/omniroute-session-sync',
-    repoLabel: 'GitHub (omniroute-session-sync)',
+    repoUrl: 'https://github.com/avichal15',
+    repoLabel: 'GitHub (avichal15)',
     coverImage: null,
     previewCode:
-      'OMNIROUTE-SESSION-SYNC · CLI & EXTENSION\n• Zero-Dependency Node.js Companion\n• Auto-Syncs Provider Cookies to 127.0.0.1:20128\n• Eliminates Manual DevTools Token Copy-Paste',
-    stack: ['JavaScript (Node.js)', 'Chrome Extension APIs', 'Local HTTP Bridge', 'CLI Automation'],
+      'SIGMAGPT + WEBML VISION SUITE\n• MERN + OpenAI Streaming Workspace\n• Client-Side TensorFlow.js COCO-SSD\n• Real-Time Crypto & Weather Dashboards',
+    stack: ['React', 'Node.js & Express', 'MongoDB', 'OpenAI API', 'TensorFlow.js (COCO-SSD)', 'WebRTC Canvas'],
     summary:
-      'Independent zero-dependency companion utility that automatically synchronizes authenticated browser sessions into a local OmniRoute AI gateway instance.',
+      'Full-stack MERN conversational AI workspace (SigmaGPT) alongside client-side TensorFlow.js webcam object detection and live market telemetry apps.',
     highlights: [
-      'Eliminated manual DevTools token copy-pasting across provider tabs with an automated local session bridge.',
-      'Published as a clean, auditable zero-dependency open-source package on GitHub.',
+      'Built persistent multi-thread chat with streaming markdown/code rendering in SigmaGPT.',
+      'Implemented zero-server webcam object detection in the browser using TensorFlow.js and COCO-SSD.',
     ],
     commentary: [
-      'Copying session cookies out of Chrome DevTools every time an AI provider token rotates is painful.',
-      'OmniRoute Session Sync automates that handshake locally with zero third-party dependencies.',
+      'These foundational builds combined full-stack MERN architecture with real-time browser machine learning.',
+      'From streaming LLM chat threads in SigmaGPT to 60fps COCO-SSD bounding boxes on live webcam feeds, everything runs fast and clean.',
     ],
     slides: [],
   },
 
-  // ROW 5: 4 + 4 + 4 = 12
   {
-    number: '10',
-    slug: 'insta-manager',
-    title: 'Insta Manager',
-    subtitle: 'Local-First Creator Outreach CRM & Browser Automation Bridge',
-    category: 'Open Source · Desktop CRM',
-    year: '2026',
-    role: 'Creator & Full-Stack Engineer',
+    number: '12',
+    slug: 'unified-crm-ecommerce-integration',
+    title: '7-Platform CRM & E-Commerce Engine',
+    subtitle: 'Webhook & Order Lifecycle Automation Across Zoho, Shopify & Shiprocket',
+    category: 'Operations Automation',
+    year: '2025',
+    role: 'Product & Operations Engineer',
     bentoSpan: 'col-4',
-    accentColor: '#DB2777',
-    surfaceTint: '#FCE7F3',
-    liveUrl: 'https://github.com/avichal15/Insta-manager',
-    liveLabel: 'View on GitHub ↗',
-    repoUrl: 'https://github.com/avichal15/Insta-manager',
-    repoLabel: 'GitHub (Insta-manager)',
-    coverImage: null,
-    previewCode:
-      'INSTA MANAGER · CREATOR CRM\n• Local-First Prospect & Reel Tracking\n• Human-in-the-Loop Browser Bridge\n• Structured DM Follow-Up Queues',
-    stack: ['React', 'Node.js', 'SQLite / Local State', 'Browser Acceptance Bridge'],
+    accentColor: '#0F766E',
+    surfaceTint: '#CCFBF1',
+    liveUrl: 'https://medistudygo.com/',
+    liveLabel: 'Live on MediStudyGo ↗',
+    repoUrl: 'https://github.com/avichal15',
+    repoLabel: 'GitHub Profile',
+    coverImage: '/media/projects/medistudygo-desktop.png',
+    stack: ['Zoho CRM', 'Shopify', 'WooCommerce', 'Shiprocket', 'DoubleTick WhatsApp', 'Webhooks'],
     summary:
-      'Local-first desktop workspace and browser bridge for organizing creator outreach, DM follow-ups, Reel discovery, and content operations.',
+      'End-to-end webhook and API integration bridging storefront checkouts, courier dispatch events, WhatsApp notifications, and CRM deal stages.',
     highlights: [
-      'Replaced scattered spreadsheets and open social tabs with structured lead stages and template queues.',
-      'Built a deterministic human-in-the-loop browser bridge for safe, repeatable creator workflows.',
+      'Eliminated manual CSV handoffs between e-commerce checkouts, Shiprocket courier webhooks, and CRM pipeline stages.',
     ],
     commentary: [
-      'Managing high-volume creator collaborations inside raw Instagram tabs leads to lost threads and duplicate DMs.',
-      'Insta Manager gives operators a local-first CRM with structured pipeline stages and browser automation helpers.',
+      'Disconnected tools silently drain hours from operations teams every single day.',
+      'By wiring Shopify, Zoho CRM, Shiprocket, and WhatsApp together via webhooks, every order state change updates across the company automatically.',
+    ],
+    slides: [
+      {
+        src: '/media/projects/medistudygo-desktop.png',
+        caption: 'Automated storefront-to-CRM and courier fulfillment pipeline.',
+      },
+    ],
+  },
+
+  {
+    number: '13',
+    slug: 'project-snowball',
+    title: 'Project Snowball',
+    subtitle: 'Autonomous Multi-Agent Quantitative Trading Platform with LLM Orchestration',
+    category: 'Quantitative Systems & Multi-Agent AI',
+    year: '2025 - 2026',
+    role: 'Creator & Lead Systems Architect',
+    bentoSpan: 'col-4',
+    accentColor: '#10B981',
+    surfaceTint: '#ECFDF5',
+    liveUrl: 'https://github.com/avichal15',
+    liveLabel: 'View on GitHub ↗',
+    repoUrl: 'https://github.com/avichal15',
+    repoLabel: 'GitHub: avichal15',
+    coverImage: null,
+    previewCode:
+      'PROJECT SNOWBALL · MULTI-AGENT EXECUTION\n• Asynchronous Python asyncio Market Pipeline\n• Multi-Model LLM Risk & Decision Synthesis\n• Sandboxed Execution Engine with Automated SL/TP',
+    stack: ['Python', 'asyncio', 'REST & WebSockets', 'LLM Orchestration', 'Risk Engine', 'Docker'],
+    summary:
+      'Autonomous multi-agent algorithmic trading and market analytics platform built in Python with asynchronous streaming telemetry, multi-LLM consensus synthesis, and secure sandboxed execution.',
+    highlights: [
+      'Engineered an event-driven market data pipeline using Python asyncio and WebSocket order book feeds.',
+      'Designed multi-model LLM debate protocols for macro sentiment filtering and trade hypothesis generation.',
+      'Implemented automated position sizing, drawdown boundaries, and continuous risk controls.',
+    ],
+    commentary: [
+      'Project Snowball was built to test autonomous agent decision-making in volatile market environments.',
+      'It combines strict quantitative risk guardrails with multi-agent LLM consensus before placing paper or live orders.',
+      'The architecture is fully modular, allowing plug-and-play strategies and zero-latency execution.',
     ],
     slides: [],
   },
+
   {
-    number: '11',
+    number: '14',
+    slug: 'whatsapp-to-csv-converter',
+    title: 'WhatsApp to CSV Converter',
+    subtitle: 'Deterministic Parser Turning Exported Chat Logs into Clean Analytics Tables',
+    category: 'Open Source · Data Utility',
+    year: '2025',
+    role: 'Creator & Maintainer',
+    bentoSpan: 'col-4',
+    accentColor: '#16A34A',
+    surfaceTint: '#DCFCE7',
+    liveUrl: 'https://github.com/avichal15/whatsapp-to-csv-converter',
+    liveLabel: 'View on GitHub ↗',
+    repoUrl: 'https://github.com/avichal15/whatsapp-to-csv-converter',
+    repoLabel: 'GitHub (whatsapp-to-csv-converter)',
+    coverImage: null,
+    previewCode:
+      'WHATSAPP-TO-CSV · STREAM PARSER\n• Multi-Line Message & Emoji Safe\n• Locale Timestamp Normalization\n• Instant UTF-8 CSV Export for CRM/BI',
+    stack: ['Python / JavaScript', 'Regex Stream Parsing', 'UTF-8 CSV Hygiene'],
+    summary:
+      'Lightweight open-source parser that transforms raw exported WhatsApp `.txt` chat logs into structured UTF-8 CSV datasets ready for CRM import or BI analysis.',
+    highlights: [
+      'Handles multi-line messages, system events, and international timestamp formats that break naive spreadsheet imports.',
+    ],
+    commentary: [
+      'Support and operations teams export WhatsApp threads all the time, only to watch Excel mangle multi-line messages.',
+      'This utility parses raw chat exports into clean, analysis-ready CSV columns in seconds.',
+    ],
+    slides: [],
+  },
+
+  {
+    number: '15',
     slug: 'recruitment-funnel-dashboard',
     title: 'Recruitment Funnel Analytics',
     subtitle: 'Multi-Tab BI Dashboard for Click-to-Hire Conversion & Channel CPH',
@@ -773,8 +904,9 @@ export const ALL_PROJECTS = [
       },
     ],
   },
+
   {
-    number: '12',
+    number: '16',
     slug: 'voca-ai',
     title: 'Voca — AI Voice Coach',
     subtitle: 'Interactive Spoken Communication, Fluency & Interview Practice Tool',
@@ -805,9 +937,8 @@ export const ALL_PROJECTS = [
     slides: [],
   },
 
-  // ROW 6: 4 + 4 + 4 = 12
   {
-    number: '13',
+    number: '17',
     slug: 'gemini-web-antigravity-stack',
     title: 'Gemini Web Antigravity Stack',
     subtitle: 'Multi-Agent AI Engineering Harness, Hook Guardrails & Skill Router',
@@ -837,104 +968,9 @@ export const ALL_PROJECTS = [
     ],
     slides: [],
   },
-  {
-    number: '14',
-    slug: 'chanakya-reel-ai',
-    title: 'Chanakya Reel AI',
-    subtitle: 'Autonomous 9:16 Short-Form Video Synthesis & FFmpeg Caption Pipeline',
-    category: 'Generative Media Pipeline',
-    year: '2026',
-    role: 'Creator & AI Pipeline Engineer',
-    bentoSpan: 'col-4',
-    accentColor: '#9333EA',
-    surfaceTint: '#F3E8FF',
-    liveUrl: 'https://github.com/avichal15',
-    liveLabel: 'View GitHub Profile ↗',
-    repoUrl: 'https://github.com/avichal15',
-    repoLabel: 'GitHub (avichal15)',
-    coverImage: null,
-    previewCode:
-      'CHANAKYA REEL AI · 9:16 VIDEO SYNTH\n• LLM Storyboard & Character Continuity\n• TTS Voice + <15ms Word-Level Captions\n• Automated 60fps FFmpeg Render Pipeline',
-    stack: ['Python / Node.js', 'FFmpeg Compositing', 'Multimodal AI', 'ASS Word-Level Subtitles', 'TTS Synthesis'],
-    summary:
-      'Automated script-to-reel production harness combining LLM storyboarding, character-consistent visual prompts, voice synthesis, and FFmpeg 9:16 motion compositing.',
-    highlights: [
-      'Automated scene generation, TTS audio timing, and dynamic word-by-word subtitle burn-in with under 15ms drift.',
-      'Compressed hours of manual short-form video editing into a repeatable CLI pipeline.',
-    ],
-    commentary: [
-      'Producing high-retention 9:16 storytelling reels manually takes hours of keyframing and caption syncing.',
-      'Chanakya Reel AI automates the entire pipeline from script to 60fps rendered vertical video.',
-    ],
-    slides: [],
-  },
-  {
-    number: '15',
-    slug: 'whatsapp-to-csv-converter',
-    title: 'WhatsApp to CSV Converter',
-    subtitle: 'Deterministic Parser Turning Exported Chat Logs into Clean Analytics Tables',
-    category: 'Open Source · Data Utility',
-    year: '2025',
-    role: 'Creator & Maintainer',
-    bentoSpan: 'col-4',
-    accentColor: '#16A34A',
-    surfaceTint: '#DCFCE7',
-    liveUrl: 'https://github.com/avichal15/whatsapp-to-csv-converter',
-    liveLabel: 'View on GitHub ↗',
-    repoUrl: 'https://github.com/avichal15/whatsapp-to-csv-converter',
-    repoLabel: 'GitHub (whatsapp-to-csv-converter)',
-    coverImage: null,
-    previewCode:
-      'WHATSAPP-TO-CSV · STREAM PARSER\n• Multi-Line Message & Emoji Safe\n• Locale Timestamp Normalization\n• Instant UTF-8 CSV Export for CRM/BI',
-    stack: ['Python / JavaScript', 'Regex Stream Parsing', 'UTF-8 CSV Hygiene'],
-    summary:
-      'Lightweight open-source parser that transforms raw exported WhatsApp `.txt` chat logs into structured UTF-8 CSV datasets ready for CRM import or BI analysis.',
-    highlights: [
-      'Handles multi-line messages, system events, and international timestamp formats that break naive spreadsheet imports.',
-    ],
-    commentary: [
-      'Support and operations teams export WhatsApp threads all the time, only to watch Excel mangle multi-line messages.',
-      'This utility parses raw chat exports into clean, analysis-ready CSV columns in seconds.',
-    ],
-    slides: [],
-  },
 
-  // ROW 7: 4 + 4 + 4 = 12
   {
-    number: '16',
-    slug: 'unified-crm-ecommerce-integration',
-    title: '7-Platform CRM & E-Commerce Engine',
-    subtitle: 'Webhook & Order Lifecycle Automation Across Zoho, Shopify & Shiprocket',
-    category: 'Operations Automation',
-    year: '2025',
-    role: 'Product & Operations Engineer',
-    bentoSpan: 'col-4',
-    accentColor: '#0F766E',
-    surfaceTint: '#CCFBF1',
-    liveUrl: 'https://medistudygo.com/',
-    liveLabel: 'Live on MediStudyGo ↗',
-    repoUrl: 'https://github.com/avichal15',
-    repoLabel: 'GitHub Profile',
-    coverImage: '/media/projects/medistudygo-desktop.png',
-    stack: ['Zoho CRM', 'Shopify', 'WooCommerce', 'Shiprocket', 'DoubleTick WhatsApp', 'Webhooks'],
-    summary:
-      'End-to-end webhook and API integration bridging storefront checkouts, courier dispatch events, WhatsApp notifications, and CRM deal stages.',
-    highlights: [
-      'Eliminated manual CSV handoffs between e-commerce checkouts, Shiprocket courier webhooks, and CRM pipeline stages.',
-    ],
-    commentary: [
-      'Disconnected tools silently drain hours from operations teams every single day.',
-      'By wiring Shopify, Zoho CRM, Shiprocket, and WhatsApp together via webhooks, every order state change updates across the company automatically.',
-    ],
-    slides: [
-      {
-        src: '/media/projects/medistudygo-desktop.png',
-        caption: 'Automated storefront-to-CRM and courier fulfillment pipeline.',
-      },
-    ],
-  },
-  {
-    number: '17',
+    number: '18',
     slug: 'openinssist-and-karo',
     title: 'OpenInssist & Karo Utilities',
     subtitle: 'Open-Source Workflow Automation & Task Execution Tools on GitHub',
@@ -963,41 +999,8 @@ export const ALL_PROJECTS = [
     ],
     slides: [],
   },
-  {
-    number: '18',
-    slug: 'sigmagpt-and-vision-suite',
-    title: 'SigmaGPT & Browser Vision Suite',
-    subtitle: 'Full-Stack Conversational AI Workspace + TensorFlow.js Object Detection',
-    category: 'AI & WebML Suite',
-    year: '2024 – 2025',
-    role: 'Full-Stack Engineer',
-    bentoSpan: 'col-4',
-    accentColor: '#B45309',
-    surfaceTint: '#FEF3C7',
-    liveUrl: 'https://github.com/avichal15',
-    liveLabel: 'View on GitHub ↗',
-    repoUrl: 'https://github.com/avichal15',
-    repoLabel: 'GitHub (avichal15)',
-    coverImage: null,
-    previewCode:
-      'SIGMAGPT + WEBML VISION SUITE\n• MERN + OpenAI Streaming Workspace\n• Client-Side TensorFlow.js COCO-SSD\n• Real-Time Crypto & Weather Dashboards',
-    stack: ['React', 'Node.js & Express', 'MongoDB', 'OpenAI API', 'TensorFlow.js (COCO-SSD)', 'WebRTC Canvas'],
-    summary:
-      'Full-stack MERN conversational AI workspace (SigmaGPT) alongside client-side TensorFlow.js webcam object detection and live market telemetry apps.',
-    highlights: [
-      'Built persistent multi-thread chat with streaming markdown/code rendering in SigmaGPT.',
-      'Implemented zero-server webcam object detection in the browser using TensorFlow.js and COCO-SSD.',
-    ],
-    commentary: [
-      'These foundational builds combined full-stack MERN architecture with real-time browser machine learning.',
-      'From streaming LLM chat threads in SigmaGPT to 60fps COCO-SSD bounding boxes on live webcam feeds, everything runs fast and clean.',
-    ],
-    slides: [],
-  },
-];
 
-export const FEATURED_STORIES = ALL_PROJECTS.slice(0, 4);
-export const ARCHIVE_PROJECTS = ALL_PROJECTS.slice(4);
+];
 
 export const ALL_WORK_BY_SLUG = new Map(ALL_PROJECTS.map((item) => [item.slug, item]));
 
@@ -1007,100 +1010,31 @@ export const ALL_WORK_BY_SLUG = new Map(ALL_PROJECTS.map((item) => [item.slug, i
 export const CERTIFICATIONS = [
   {
     number: 'C1',
-    slug: 'oci-genai-professional',
-    title: 'Oracle Cloud Infrastructure 2025 Certified Generative AI Professional',
-    issuer: 'Oracle University',
-    issueDate: '2025',
-    category: 'Enterprise LLMs & RAG Architecture',
+    slug: 'alpha-dsa-java',
+    title: 'Data Structures & Algorithms in Java (Alpha Batch)',
+    issuer: 'Apna College (Shradha Khapra)',
+    issueDate: '2023 - 2024',
+    category: 'Core Computer Science & Algorithms',
     bentoSpan: 'col-6',
-    badgeColor: '#C2410C',
-    surfaceTint: '#FFEDD5',
+    badgeColor: '#6D28D9',
+    surfaceTint: '#EDE9FE',
     verifyUrl: 'https://www.linkedin.com/in/avichalgoyal007/',
-    verifyLabel: 'Verify on LinkedIn ↗',
+    verifyLabel: 'Verify ID: 66369520abe8a8bb500f4cc4 ↗',
     summary:
-      'Validated expertise in designing, fine-tuning, and deploying enterprise Large Language Models, RAG pipelines, semantic search, and vector indexing on Oracle Cloud Infrastructure.',
+      'Verified completion of the Alpha Batch algorithmic curriculum covering trees, graphs, dynamic programming, recursion, heaps, and asymptotic complexity optimization in Java. Certificate ID: 66369520abe8a8bb500f4cc4.',
     skills: [
-      'OCI Generative AI Service',
-      'RAG & Vector Databases',
-      'LangChain / LlamaIndex Orchestration',
-      'Dedicated AI Clusters & Guardrails',
+      'Java & OOP Architecture',
+      'Binary Trees & Graphs',
+      'Dynamic Programming & Recursion',
+      'Time & Space Complexity Analysis',
     ],
     appliedInWork:
-      'Applied directly in architecting multi-provider LLM gateways (OmniRoute), RAG study pipelines (MediStudyGo), and autonomous agent harnesses.',
+      'Applied in stream parsing algorithms, high-efficiency memory state caching, and 3D scene-graph traversal.',
   },
   {
     number: 'C2',
-    slug: 'oci-data-science-professional',
-    title: 'Oracle Cloud Infrastructure 2025 Certified Data Science Professional',
-    issuer: 'Oracle University',
-    issueDate: '2025',
-    category: 'MLOps & Cloud Model Deployment',
-    bentoSpan: 'col-6',
-    badgeColor: '#0369A1',
-    surfaceTint: '#E0F2FE',
-    verifyUrl: 'https://www.linkedin.com/in/avichalgoyal007/',
-    verifyLabel: 'Verify on LinkedIn ↗',
-    summary:
-      'Certified proficiency in end-to-end machine learning lifecycles, feature stores, model catalog governance, distributed training, and scalable inference pipelines on OCI.',
-    skills: [
-      'End-to-End MLOps',
-      'Model Catalog & Feature Stores',
-      'Scalable Cloud Inference',
-      'Model Evaluation & Drift Monitoring',
-    ],
-    appliedInWork:
-      'Used in designing reproducible analytics pipelines, synthetic data benchmarking, and production AI evaluation loops.',
-  },
-  {
-    number: 'C3',
-    slug: 'stanford-ml-specialization',
-    title: 'Machine Learning Specialization — Stanford Online & DeepLearning.AI',
-    issuer: 'Stanford Online & DeepLearning.AI (Andrew Ng)',
-    issueDate: '2024 – 2025',
-    category: 'Supervised, Unsupervised & Reinforcement Learning',
-    bentoSpan: 'col-6',
-    badgeColor: '#B91C1C',
-    surfaceTint: '#FEE2E2',
-    verifyUrl: 'https://www.linkedin.com/in/avichalgoyal007/',
-    verifyLabel: 'Verify on LinkedIn ↗',
-    summary:
-      '3-course specialization taught by Andrew Ng covering linear/logistic regression, neural networks, decision trees, clustering, anomaly detection, recommender systems, and reinforcement learning.',
-    skills: [
-      'Supervised & Unsupervised ML',
-      'Neural Networks & Backpropagation',
-      'Decision Trees & Ensembles',
-      'Recommender Systems & RL',
-    ],
-    appliedInWork:
-      'Forms the mathematical foundation behind my computer vision, voice coaching, and intelligent ranking workflows.',
-  },
-  {
-    number: 'C4',
-    slug: 'foundations-of-business-intelligence',
-    title: 'Foundations of Business Intelligence',
-    issuer: 'Google (via Coursera)',
-    issueDate: 'August 2024',
-    category: 'Business Intelligence & ETL Systems',
-    bentoSpan: 'col-6',
-    badgeColor: '#1D4ED8',
-    surfaceTint: '#DBEAFE',
-    verifyUrl: 'https://www.linkedin.com/in/avichalgoyal007/',
-    verifyLabel: 'Verify on LinkedIn ↗',
-    summary:
-      'Professional credential covering BI lifecycle stages, data warehousing concepts, stakeholder metric definition, ETL pipelines, and executive dashboard design.',
-    skills: [
-      'BI Strategy & KPI Alignment',
-      'Data Modeling & ETL Pipelines',
-      'Executive Dashboard Design',
-      'Cohort & Funnel Telemetry',
-    ],
-    appliedInWork:
-      'Applied directly while structuring 7-platform cohort analytics at MediStudyGo and building the Recruitment Funnel Analytics Dashboard.',
-  },
-  {
-    number: 'C5',
     slug: 'mern-stack-development',
-    title: 'Full-Stack Web Development (MERN Stack — Delta Batch)',
+    title: 'Full-Stack Web Development (MERN Stack)',
     issuer: 'Apna College',
     issueDate: '2024',
     category: 'Full-Stack Software Engineering',
@@ -1110,38 +1044,107 @@ export const CERTIFICATIONS = [
     verifyUrl: 'https://www.linkedin.com/in/avichalgoyal007/',
     verifyLabel: 'Verify on LinkedIn ↗',
     summary:
-      'Intensive project-based engineering curriculum covering MongoDB, Express.js, React, Node.js, REST API architecture, authentication, and cloud deployment.',
+      'Rigorous project-driven full-stack engineering curriculum covering MongoDB schema design, Express.js REST APIs, React state architecture, Node.js backend pipelines, JWT authentication, and cloud deployment.',
     skills: [
-      'React & Modern Frontend Craft',
-      'Node.js & Express APIs',
-      'MongoDB Schema Design',
-      'Authentication & Production Deployment',
+      'React.js & State Choreography',
+      'Node.js & Express REST APIs',
+      'MongoDB & Mongoose Schemas',
+      'Full-Stack Cloud Deployment',
     ],
     appliedInWork:
-      'Powers the full-stack architecture behind Masterplayer 3D Studio, TruGifting Solutions, SigmaGPT, and this interactive portfolio.',
+      'Forms the software architecture foundation across TruGifting Solutions, Masterplayer Studio, and client web apps.',
   },
   {
-    number: 'C6',
-    slug: 'data-structures-and-algorithms-java',
-    title: 'Data Structures & Algorithms in Java (Alpha Batch)',
-    issuer: 'Apna College',
-    issueDate: '2023',
-    category: 'Core Computer Science & Algorithms',
+    number: 'C3',
+    slug: 'foundations-of-business-intelligence',
+    title: 'Foundations of Business Intelligence',
+    issuer: 'Google (via Coursera)',
+    issueDate: 'August 2024',
+    category: 'Business Intelligence & Telemetry',
     bentoSpan: 'col-6',
-    badgeColor: '#6D28D9',
-    surfaceTint: '#EDE9FE',
+    badgeColor: '#1D4ED8',
+    surfaceTint: '#DBEAFE',
     verifyUrl: 'https://www.linkedin.com/in/avichalgoyal007/',
     verifyLabel: 'Verify on LinkedIn ↗',
     summary:
-      'Comprehensive algorithmic problem-solving curriculum covering trees, graphs, heaps, recursion, dynamic programming, and asymptotic complexity analysis in Java.',
+      'Google professional credential covering the business intelligence lifecycle, data warehousing fundamentals, stakeholder KPI modeling, ETL data pipelines, and executive metric dashboards.',
     skills: [
-      'Java & OOP Architecture',
-      'Trees, Graphs & Heaps',
-      'Dynamic Programming',
-      'Time & Space Complexity Optimization',
+      'BI Strategy & KPI Alignment',
+      'Data Modeling & ETL Pipelines',
+      'Executive Dashboard Design',
+      'Funnel Telemetry & Analytics',
     ],
     appliedInWork:
-      'Used in stream parser design (WhatsApp to CSV Converter), 3D scene graph traversal, and low-latency state management.',
+      'Directly applied in architecting MediStudyGo cohort metrics and recruitment operations funnels.',
+  },
+  {
+    number: 'C4',
+    slug: 'medistudygo-operations-internship',
+    title: 'Product & Platform Operations Credential',
+    issuer: 'Medi Study Go (Executive Board)',
+    issueDate: 'May 2025 - Feb 2026',
+    category: 'EdTech Operations & Enterprise APIs',
+    bentoSpan: 'col-6',
+    badgeColor: '#0D9488',
+    surfaceTint: '#E6F4F1',
+    verifyUrl: 'https://medistudygo.com/',
+    verifyLabel: 'View MediStudyGo ↗',
+    summary:
+      'Executive Certificate presented by CEO Dr. Palak Bhandari & Chairman Dr. George P John for owning 7-platform product operations, API automations, and e-commerce infrastructure serving 50,000+ medical students.',
+    skills: [
+      'Shopify & CRM API Integrations',
+      'WhatsApp Automation & ManyChat',
+      '50+ Cross-Functional Scrums',
+      'High-Reliability Platform Release',
+    ],
+    appliedInWork:
+      'Reduced manual platform operations by 60% while maintaining 95% issue resolution SLA.',
+  },
+  {
+    number: 'C5',
+    slug: 'teachspoon-experience-cert',
+    title: 'Professional Software & Operations Experience',
+    issuer: 'Teachspoon EdTech Private Limited',
+    issueDate: 'March 2026',
+    category: 'Enterprise EdTech Operations',
+    bentoSpan: 'col-6',
+    badgeColor: '#EA580C',
+    surfaceTint: '#FFEDD5',
+    verifyUrl: 'https://www.linkedin.com/in/avichalgoyal007/',
+    verifyLabel: 'Verify on LinkedIn ↗',
+    summary:
+      'Formal Corporate Experience Certificate from Teachspoon EdTech Private Limited (CIN: U80900MH2022PTC386230, Powai, Mumbai) certifying platform outreach, workflow engineering, and digital growth operations.',
+    skills: [
+      'Workflow Automation',
+      'Operational Systems Design',
+      'Stakeholder Delivery',
+      'Process Scaling',
+    ],
+    appliedInWork:
+      'Applied across large-scale student acquisition funnels and multi-channel communication systems.',
+  },
+  {
+    number: 'C6',
+    slug: 'btech-computer-science',
+    title: 'B.Tech in Computer Science & Engineering',
+    issuer: 'SRM Institute of Science and Technology',
+    issueDate: '2021 - 2025',
+    category: 'Computer Science Degree',
+    bentoSpan: 'col-6',
+    badgeColor: '#2563EB',
+    surfaceTint: '#EFF6FF',
+    verifyUrl: 'https://github.com/avichal15',
+    verifyLabel: 'View GitHub ↗',
+    summary:
+      'Four-year comprehensive Computer Science and Engineering degree covering Object-Oriented Programming, Database Management Systems, Operating Systems, Computer Networks, and Software Engineering.',
+    skills: [
+      'Java, Python & JavaScript',
+      'SQL & Database Management Systems',
+      'Operating Systems & Networking',
+      'Agile Software Development Lifecycle',
+    ],
+    appliedInWork:
+      'Core theoretical and practical software engineering foundation applied throughout all production systems.',
   },
 ];
 
