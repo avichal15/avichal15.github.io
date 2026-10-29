@@ -19,7 +19,10 @@ export default function CertificationsView({ slug = null, onNavigate }) {
   }, [slug]);
 
   if (slug) {
-    const cert = CERTIFICATIONS_BY_SLUG.get(slug);
+    const cert =
+      typeof CERTIFICATIONS_BY_SLUG.get === 'function'
+        ? CERTIFICATIONS_BY_SLUG.get(slug)
+        : CERTIFICATIONS_BY_SLUG[slug];
     const { prev, next } = getAdjacentCertifications(slug);
 
     if (!cert) {
