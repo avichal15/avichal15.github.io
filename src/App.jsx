@@ -28,7 +28,7 @@ export default function App() {
   // Core Portfolio & Character State
   // ---------------------------------------------------------------------------
   const [batmanMode, setBatmanMode] = useState(false);
-  const [manualOutfit, setManualOutfit] = useState(null);
+  const [manualOutfit] = useState(null);
   const [autoOutfit, setAutoOutfit] = useState('classic');
   const [trickState, setTrickState] = useState({ name: null, nonce: 0 });
   const [menuOpen, setMenuOpen] = useState(false);
@@ -69,6 +69,7 @@ export default function App() {
   const dragStartRef = useRef({ x: 0, y: 0, lastX: 0, lastY: 0, shakeScore: 0 });
   const hoverShakeRef = useRef({ lastX: 0, lastY: 0, score: 0, cooldownUntil: 0 });
   const globalPointerRef = useRef({ x: 0, y: 0 });
+  const lastMascotTapRef = useRef(0);
 
   // Section & Scroll Refs
   const heroRef = useRef(null);
@@ -110,7 +111,13 @@ export default function App() {
   // ---------------------------------------------------------------------------
   const triggerTrick = useCallback(
     (trickId, customMessage) => {
-      setTrickState((prev) => ({ name: trickId, nonce: prev.nonce + 1 }));
+      setTrickState((prev) => ({
+        name: trickId,
+        kind: trickId,
+        startedAt: performance.now(),
+        duration: 1.35,
+        nonce: (prev.nonce || 0) + 1,
+      }));
       soundEngine.trick(trickId);
 
       const trickQuips = {
@@ -335,16 +342,18 @@ export default function App() {
           }
 
           const bRect = bEl.getBoundingClientRect();
-          const isVis = bIdx === 0 || bRect.top <= vh * 0.44;
-          bubbleVisible.push(isVis);
+          // STRICT RULE: Paragraphs ONLY start reading when they scroll ABOVE / past the character's head!
+          // Mascot is stationed at ~72vh, so reading begins strictly when bRect.bottom <= vh * 0.58
+          const isAboveCharacter = bRect.bottom <= vh * 0.58;
+          bubbleVisible.push(bRect.top <= vh * 0.88);
 
-          // Bubble lights up in the clear zone above the character's head
-          const startTop = bIdx === 0 ? vh * 0.76 : vh * 0.44;
-          const span = bIdx === 0 ? vh * 0.42 : vh * 0.34;
-          const ratio = isVis ? clamp((startTop - bRect.top) / span, 0, 1) : 0;
-          const lit = Math.round(ratio * wordCount);
+          let lit = 0;
+          if (isAboveCharacter) {
+            const readProgress = clamp((vh * 0.58 - bRect.bottom) / (vh * 0.36), 0, 1);
+            lit = Math.round(readProgress * wordCount);
+          }
 
-          if (isVis && bRect.top < vh * 0.5) {
+          if (isAboveCharacter && bRect.bottom < vh * 0.46) {
             activeStep = bIdx;
           }
 
@@ -609,6 +618,16 @@ export default function App() {
     [isGrabbed, sayTemporarily, stageState.isBadge]
   );
 
+  const lastClickTimeRef = useRef(0);
+  const handleMascotClick = useCallback(() => {
+    const now = Date.now();
+    if (now - lastClickTimeRef.current < 450) {
+      soundEngine.pop();
+      setMenuOpen((prev) => !prev);
+    }
+    lastClickTimeRef.current = now;
+  }, []);
+
   const handleCharacterPointerDown = useCallback(
     (e) => {
       if (stageState.isBadge) {
@@ -762,30 +781,6 @@ export default function App() {
                 </button>
               ))}
             </div>
-
-            <div className="mascot-menu__section-label">Dress me up</div>
-            <div className="mascot-menu__grid">
-              {OUTFITS.map((outfit) => (
-                <button
-                  key={outfit.id}
-                  type="button"
-                  className={`mascot-menu__btn ${activeOutfitId === outfit.id ? 'is-active' : ''}`}
-                  onClick={() => {
-                    soundEngine.pop();
-                    if (outfit.id === 'gotham') {
-                      if (!batmanMode) toggleBatmanMode();
-                    } else {
-                      if (batmanMode) setBatmanMode(false);
-                      setManualOutfit(outfit.id);
-                      sayTemporarily(`👕 Switched to ${outfit.label}! ${outfit.tagline}`, 3800);
-                    }
-                    setMenuOpen(false);
-                  }}
-                >
-                  {outfit.shortLabel}
-                </button>
-              ))}
-            </div>
           </div>
         )}
 
@@ -794,7 +789,18 @@ export default function App() {
           className="mascot-canvas-wrap"
           onPointerMove={handleCharacterPointerMove}
           onPointerDown={handleCharacterPointerDown}
-          onDoubleClick={() => {
+          onTouchStart={(e) => {
+            const now = Date.now();
+            if (now - lastMascotTapRef.current < 380) {
+              e.preventDefault();
+              soundEngine.pop();
+              setMenuOpen((prev) => !prev);
+            }
+            lastMascotTapRef.current = now;
+          }}
+          onClick={handleMascotClick}
+          onDoubleClick={(e) => {
+            e.stopPropagation();
             soundEngine.pop();
             setMenuOpen((prev) => !prev);
           }}
@@ -817,43 +823,6 @@ export default function App() {
             globalPointerRef={globalPointerRef}
           />
         </div>
-
-        {/* Under-Character Quick Controls (Dress me up / Do a trick) */}
-        {!stageState.isBadge &&
-          (!stageState.sectionMode ||
-            stageState.sectionMode === 'hero' ||
-            stageState.sectionMode === 'footer') && (
-            <div className="mascot-controls">
-              <button
-                type="button"
-                className="mascot-chip"
-                onClick={() => {
-                  soundEngine.pop();
-                  setMenuOpen((prev) => !prev);
-                }}
-              >
-                ✨ Do a trick
-              </button>
-              <button
-                type="button"
-                className="mascot-chip"
-                onClick={() => {
-                  soundEngine.pop();
-                  const currIdx = OUTFITS.findIndex((o) => o.id === activeOutfitId);
-                  const nextOutfit = OUTFITS[(currIdx + 1) % OUTFITS.length];
-                  if (nextOutfit.id === 'gotham') {
-                    toggleBatmanMode();
-                  } else {
-                    if (batmanMode) setBatmanMode(false);
-                    setManualOutfit(nextOutfit.id);
-                    sayTemporarily(`👕 Dressed in ${nextOutfit.label}!`, 3500);
-                  }
-                }}
-              >
-                👕 Dress me up ({activeOutfitObj.shortLabel})
-              </button>
-            </div>
-          )}
       </div>
 
       {/* =====================================================================
@@ -1362,34 +1331,22 @@ export default function App() {
               <span>© 2026 {OWNER_PROFILE.name} · Built with Three.js & WebAudio</span>
 
               <div className="footer__bottom-actions">
-                <button
-                  type="button"
+                <a
+                  href="https://github.com/avichal15"
+                  target="_blank"
+                  rel="noreferrer"
                   className="footer__action-btn"
-                  onClick={() => {
-                    soundEngine.pop();
-                    setMenuOpen(true);
-                  }}
                 >
-                  👕 Dress me up
-                </button>
-                <button
-                  type="button"
+                  GitHub ↗
+                </a>
+                <a
+                  href="https://www.linkedin.com/in/avichalgoyal007/"
+                  target="_blank"
+                  rel="noreferrer"
                   className="footer__action-btn"
-                  onClick={() => {
-                    const randomTrick =
-                      MASCOT_TRICKS[Math.floor(Math.random() * MASCOT_TRICKS.length)];
-                    triggerTrick(randomTrick.id);
-                  }}
                 >
-                  ✨ Do a trick
-                </button>
-                <button
-                  type="button"
-                  className="footer__action-btn"
-                  onClick={toggleBatmanMode}
-                >
-                  {batmanMode ? '☀️ Daylight Mode' : '🦇 Batman Mode'}
-                </button>
+                  LinkedIn ↗
+                </a>
               </div>
             </div>
           </div>
