@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Copy, Check, ArrowUpRight, Mail, FileText, Shield } from 'lucide-react';
+import { Copy, Check, ArrowUpRight, Mail, Shield } from 'lucide-react';
 import { OWNER_PROFILE, FEATURED_STORIES } from '../data/portfolioData';
 
 export default function Footer({ onNavigate, gothamMode = false, onToggleGotham }) {
@@ -53,17 +53,6 @@ export default function Footer({ onNavigate, gothamMode = false, onToggleGotham 
               <a href={`mailto:${OWNER_PROFILE.email}`} className="neo-btn neo-btn-secondary">
                 <Mail size={16} aria-hidden="true" />
                 <span>Open in Email App</span>
-              </a>
-
-              <a
-                href={OWNER_PROFILE.resumeUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="neo-btn neo-btn-secondary"
-              >
-                <FileText size={16} aria-hidden="true" />
-                <span>Resume (PDF)</span>
-                <ArrowUpRight size={14} aria-hidden="true" />
               </a>
             </div>
           </div>
@@ -150,11 +139,6 @@ export default function Footer({ onNavigate, gothamMode = false, onToggleGotham 
                   }}
                 >
                   Certifications & Credentials (/certifications)
-                </a>
-              </li>
-              <li>
-                <a href={OWNER_PROFILE.resumeUrl} target="_blank" rel="noopener noreferrer">
-                  Download Resume (/resume.pdf)
                 </a>
               </li>
             </ul>

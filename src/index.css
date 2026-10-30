@@ -1,26 +1,57 @@
-/* hallmark: playful | paper: #F6F2E9 | type: Funnel Display / Space Grotesk / Space Mono | floor: strict | mobile: android-optimized */
+/* Tactile 3D Studio LEGO Aesthetic (Normal Mode) + LEGO Batman Batcave & Batcomputer Mode */
 :root {
-  --bg-cream: #F6F2E9;
-  --bg-active: #F6F2E9;
-  --paper: #FBFBF8;
-  --stone: #EFECE3;
-  --ink: #0B0B0C;
-  --ink-soft: #3F3F44;
-  --ink-muted: #6E6D68;
-  --border: #0B0B0C;
-  --border-subtle: rgba(11, 11, 12, 0.15);
-  --accent-yellow: #FACC15;
+  --bg-cream: #EAE5DD;
+  --bg-active: #EAE5DD;
+  --paper: #F7F4EE;
+  --tile-surface: #F7F4EE;
+  --tile-bevel: #C8C2B8;
+  --stone: #E2DDD3;
+  --ink: #121316;
+  --ink-soft: #383A42;
+  --ink-muted: #646670;
+  --border: rgba(18, 19, 22, 0.14);
+  --border-subtle: rgba(18, 19, 22, 0.1);
+  --accent-yellow: #FFD000;
+  --accent-yellow-lip: #C9A000;
   --accent-red: #E3000B;
   --accent-blue: #2261E9;
   --cols: 12;
   --margin: clamp(1.25rem, 2.8vw, 3rem);
-  --gutter: clamp(0.75rem, 1.4vw, 1.5rem);
-  --dither: conic-gradient(var(--ink) 25%, transparent 0 50%, var(--ink) 0 75%, transparent 0) 0 0 / 4px 4px;
+  --gutter: clamp(0.85rem, 1.5vw, 1.5rem);
   --font-display: 'Funnel Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --font-sans: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --font-mono: 'Space Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
   --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --cursor-x: 50vw;
+  --cursor-y: 50vh;
+
+  /* 3D Injection-Molded ABS LEGO Stud Baseplate SVG Tile (Normal Mode) */
+  --lego-stud-tile: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Cdefs%3E%3ClinearGradient id='studBody' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23ffffff' stop-opacity='0.52'/%3E%3Cstop offset='48%25' stop-color='%23ffffff' stop-opacity='0.06'/%3E%3Cstop offset='100%25' stop-color='%23000000' stop-opacity='0.18'/%3E%3C/linearGradient%3E%3CradialGradient id='studTop' cx='34%25' cy='32%25' r='64%25'%3E%3Cstop offset='0%25' stop-color='%23ffffff' stop-opacity='0.65'/%3E%3Cstop offset='52%25' stop-color='%23ffffff' stop-opacity='0.10'/%3E%3Cstop offset='100%25' stop-color='%23000000' stop-opacity='0.14'/%3E%3C/radialGradient%3E%3C/defs%3E%3Cpath d='M48 0H0V48' fill='none' stroke='%23000000' stroke-opacity='0.045' stroke-width='1'/%3E%3Cpath d='M48 1H1V48' fill='none' stroke='%23ffffff' stroke-opacity='0.28' stroke-width='0.75'/%3E%3Ccircle cx='26.2' cy='26.6' r='11.5' fill='%23000000' fill-opacity='0.18'/%3E%3Ccircle cx='24' cy='24' r='11.5' fill='url(%23studBody)' stroke='%23000000' stroke-opacity='0.11' stroke-width='0.8'/%3E%3Ccircle cx='23.5' cy='23.5' r='9.2' fill='url(%23studTop)'/%3E%3Cpath d='M16.8 19.2 A 8.4 8.4 0 0 1 28.4 16.4' fill='none' stroke='%23ffffff' stroke-opacity='0.65' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
+
+  /* Tactile 3D Plastic Tile Shadows & Bevels */
+  --plastic-card-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.78),
+    inset 1px 0 0 rgba(255, 255, 255, 0.45),
+    0 3px 0 var(--tile-bevel),
+    0 12px 28px -6px rgba(0, 0, 0, 0.22),
+    0 4px 10px -2px rgba(0, 0, 0, 0.12);
+
+  --plastic-card-shadow-hover:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    inset 1px 0 0 rgba(255, 255, 255, 0.55),
+    0 5px 0 var(--tile-bevel),
+    0 20px 38px -8px rgba(0, 0, 0, 0.28),
+    0 8px 16px -4px rgba(0, 0, 0, 0.16);
+
+  /* 3D Extruded Plastic Heading Shadow */
+  --extruded-title-shadow:
+    1px 1px 0 #26282e,
+    2px 2px 0 #1f2126,
+    3px 3px 0 #181a1e,
+    4px 4px 0 #131518,
+    5px 5px 0 #0e0f12,
+    8px 14px 22px rgba(0, 0, 0, 0.28);
 }
 
 @media (max-width: 767px) {
@@ -29,17 +60,46 @@
   }
 }
 
+/* ============================================================================
+   PART 2: LEGO BATMAN MODE — "BLACK, AND VERY, VERY DARK GREY" PALETTE
+   ============================================================================ */
 body.batman-mode {
-  --bg-cream: #0B0F19;
-  --bg-active: #0B0F19;
-  --paper: #131B2E;
-  --stone: #0F172A;
+  --bg-cream: #0B0C0E;
+  --bg-active: #0B0C0E;
+  --paper: #14161D;
+  --tile-surface: #14161D;
+  --tile-bevel: #07080A;
+  --stone: #101218;
   --ink: #F8FAFC;
   --ink-soft: #CBD5E1;
   --ink-muted: #94A3B8;
-  --border: #FACC15;
-  --border-subtle: rgba(250, 204, 21, 0.25);
-  --dither: conic-gradient(#FACC15 25%, transparent 0 50%, #FACC15 0 75%, transparent 0) 0 0 / 4px 4px;
+  --border: rgba(255, 208, 0, 0.35);
+  --border-subtle: rgba(0, 240, 255, 0.25);
+
+  /* Dark Stone Grey (#16181F) 3D Studs on Deep Obsidian ABS (#0B0C0E) Baseplate */
+  --lego-stud-tile: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Cdefs%3E%3ClinearGradient id='bBody' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23252834' stop-opacity='0.95'/%3E%3Cstop offset='50%25' stop-color='%2316181F' stop-opacity='0.98'/%3E%3Cstop offset='100%25' stop-color='%23050608' stop-opacity='0.98'/%3E%3C/linearGradient%3E%3CradialGradient id='bTop' cx='32%25' cy='30%25' r='65%25'%3E%3Cstop offset='0%25' stop-color='%23ffffff' stop-opacity='0.16'/%3E%3Cstop offset='48%25' stop-color='%2316181F' stop-opacity='0.92'/%3E%3Cstop offset='100%25' stop-color='%2307080A' stop-opacity='0.96'/%3E%3C/radialGradient%3E%3C/defs%3E%3Cpath d='M48 0H0V48' fill='none' stroke='%23000000' stroke-opacity='0.65' stroke-width='1'/%3E%3Cpath d='M48 1H1V48' fill='none' stroke='%23ffffff' stroke-opacity='0.045' stroke-width='0.75'/%3E%3Ccircle cx='26.8' cy='27.2' r='11.8' fill='%23000000' fill-opacity='0.9'/%3E%3Ccircle cx='24' cy='24' r='11.5' fill='url(%23bBody)' stroke='%23ffffff' stroke-opacity='0.08' stroke-width='0.8'/%3E%3Ccircle cx='23.5' cy='23.5' r='9.2' fill='url(%23bTop)'/%3E%3Cpath d='M16.8 19.2 A 8.4 8.4 0 0 1 28.4 16.4' fill='none' stroke='%23ffffff' stroke-opacity='0.16' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
+
+  --plastic-card-shadow:
+    inset 0 1px 0 rgba(255, 208, 0, 0.35),
+    inset 0 0 0 1px rgba(0, 240, 255, 0.16),
+    0 4px 0 #07080A,
+    0 16px 34px -6px rgba(0, 0, 0, 0.78),
+    0 6px 14px -2px rgba(0, 0, 0, 0.6);
+
+  --plastic-card-shadow-hover:
+    inset 0 1px 0 rgba(255, 208, 0, 0.65),
+    inset 0 0 0 1px rgba(0, 240, 255, 0.35),
+    0 6px 0 #07080A,
+    0 24px 48px -6px rgba(0, 0, 0, 0.88),
+    0 0 24px rgba(255, 208, 0, 0.14);
+
+  --extruded-title-shadow:
+    1px 1px 0 #262936,
+    2px 2px 0 #1c1f29,
+    3px 3px 0 #14161d,
+    4px 4px 0 #0c0e12,
+    5px 5px 0 #060709,
+    8px 14px 26px rgba(0, 0, 0, 0.82);
 }
 
 *,
@@ -64,6 +124,10 @@ body {
   padding: 0;
   overflow-x: clip;
   background-color: var(--bg-active);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Ccircle cx='26.2' cy='26.6' r='11.5' fill='%23000000' fill-opacity='0.18'/%3E%3Ccircle cx='24' cy='24' r='11.5' fill='%23ffffff' fill-opacity='0.18' stroke='%23000000' stroke-opacity='0.11' stroke-width='0.8'/%3E%3Cpath d='M16.8 19.2 A 8.4 8.4 0 0 1 28.4 16.4' fill='none' stroke='%23ffffff' stroke-opacity='0.65' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-image: var(--lego-stud-tile);
+  background-size: 48px 48px;
+  background-attachment: fixed;
   color: var(--ink);
   transition: background-color 0.55s cubic-bezier(0.22, 1, 0.36, 1), color 0.35s ease;
 }
@@ -79,7 +143,7 @@ button {
 }
 
 /* ============================================================================
-   SEBG.CH 12-COLUMN ARCHITECTURAL GRID & BACKGROUND LINES
+   12-COLUMN ARCHITECTURAL GRID & PHYSICAL 3D STUD BASEPLATE
    ============================================================================ */
 .grid-page {
   display: grid;
@@ -89,14 +153,20 @@ button {
 }
 
 .bg-grid {
-  background-image: repeating-linear-gradient(
-    to right,
-    color-mix(in srgb, currentColor 7.5%, transparent) 0 1px,
-    transparent 1px calc((100% - 1px) / var(--cols))
-  );
-  background-size: calc(100% - 2 * var(--margin) + var(--gutter) + 1px) 100%;
-  background-position: calc(var(--margin) - var(--gutter) / 2) 0;
-  background-repeat: no-repeat;
+  background-image:
+    var(--lego-stud-tile),
+    repeating-linear-gradient(
+      to right,
+      color-mix(in srgb, currentColor 5%, transparent) 0 1px,
+      transparent 1px calc((100% - 1px) / var(--cols))
+    );
+  background-size:
+    48px 48px,
+    calc(100% - 2 * var(--margin) + var(--gutter) + 1px) 100%;
+  background-position:
+    0 0,
+    calc(var(--margin) - var(--gutter) / 2) 0;
+  background-repeat: repeat, no-repeat;
 }
 
 .app-shell {
@@ -104,16 +174,23 @@ button {
   min-height: 100vh;
 }
 
+/* Interactive Cursor Bat-Light (650px diameter / 325px radius) + Hero Bat-Signal Glow */
 #batsignal-glow {
   position: fixed;
   inset: 0;
   pointer-events: none;
-  z-index: 1;
+  z-index: 2;
   opacity: 0;
   background:
-    radial-gradient(circle at 75% 18%, rgba(250, 204, 21, 0.14), transparent 36%),
-    radial-gradient(circle at 24% 82%, rgba(56, 189, 248, 0.08), transparent 44%);
-  transition: opacity 0.5s ease;
+    radial-gradient(
+      650px circle at var(--cursor-x, 50vw) var(--cursor-y, 50vh),
+      rgba(255, 208, 0, 0.075) 0%,
+      rgba(0, 240, 255, 0.025) 38%,
+      transparent 70%
+    ),
+    radial-gradient(circle at 74% 26%, rgba(255, 208, 0, 0.16) 0%, transparent 42%),
+    radial-gradient(circle at 22% 80%, rgba(0, 240, 255, 0.07) 0%, transparent 45%);
+  transition: opacity 0.45s ease;
 }
 
 body.batman-mode #batsignal-glow {
@@ -121,7 +198,7 @@ body.batman-mode #batsignal-glow {
 }
 
 /* ============================================================================
-   NEO-BRUTALIST BUTTON WITH EXACT SEBG.CH 4PX DITHERED PIXEL SHADOW
+   3D PLASTIC KEYCAP BUTTONS & LEGO BRICK PRIMARY CTAS
    ============================================================================ */
 .button {
   touch-action: manipulation;
@@ -130,96 +207,148 @@ body.batman-mode #batsignal-glow {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.625rem;
+  gap: 0.55rem;
   height: 2.75rem;
-  padding-inline: 1.125rem;
+  padding-inline: 1.15rem;
   font-family: var(--font-sans);
   font-size: 0.9375rem;
-  font-weight: 500;
+  font-weight: 600;
   letter-spacing: -0.01em;
   color: var(--ink);
-  background: transparent;
-  border: none;
-  border-radius: 999px;
+  background: var(--tile-surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
   white-space: nowrap;
-  transition: translate 0.15s ease-out, color 0.2s ease;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.8),
+    0 3px 0 var(--tile-bevel),
+    0 8px 18px -4px rgba(0, 0, 0, 0.2);
+  transition: transform 0.14s var(--ease-spring), box-shadow 0.14s ease, background-color 0.2s ease;
   user-select: none;
 }
 
-.button::before,
-.button::after {
+.button:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    0 5px 0 var(--tile-bevel),
+    0 12px 24px -4px rgba(0, 0, 0, 0.26);
+}
+
+.button:active {
+  transform: translateY(2px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.6),
+    0 1px 0 var(--tile-bevel),
+    0 3px 8px rgba(0, 0, 0, 0.18);
+}
+
+/* Physical 3D Yellow LEGO Brick CTA (#FFD000 with 4 Top Studs & 4px #C9A000 Lip) */
+.button--yellow {
+  background: linear-gradient(180deg, #FFE033 0%, #FFD000 100%);
+  color: #111215 !important;
+  border: 1px solid #D4A800;
+  border-radius: 10px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.88),
+    inset 1px 0 0 rgba(255, 255, 255, 0.5),
+    0 4px 0 #C9A000,
+    0 10px 22px -4px rgba(0, 0, 0, 0.28);
+}
+
+.button--yellow::before {
   content: '';
   position: absolute;
-  inset: 0;
-  border-radius: 999px;
-  transition: translate 0.15s ease-out, background-color 0.2s ease;
+  top: -5px;
+  left: 14px;
+  right: 14px;
+  height: 5px;
+  background-image: radial-gradient(
+    ellipse 7px 4px at center,
+    #FFE552 0%,
+    #FFD000 68%,
+    #C9A000 95%,
+    transparent 100%
+  );
+  background-size: 25% 100%;
+  background-repeat: repeat-x;
+  pointer-events: none;
+  filter: drop-shadow(0 -1px 0 rgba(255, 255, 255, 0.6));
 }
 
-/* Dithered offset shadow layer */
-.button::before {
-  z-index: -2;
-  background: var(--dither);
-  translate: 4px 4px;
+.button--yellow:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.95),
+    0 6px 0 #C9A000,
+    0 14px 28px -4px rgba(0, 0, 0, 0.34);
 }
 
-/* Crisp surface layer */
-.button::after {
-  z-index: -1;
-  background: var(--paper);
-  border: 1.5px solid var(--border);
-}
-
-.button--yellow::after {
-  background: var(--accent-yellow);
-  border-color: #0B0B0C;
-}
-
-.button--yellow {
-  color: #0B0B0C !important;
-}
-
-.button--dark::after {
-  background: #0B0B0C;
-  border-color: #0B0B0C;
-}
-
-.button--dark {
-  color: #FBFBF8 !important;
-}
-
-.button:hover {
-  translate: -2px -2px;
-}
-
-.button:hover::before {
-  translate: 6px 6px;
-}
-
-.button:active,
-.button:active::before {
-  translate: 2px 2px;
+.button--yellow:active {
+  transform: translateY(2px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.7),
+    0 2px 0 #C9A000,
+    0 4px 10px rgba(0, 0, 0, 0.22);
 }
 
 .button:focus-visible {
-  outline: 2px solid var(--ink);
+  outline: 2px solid var(--accent-yellow);
   outline-offset: 4px;
 }
 
 /* ============================================================================
-   SOUND TOGGLE BUTTON (FIXED BOTTOM RIGHT — SEBG.CH)
+   SOUND TOGGLE & FLOATING CHARACTER CONTROLS (BUG FIX #3: NO FOOTER COLLISION)
    ============================================================================ */
 .sound-toggle {
   position: fixed;
   right: 1.5rem;
   bottom: 1.5rem;
   z-index: 65;
-  width: 2.75rem;
-  height: 2.75rem;
+  width: 2.85rem;
+  height: 2.85rem;
   padding: 0;
+  border-radius: 12px;
+  transition: bottom 0.35s var(--ease-out-expo), transform 0.14s var(--ease-spring);
+}
+
+.sound-toggle--footer-offset {
+  bottom: 5.25rem;
+}
+
+.floating-char-controls {
+  position: fixed;
+  right: 5.1rem;
+  bottom: 1.5rem;
+  z-index: 64;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  transition: opacity 0.3s ease, transform 0.3s var(--ease-out-expo);
+}
+
+.floating-char-controls.is-hidden {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(14px);
+}
+
+@media (max-width: 767px) {
+  .floating-char-controls {
+    right: 4.85rem;
+    bottom: 1.25rem;
+  }
+  .sound-toggle {
+    right: 1.25rem;
+    bottom: 1.25rem;
+  }
+  .sound-toggle--footer-offset {
+    bottom: 5rem;
+  }
 }
 
 /* ============================================================================
-   HERO SECTION (SEBG.CH PROPORTIONS & FUNNEL DISPLAY 600 TYPOGRAPHY)
+   HERO SECTION (3D EXTRUDED TYPOGRAPHY & LEGO BRICK BATMAN TRIGGER)
    ============================================================================ */
 .hero {
   position: relative;
@@ -253,21 +382,30 @@ body.batman-mode #batsignal-glow {
 }
 
 .hero__name-primary {
-  font-weight: 600;
+  font-weight: 700;
   color: var(--ink);
 }
 
 .hero__name-sub {
-  font-family: var(--font-sans);
-  font-size: clamp(0.95rem, 1.25vw, 1.15rem);
-  font-weight: 500;
+  font-family: var(--font-mono);
+  font-size: clamp(0.85rem, 1.1vw, 1.02rem);
+  font-weight: 700;
   color: var(--ink-soft);
+  padding: 0.2rem 0.6rem;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--tile-surface) 85%, transparent);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5), 0 2px 0 var(--tile-bevel);
+}
+
+body.batman-mode .hero__name-sub {
+  color: #FFD000;
+  border: 1px solid rgba(255, 208, 0, 0.35);
 }
 
 .hero__header-actions {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.85rem;
   flex-wrap: wrap;
 }
 
@@ -276,6 +414,23 @@ body.batman-mode #batsignal-glow {
   align-self: end;
   padding-bottom: clamp(1rem, 3svh, 2.5rem);
   max-width: 62rem;
+  position: relative;
+}
+
+/* Volumetric Bat-Signal Glow behind Hero Headline & Minifigure in Batman Mode */
+body.batman-mode .hero__content::before {
+  content: '';
+  position: absolute;
+  inset: -4rem -6rem -2rem -3rem;
+  background: radial-gradient(
+    ellipse at 58% 48%,
+    rgba(255, 208, 0, 0.17) 0%,
+    rgba(255, 208, 0, 0.05) 45%,
+    transparent 74%
+  );
+  pointer-events: none;
+  z-index: -1;
+  filter: blur(18px);
 }
 
 @media (max-width: 1024px) {
@@ -291,10 +446,18 @@ body.batman-mode #batsignal-glow {
   font-family: var(--font-display);
   font-size: clamp(2.65rem, 5.4vw, 5.65rem);
   font-weight: 600;
-  line-height: 0.96;
+  line-height: 0.98;
   letter-spacing: -0.042em;
   text-wrap: balance;
   color: var(--ink);
+  text-shadow:
+    1px 1px 0 rgba(0, 0, 0, 0.14),
+    2px 2px 0 rgba(0, 0, 0, 0.1),
+    0 10px 24px rgba(0, 0, 0, 0.12);
+}
+
+body.batman-mode .hero__headline {
+  text-shadow: var(--extruded-title-shadow);
 }
 
 .hero__word {
@@ -313,46 +476,86 @@ body.batman-mode #batsignal-glow {
   }
 }
 
+/* Physical 3D Yellow LEGO Brick "Batman." Highlight Badge with 4 Top Studs & Bat-Emblem Watermark */
 .batman-trigger {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  padding: 0.04em 0.36em 0.08em;
-  margin-left: 0.06em;
-  border-radius: 0.32em;
-  background: #0B0B0C;
-  color: #FACC15;
-  border: 2px solid #0B0B0C;
+  padding: 0.06em 0.38em 0.1em;
+  margin-left: 0.08em;
+  margin-top: 0.12em;
+  border-radius: 0.24em;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 32'%3E%3Cpath d='M32 6c-2.2 0-3.4 2.4-4.2 4.2l-1.8-2.6-1.4 3.4c-3.8-1.2-8.2-3.8-16.6-3.2 4.2 3.6 5.2 8.2 3.2 12.6 5.2-1.8 9.2-.4 11.8 3.2 2.4-2.6 5.6-3.2 9-0.4 3.4-2.8 6.6-2.2 9 0.4 2.6-3.6 6.6-5 11.8-3.2-2-4.4-1-9 3.2-12.6-8.4-.6-12.8 2-16.6 3.2l-1.4-3.4-1.8 2.6C35.4 8.4 34.2 6 32 6z' fill='%23000000' fill-opacity='0.11'/%3E%3C/svg%3E")
+      center / 78% no-repeat,
+    linear-gradient(180deg, #FFE033 0%, #FFD000 100%);
+  color: #111215;
+  border: 1.5px solid #C9A000;
   font-family: var(--font-display);
-  font-size: 0.96em;
-  font-weight: 600;
+  font-size: 0.94em;
+  font-weight: 700;
   line-height: 1;
   letter-spacing: -0.03em;
   cursor: pointer;
   position: relative;
-  box-shadow: 4px 4px 0 rgba(11, 11, 12, 0.28);
-  transition: transform 0.2s var(--ease-spring), background-color 0.2s ease, color 0.2s ease;
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.88),
+    inset 1px 0 0 rgba(255, 255, 255, 0.5),
+    0 5px 0 #C9A000,
+    0 12px 26px rgba(0, 0, 0, 0.28);
+  transition: transform 0.18s var(--ease-spring), box-shadow 0.18s ease;
   touch-action: manipulation;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+/* 4 Cylindrical 3D LEGO Studs along the Top Edge of the "Batman." Brick */
+.batman-trigger::before {
+  content: '';
+  position: absolute;
+  top: -8px;
+  left: 10%;
+  right: 10%;
+  height: 8px;
+  background-image: radial-gradient(
+    ellipse 11px 5px at center,
+    #FFF078 0%,
+    #FFD000 62%,
+    #C9A000 92%,
+    transparent 100%
+  );
+  background-size: 25% 100%;
+  background-repeat: repeat-x;
+  pointer-events: none;
+  filter: drop-shadow(0 -1px 0 rgba(255, 255, 255, 0.75));
 }
 
 body.batman-mode .batman-trigger {
-  background: #FACC15;
-  color: #0B0F19;
-  border-color: #FACC15;
-  box-shadow: 4px 4px 0 rgba(250, 204, 21, 0.35);
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.92),
+    0 5px 0 #C9A000,
+    0 0 32px rgba(255, 208, 0, 0.55),
+    0 14px 30px rgba(0, 0, 0, 0.75);
 }
 
 .batman-trigger:hover {
-  transform: translate(-2px, -2px) scale(1.02);
+  transform: translateY(-3px) scale(1.02);
+}
+
+.batman-trigger:active {
+  transform: translateY(2px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.75),
+    0 2px 0 #C9A000,
+    0 6px 14px rgba(0, 0, 0, 0.25);
 }
 
 /* ============================================================================
-   ABOUT SECTION (SEBG.CH STICKY 150SVH + COL-START-6 COL-SPAN-7)
+   ABOUT SECTION (STICKY 150SVH + WORD-BY-WORD SCROLL ILLUMINATION)
    ============================================================================ */
 .about {
   position: relative;
   z-index: 10;
-  min-height: 145svh;
+  min-height: 155svh;
 }
 
 .about__sticky {
@@ -360,11 +563,16 @@ body.batman-mode .batman-trigger {
   top: 0;
   min-height: 100svh;
   align-content: center;
-  padding-block: 12svh;
+  padding-block: 10svh;
 }
 
 .about__inner {
-  grid-column: 6 / span 7;
+  grid-column: 5 / span 8;
+  padding: clamp(1.5rem, 3vw, 2.5rem);
+  border-radius: 22px;
+  background: color-mix(in srgb, var(--tile-surface) 92%, transparent);
+  border: 1px solid var(--border);
+  box-shadow: var(--plastic-card-shadow);
 }
 
 @media (max-width: 1024px) {
@@ -376,16 +584,16 @@ body.batman-mode .batman-trigger {
 .about__text {
   margin: 0;
   font-family: var(--font-display);
-  font-size: clamp(1.75rem, 3.3vw, 3.5rem);
+  font-size: clamp(1.35rem, 2.35vw, 2.45rem);
   font-weight: 600;
-  line-height: 1.05;
-  letter-spacing: -0.03em;
+  line-height: 1.18;
+  letter-spacing: -0.025em;
   color: var(--ink);
 }
 
 .about__word {
-  opacity: 0.14;
-  transition: opacity 0.18s ease, color 0.18s ease;
+  opacity: 0.16;
+  transition: opacity 0.16s ease, color 0.16s ease;
 }
 
 .about__word.is-lit {
@@ -393,7 +601,7 @@ body.batman-mode .batman-trigger {
 }
 
 /* ============================================================================
-   FIXED MASCOT STAGE OVERLAY (3D CHARACTER + SPEECH BUBBLE + TRICK MENU)
+   FIXED MASCOT STAGE OVERLAY (3D CHARACTER + SPEECH BUBBLE + POPOVER MENU)
    ============================================================================ */
 .mascot-layer {
   position: fixed;
@@ -411,20 +619,21 @@ body.batman-mode .batman-trigger {
   position: absolute;
   top: 0;
   left: 0;
-  width: 310px;
-  height: 390px;
-  margin-left: -155px;
-  margin-top: -195px;
+  width: 300px;
+  height: 375px;
+  margin-left: -150px;
+  margin-top: -188px;
   pointer-events: none;
   will-change: transform;
   transition: width 0.45s var(--ease-out-expo), height 0.45s var(--ease-out-expo);
 }
 
+/* Compact Porthole Badge in Bento / Certs / Case View (BUG FIX #2: Never blocks Card #01) */
 .mascot-anchor.is-badge {
-  width: 156px;
-  height: 156px;
-  margin-left: -78px;
-  margin-top: -78px;
+  width: 116px;
+  height: 116px;
+  margin-left: -58px;
+  margin-top: -58px;
 }
 
 .mascot-canvas-wrap {
@@ -443,38 +652,40 @@ body.batman-mode .batman-trigger {
 
 .mascot-anchor.is-badge .mascot-canvas-wrap {
   border-radius: 999px;
-  background: var(--paper);
+  background: var(--tile-surface);
   box-shadow:
-    0 0 0 4px var(--paper),
-    0 0 0 6px var(--ink),
-    0 16px 36px rgba(11, 11, 12, 0.24);
+    inset 0 2px 0 rgba(255, 255, 255, 0.7),
+    0 0 0 3px var(--tile-surface),
+    0 0 0 5px var(--accent-yellow),
+    0 14px 32px rgba(0, 0, 0, 0.35);
   overflow: hidden;
 }
 
-/* Speech Bubble above / beside character (Exact sebg.ch .mascot-bubble__body) */
+/* Tactile 3D Plastic Speech Bubble above / beside character */
 .mascot-bubble {
   position: absolute;
-  bottom: calc(100% - 14px);
+  bottom: calc(100% - 10px);
   left: 50%;
   transform: translateX(-50%);
   width: max-content;
-  max-width: min(370px, 86vw);
+  max-width: min(350px, 86vw);
   pointer-events: auto;
   z-index: 45;
-  animation: bubblePopIn 0.4s var(--ease-spring);
+  animation: bubblePopIn 0.38s var(--ease-spring);
 }
 
+/* In Porthole Badge mode, dock tooltip horizontally to the right of the porthole so it never covers Card #01 above it */
 .mascot-anchor.is-badge .mascot-bubble {
-  bottom: calc(100% + 14px);
-  left: 0;
+  bottom: 12px;
+  left: calc(100% + 14px);
   transform: none;
-  max-width: min(360px, 84vw);
+  max-width: min(310px, 68vw);
 }
 
 @keyframes bubblePopIn {
   from {
     opacity: 0;
-    transform: translateX(-50%) scale(0.88) translateY(8px);
+    transform: translateX(-50%) scale(0.9) translateY(8px);
   }
   to {
     opacity: 1;
@@ -485,37 +696,20 @@ body.batman-mode .batman-trigger {
 .mascot-bubble__card {
   position: relative;
   isolation: isolate;
-  padding: 1.125rem 1.375rem 1.25rem;
-  border-radius: 1.5rem;
+  padding: 0.95rem 1.2rem 1.05rem;
+  border-radius: 1.25rem;
+  background: var(--tile-surface);
+  border: 1px solid var(--border);
+  box-shadow: var(--plastic-card-shadow);
   color: var(--ink);
-}
-
-.mascot-bubble__card::before,
-.mascot-bubble__card::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: 1.5rem;
-}
-
-.mascot-bubble__card::before {
-  z-index: -2;
-  translate: 6px 6px;
-  background: var(--dither);
-}
-
-.mascot-bubble__card::after {
-  z-index: -1;
-  background: var(--paper);
-  border: 1.5px solid var(--border);
 }
 
 .mascot-bubble__text {
   margin: 0;
   font-family: var(--font-display);
-  font-size: clamp(1.05rem, 1.5vw, 1.45rem);
+  font-size: clamp(0.98rem, 1.35vw, 1.25rem);
   font-weight: 600;
-  line-height: 1.15;
+  line-height: 1.18;
   letter-spacing: -0.02em;
   color: var(--ink);
 }
@@ -529,110 +723,124 @@ body.batman-mode .batman-trigger {
   top: calc(100% - 2px);
   left: 50%;
   translate: -50% 0;
-  width: 1.5rem;
-  height: 1rem;
-  background: var(--paper);
+  width: 1.25rem;
+  height: 0.85rem;
+  background: var(--tile-surface);
   clip-path: polygon(0 0, 100% 0, 50% 100%);
   z-index: 2;
 }
 
 .mascot-anchor.is-badge .mascot-bubble__tail {
-  left: 3rem;
+  top: 50%;
+  left: -10px;
+  translate: 0 -50%;
+  width: 0.75rem;
+  height: 1.1rem;
+  clip-path: polygon(100% 0, 100% 100%, 0 50%);
 }
 
 /* ============================================================================
-   MASCOT RADIAL / POPOVER TRICK MENU (DOUBLE-CLICK OR TRICK BUTTON)
+   MASCOT POPOVER MENU (BUG FIX #3: UPWARD ANCHOR + MAX-HEIGHT SCROLL GUARD)
    ============================================================================ */
 .mascot-menu {
   position: absolute;
-  bottom: calc(100% - 8px);
+  bottom: calc(100% + 12px);
   left: 50%;
   transform: translateX(-50%);
-  width: min(390px, 92vw);
+  width: min(400px, 92vw);
+  max-height: min(410px, 64vh);
+  overflow-y: auto;
   isolation: isolate;
-  padding: 1.125rem 1.375rem 1.25rem;
-  border-radius: 1.5rem;
+  padding: 1rem 1.2rem 1.15rem;
+  border-radius: 1.35rem;
+  background: var(--tile-surface);
+  border: 1px solid var(--border);
+  box-shadow: var(--plastic-card-shadow-hover);
   pointer-events: auto;
-  z-index: 60;
-  animation: bubblePopIn 0.35s var(--ease-spring);
+  z-index: 75;
+  animation: bubblePopIn 0.32s var(--ease-spring);
 }
 
-.mascot-menu::before,
-.mascot-menu::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: 1.5rem;
-}
-
-.mascot-menu::before {
-  z-index: -2;
-  translate: 6px 6px;
-  background: var(--dither);
-}
-
-.mascot-menu::after {
-  z-index: -1;
-  background: var(--paper);
-  border: 1.5px solid var(--border);
+.mascot-anchor.is-badge .mascot-menu {
+  left: 0;
+  transform: none;
 }
 
 .mascot-menu__header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.65rem;
 }
 
 .mascot-menu__title {
   font-family: var(--font-display);
-  font-size: clamp(1.125rem, 1.6vw, 1.5rem);
-  font-weight: 600;
-  line-height: 1.12;
+  font-size: 1.1rem;
+  font-weight: 700;
   letter-spacing: -0.02em;
   color: var(--ink);
+}
+
+.mascot-menu__section-label {
+  display: block;
+  margin: 0.65rem 0 0.4rem;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink-muted);
 }
 
 .mascot-menu__close {
   width: 28px;
   height: 28px;
-  border-radius: 999px;
-  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  border: 1px solid var(--border);
   background: var(--bg-cream);
   color: var(--ink);
   font-weight: 700;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 0 2px 0 var(--tile-bevel);
 }
 
 .mascot-menu__grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0.25rem 0.5rem;
+  gap: 0.4rem;
 }
 
 .mascot-menu__btn {
-  padding: 0.35rem 0.65rem;
-  border-radius: 999px;
-  border: none;
-  background: transparent;
+  padding: 0.4rem 0.6rem;
+  border-radius: 9px;
+  border: 1px solid var(--border);
+  background: var(--bg-cream);
   color: var(--ink);
   font-family: var(--font-sans);
-  font-size: 0.9rem;
-  font-weight: 500;
-  text-align: left;
-  transition: background-color 0.14s ease, color 0.14s ease;
+  font-size: 0.82rem;
+  font-weight: 600;
+  text-align: center;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.7),
+    0 2px 0 var(--tile-bevel);
+  transition: transform 0.12s ease, background-color 0.14s ease, color 0.14s ease;
 }
 
 .mascot-menu__btn:hover,
 .mascot-menu__btn.is-active {
-  background: var(--ink);
-  color: var(--paper);
+  background: var(--accent-yellow);
+  color: #111215;
+  border-color: #C9A000;
+}
+
+.mascot-menu__btn:active {
+  transform: translateY(2px);
 }
 
 /* ============================================================================
-   GUIDED TOUR CHAPTERS (.tour__chapter — EXACT SEBG.CH RATIOS & SLIDE STACKS)
+   GUIDED TOUR CHAPTERS (.tour__chapter — 3D EXTRUDED TITLES & DEVICE HARDWARE)
    ============================================================================ */
 .tour {
   position: relative;
@@ -641,17 +849,7 @@ body.batman-mode .batman-trigger {
 
 .tour__chapter {
   position: relative;
-  --seam: conic-gradient(var(--chapter-tint, var(--ink)) 25%, transparent 0 50%, var(--chapter-tint, var(--ink)) 0 75%, transparent 0) 0 0 / 4px 4px;
-}
-
-.tour__chapter::before {
-  content: '';
-  position: absolute;
-  inset-inline: 0;
-  bottom: 100%;
-  height: 0.375rem;
-  background: var(--seam);
-  pointer-events: none;
+  border-top: 1px solid var(--border-subtle);
 }
 
 /* Sticky 100svh Stage on the 12-Column Grid */
@@ -662,12 +860,12 @@ body.batman-mode .batman-trigger {
   overflow: hidden;
   display: grid;
   grid-template-rows: auto 1fr;
-  padding-top: clamp(1.5rem, 5.5svh, 3.75rem);
-  padding-bottom: clamp(1.5rem, 4svh, 3rem);
+  padding-top: clamp(1.25rem, 4svh, 2.75rem);
+  padding-bottom: clamp(1.25rem, 3.5svh, 2.5rem);
   z-index: 12;
 }
 
-/* Header row: spans 7 columns on showcase side */
+/* Header row: spans 8 columns on showcase side */
 .tour__title-row {
   grid-row: 1;
   grid-column: 5 / span 8;
@@ -675,7 +873,7 @@ body.batman-mode .batman-trigger {
   flex-wrap: wrap;
   align-items: flex-end;
   justify-content: space-between;
-  gap: 1rem 1.5rem;
+  gap: 0.85rem 1.25rem;
   z-index: 20;
 }
 
@@ -686,33 +884,99 @@ body.batman-mode .batman-trigger {
 .tour__title-block {
   display: flex;
   flex-direction: column;
-  gap: 0.35rem;
+  gap: 0.3rem;
 }
 
 .tour__eyebrow {
-  font-family: var(--font-sans);
-  font-size: 0.875rem;
-  font-weight: 500;
-  letter-spacing: -0.01em;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
   color: var(--ink-soft);
 }
 
+/* Glowing Translucent-Amber 1x1 Round LEGO Stud on Tour Headers */
+.tour__log-stud {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: radial-gradient(circle at 35% 35%, #FFF275 0%, #FFD000 55%, #D97706 100%);
+  box-shadow:
+    inset 0 1px 1px rgba(255, 255, 255, 0.85),
+    0 0 8px rgba(255, 208, 0, 0.75);
+  display: inline-block;
+}
+
+body.batman-mode .tour__eyebrow {
+  color: #FFD000;
+}
+
+/* 3D Extruded Plastic Section Headings */
 .tour__title {
   margin: 0;
   font-family: var(--font-display);
-  font-size: clamp(2.25rem, 5vw, 5.25rem);
-  font-weight: 600;
-  line-height: 0.9;
-  letter-spacing: -0.028em;
+  font-size: clamp(2.15rem, 4.4vw, 4.5rem);
+  font-weight: 700;
+  line-height: 0.94;
+  letter-spacing: -0.03em;
   text-wrap: balance;
   color: var(--ink);
+  text-shadow: 1px 1px 0 #26282e, 2px 2px 0 #1f2126, 3px 3px 0 #181a1e, 4px 4px 0 #131518, 5px 5px 0 #0e0f12, 8px 14px 22px rgba(0, 0, 0, 0.28);
+  text-shadow: var(--extruded-title-shadow);
 }
 
 .tour__actions {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.65rem;
   flex-wrap: wrap;
+}
+
+/* Tactile 3D Plastic Keycap Slide Switcher Buttons (1, 2, 3) */
+.tour__slide-switchers {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.keycap-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.15rem;
+  height: 2.15rem;
+  padding-inline: 0.55rem;
+  border-radius: 9px;
+  border: 1px solid var(--border);
+  background: var(--tile-surface);
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-weight: 700;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.8),
+    0 3px 0 var(--tile-bevel),
+    0 5px 10px rgba(0, 0, 0, 0.16);
+  transition: transform 0.12s ease, box-shadow 0.12s ease, background-color 0.15s ease;
+}
+
+.keycap-btn:hover {
+  transform: translateY(-1px);
+}
+
+.keycap-btn:active,
+.keycap-btn.is-active {
+  transform: translateY(2px);
+  background: var(--accent-yellow);
+  color: #111215;
+  border-color: #C9A000;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.85),
+    0 1px 0 #C9A000,
+    0 2px 6px rgba(0, 0, 0, 0.2);
 }
 
 /* Showcase Span: 8 columns wide on showcase side, vertically centered */
@@ -722,7 +986,7 @@ body.batman-mode .batman-trigger {
   align-self: center;
   position: relative;
   width: 100%;
-  margin-top: clamp(0.75rem, 2svh, 1.5rem);
+  margin-top: clamp(0.5rem, 1.5svh, 1.15rem);
 }
 
 .tour__chapter--right .tour__span {
@@ -734,33 +998,29 @@ body.batman-mode .batman-trigger {
   width: 100%;
 }
 
-/* Large sebg.ch Browser Frame (16:10 aspect ratio, unobstructed viewport) */
+/* Tactile 3D Plastic Browser Module Frame (16:10 aspect ratio) */
 .tour__browser {
   position: relative;
   width: 100%;
-  background: var(--paper);
-  border: 1.5px solid color-mix(in srgb, var(--ink) 18%, transparent);
-  border-radius: 14px;
+  background: var(--tile-surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
   overflow: hidden;
-  box-shadow:
-    0 24px 60px -12px rgba(11, 11, 12, 0.18),
-    0 0 0 1px rgba(11, 11, 12, 0.05);
+  box-shadow: var(--plastic-card-shadow);
   cursor: pointer;
   transition: transform 0.35s var(--ease-out-expo), box-shadow 0.35s var(--ease-out-expo);
 }
 
 .tour__browser:hover {
-  transform: translateY(-3px) scale(1.005);
-  box-shadow:
-    0 32px 72px -12px rgba(11, 11, 12, 0.25),
-    0 0 0 1.5px var(--ink);
+  transform: translateY(-3px);
+  box-shadow: var(--plastic-card-shadow-hover);
 }
 
 .tour__browser-bar {
-  height: 2.25rem;
-  padding-inline: 0.875rem;
-  border-bottom: 1px solid color-mix(in srgb, var(--ink) 12%, transparent);
-  background: var(--paper);
+  height: 2.5rem;
+  padding-inline: 0.95rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--tile-surface);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -770,46 +1030,73 @@ body.batman-mode .batman-trigger {
 .tour__dots {
   display: flex;
   align-items: center;
-  gap: 0.375rem;
+  gap: 0.45rem;
 }
 
+/* Glowing 1x1 Round LEGO Stud Browser Dots */
 .tour__dot {
-  width: 0.625rem;
-  height: 0.625rem;
+  width: 0.7rem;
+  height: 0.7rem;
   border-radius: 999px;
-  background: color-mix(in srgb, var(--ink) 18%, transparent);
+  box-shadow:
+    inset 0 1px 1px rgba(255, 255, 255, 0.75),
+    0 1px 2px rgba(0, 0, 0, 0.35);
 }
 
 .tour__dot--red {
-  background: #FF5F56;
+  background: radial-gradient(circle at 35% 35%, #FF8A84 0%, #FF3B30 65%, #A81B12 100%);
 }
 .tour__dot--yellow {
-  background: #FFBD2E;
+  background: radial-gradient(circle at 35% 35%, #FFF275 0%, #FFD000 65%, #B88600 100%);
 }
 .tour__dot--green {
-  background: #27C93F;
+  background: radial-gradient(circle at 35% 35%, #86EFAC 0%, #27C93F 65%, #15803D 100%);
+}
+
+body.batman-mode .tour__dot--green {
+  background: radial-gradient(circle at 35% 35%, #A5F3FC 0%, #00F0FF 65%, #0284C7 100%);
+  box-shadow:
+    inset 0 1px 1px rgba(255, 255, 255, 0.85),
+    0 0 8px rgba(0, 240, 255, 0.65);
+}
+
+body.batman-mode .tour__dot--yellow {
+  box-shadow:
+    inset 0 1px 1px rgba(255, 255, 255, 0.85),
+    0 0 8px rgba(255, 208, 0, 0.65);
 }
 
 .tour__hosts {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.45rem;
+  flex-wrap: wrap;
 }
 
+/* Tactile 3D Keycap Domain Tabs */
 .tour__host-pill {
   font-family: var(--font-sans);
-  font-size: 0.8125rem;
-  font-weight: 500;
-  color: var(--ink-soft);
-  padding: 0.15rem 0.65rem;
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--ink) 6%, transparent);
-  transition: background-color 0.2s ease, color 0.2s ease;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--ink);
+  padding: 0.22rem 0.7rem;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg-cream);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.75),
+    0 2px 0 var(--tile-bevel);
+  transition: transform 0.12s ease, background-color 0.15s ease, color 0.15s ease;
 }
 
 .tour__host-pill:hover {
-  background: var(--ink);
-  color: var(--paper);
+  background: var(--accent-yellow);
+  color: #111215;
+  transform: translateY(-1px);
+}
+
+.tour__host-pill:active {
+  transform: translateY(2px);
 }
 
 .tour__expand-hint {
@@ -822,13 +1109,13 @@ body.batman-mode .batman-trigger {
   gap: 0.35rem;
 }
 
-/* Browser Screen Viewport — Generous sebg.ch 16:10 Ratio */
+/* Browser Screen Viewport — Generous 16:10 Ratio */
 .tour__viewport {
   position: relative;
   isolation: isolate;
   width: 100%;
   aspect-ratio: 16 / 10;
-  max-height: calc(100svh - 12.5rem);
+  max-height: calc(100svh - 13.5rem);
   overflow: hidden;
   background: #101218;
 }
@@ -859,7 +1146,6 @@ body.batman-mode .batman-trigger {
   display: block;
 }
 
-/* Subtle bottom-left floating pill caption (never obscuring the showcase) */
 .tour__slide-pill {
   position: absolute;
   left: 0.875rem;
@@ -870,13 +1156,14 @@ body.batman-mode .batman-trigger {
   gap: 0.5rem;
   padding: 0.35rem 0.75rem;
   border-radius: 999px;
-  background: rgba(11, 11, 12, 0.78);
+  background: rgba(11, 12, 14, 0.84);
   backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.16);
   color: #FBFBF8;
-  font-family: var(--font-sans);
-  font-size: 0.78rem;
-  font-weight: 500;
-  letter-spacing: -0.01em;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
   pointer-events: none;
 }
 
@@ -894,7 +1181,7 @@ body.batman-mode .batman-trigger {
   gap: 0.35rem;
   padding: 0.3rem 0.5rem;
   border-radius: 999px;
-  background: rgba(11, 11, 12, 0.65);
+  background: rgba(11, 12, 14, 0.72);
   backdrop-filter: blur(6px);
 }
 
@@ -907,28 +1194,30 @@ body.batman-mode .batman-trigger {
 }
 
 .tour__step-dot.is-active {
-  background: #FACC15;
+  background: #FFD000;
   transform: scale(1.25);
 }
 
-/* Overlapping 3D Phone Mockup (Exact sebg.ch .tour__phone 390/844 ratio) */
+/* ============================================================================
+   REALISTIC 3D DARK-METALLIC SMARTPHONE HARDWARE BEZEL & DYNAMIC ISLAND
+   ============================================================================ */
 .tour__phone {
   container-type: inline-size;
   position: absolute;
-  bottom: -6%;
-  width: clamp(165px, 24.5%, 235px);
+  bottom: -5%;
+  width: clamp(160px, 23.5%, 228px);
   z-index: 25;
-  perspective: 900px;
+  perspective: 950px;
   cursor: pointer;
   transition: transform 0.55s var(--ease-spring);
 }
 
 .tour__chapter--left .tour__phone {
-  left: -4.5%;
+  left: -4%;
 }
 
 .tour__chapter--right .tour__phone {
-  right: -4.5%;
+  right: -4%;
 }
 
 .tour__phone:hover {
@@ -937,12 +1226,15 @@ body.batman-mode .batman-trigger {
 
 .tour__phone-shell {
   position: relative;
-  background: #0B0B0C;
-  border-radius: 16.6cqw;
+  background: linear-gradient(145deg, #2A2E39 0%, #12141A 48%, #090A0D 100%);
+  border-radius: 16.8cqw;
   padding: 3.6cqw;
   box-shadow:
-    0 22px 48px rgba(11, 11, 12, 0.36),
-    0 0 0 2px rgba(255, 255, 255, 0.12);
+    inset 0 1.5px 1px rgba(255, 255, 255, 0.32),
+    inset 0 -2px 2px rgba(0, 0, 0, 0.85),
+    0 28px 56px -8px rgba(0, 0, 0, 0.55),
+    0 12px 24px -4px rgba(0, 0, 0, 0.38),
+    0 0 0 1.5px rgba(255, 255, 255, 0.14);
   transform-style: preserve-3d;
   transition: transform 0.65s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
@@ -952,32 +1244,64 @@ body.batman-mode .batman-trigger {
   isolation: isolate;
   aspect-ratio: 390 / 844;
   width: 100%;
-  background: var(--paper);
-  border-radius: 13cqw;
+  background: #0F1117;
+  border-radius: 13.4cqw;
   overflow: hidden;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+
+/* Subtle Diagonal Screen Glass Reflection Overlay */
+.tour__phone-screen::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    125deg,
+    rgba(255, 255, 255, 0.18) 0%,
+    rgba(255, 255, 255, 0.05) 26%,
+    transparent 44%,
+    transparent 100%
+  );
+  pointer-events: none;
+  z-index: 6;
 }
 
 .tour__phone-statusbar {
   position: relative;
-  z-index: 3;
+  z-index: 5;
   height: 12cqw;
   display: grid;
-  grid-template-columns: 1fr 29.7cqw 1fr;
+  grid-template-columns: 1fr 31cqw 1fr;
   align-items: center;
   padding-inline: 6cqw;
   background: var(--paper);
-  color: #0B0B0C;
+  color: var(--ink);
   font-family: var(--font-sans);
   font-size: 4cqw;
-  font-weight: 600;
+  font-weight: 700;
   letter-spacing: -0.02em;
 }
 
+/* Dynamic Island Cutout with Camera Lens Specular Dot */
 .tour__phone-notch {
+  position: relative;
   width: 100%;
-  height: 5.5cqw;
+  height: 5.8cqw;
   border-radius: 999px;
-  background: #0B0B0C;
+  background: #050608;
+  box-shadow: inset 0 0.5px 1px rgba(255, 255, 255, 0.22);
+}
+
+.tour__phone-notch::after {
+  content: '';
+  position: absolute;
+  right: 16%;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 2.2cqw;
+  height: 2.2cqw;
+  border-radius: 999px;
+  background: radial-gradient(circle at 35% 35%, #60A5FA 0%, #1E3A8A 60%, #090D16 100%);
 }
 
 .tour__phone-status-icons {
@@ -991,7 +1315,7 @@ body.batman-mode .batman-trigger {
   width: 2.2cqw;
   height: 2.2cqw;
   border-radius: 999px;
-  background: #0B0B0C;
+  background: currentColor;
 }
 
 .tour__phone-body {
@@ -1008,17 +1332,19 @@ body.batman-mode .batman-trigger {
   display: block;
 }
 
-/* Phoney Interactive 6-Slot Audio Emoji Quick Tray Dock */
+/* ============================================================================
+   PHONEY INTERACTIVE 6-SLOT AUDIO EMOJI QUICK TRAY (3D PLASTIC KEYCAPS + SVGS)
+   ============================================================================ */
 .phoney-soundboard {
-  margin-top: 0.85rem;
+  margin-top: 0.75rem;
   margin-left: auto;
   width: fit-content;
   max-width: 100%;
-  padding: 0.55rem 0.85rem;
+  padding: 0.6rem 0.9rem;
   border-radius: 16px;
-  background: var(--paper);
-  border: 1.5px solid var(--border);
-  box-shadow: 4px 4px 0 rgba(11, 11, 12, 0.2);
+  background: var(--tile-surface);
+  border: 1px solid var(--border);
+  box-shadow: var(--plastic-card-shadow);
   display: flex;
   align-items: center;
   gap: 0.75rem;
@@ -1040,6 +1366,10 @@ body.batman-mode .batman-trigger {
   color: #7C3AED;
 }
 
+body.batman-mode .phoney-soundboard__badge {
+  color: #FFD000;
+}
+
 .phoney-soundboard__sub {
   font-size: 0.75rem;
   color: var(--ink-soft);
@@ -1048,47 +1378,71 @@ body.batman-mode .batman-trigger {
 .phoney-soundboard__grid {
   display: flex;
   align-items: center;
-  gap: 0.4rem;
+  gap: 0.45rem;
   flex-wrap: wrap;
 }
 
 .phoney-emoji-btn {
   display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
-  padding: 0.35rem 0.65rem;
-  border-radius: 999px;
-  border: 1.5px solid var(--border);
+  gap: 0.4rem;
+  padding: 0.36rem 0.7rem;
+  border-radius: 10px;
+  border: 1px solid var(--border);
   background: var(--bg-cream);
   color: var(--ink);
   font-family: var(--font-sans);
   font-size: 0.8rem;
-  font-weight: 600;
-  transition: transform 0.16s var(--ease-spring), background-color 0.16s ease;
+  font-weight: 700;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.8),
+    0 3px 0 var(--tile-bevel),
+    0 6px 12px rgba(0, 0, 0, 0.14);
+  transition: transform 0.12s var(--ease-spring), box-shadow 0.12s ease, background-color 0.15s ease;
 }
 
-.phoney-emoji-btn:hover,
+.phoney-emoji-btn__icon {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+  display: block;
+}
+
+.phoney-emoji-btn:hover {
+  background: var(--emoji-accent, #FFD000);
+  color: #111215;
+  transform: translateY(-2px);
+}
+
+.phoney-emoji-btn:active,
 .phoney-emoji-btn.is-playing {
-  background: var(--emoji-accent, #FACC15);
-  color: #0B0B0C;
-  transform: translateY(-2px) scale(1.04);
+  background: var(--emoji-accent, #FFD000);
+  color: #111215;
+  transform: translateY(2px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.7),
+    0 1px 0 var(--tile-bevel);
 }
 
-/* Scrolling Speech Bubbles Column (.tour__lines & .tour__bubble) */
+/* ============================================================================
+   SCROLLING TOUR NOTES (.tour__lines & .tour__bubble-card)
+   BUG FIX #1: Clean separation above minifigure head & hidden until reading zone
+   ============================================================================ */
 .tour__lines {
   position: relative;
   z-index: 22;
   margin-top: -100svh;
-  padding-top: 58svh;
-  padding-bottom: 48svh;
+  padding-top: 64svh;
+  padding-bottom: 54svh;
   pointer-events: none;
 }
 
 .tour__step {
   grid-column: 1 / span 4;
-  min-height: 44svh;
+  min-height: 92svh;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
+  padding-top: 6svh;
 }
 
 .tour__chapter--right .tour__step {
@@ -1096,56 +1450,63 @@ body.batman-mode .batman-trigger {
 }
 
 .tour__bubble-card {
-  pointer-events: auto;
+  pointer-events: none;
   position: relative;
   isolation: isolate;
-  width: fit-content;
-  max-width: 100%;
-  padding: 1.125rem 1.375rem 1.25rem;
-  border-radius: 1.5rem;
-  opacity: 0.18;
-  transform: translateY(14px) scale(0.96);
-  transition: opacity 0.35s ease, transform 0.35s var(--ease-out-expo);
+  width: 100%;
+  max-width: 24rem;
+  padding: 1.1rem 1.3rem 1.2rem;
+  border-radius: 1.25rem;
+  background: var(--tile-surface);
+  border: 1px solid var(--border);
+  box-shadow: var(--plastic-card-shadow);
+  opacity: 0;
+  transform: translate3d(0, 28px, 0) scale(0.96);
+  transition: opacity 0.32s ease, transform 0.36s var(--ease-out-expo);
 }
 
-.tour__bubble-card::before,
-.tour__bubble-card::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: 1.5rem;
-}
-
-.tour__bubble-card::before {
-  z-index: -2;
-  translate: 6px 6px;
-  background: var(--dither);
-}
-
-.tour__bubble-card::after {
-  z-index: -1;
-  background: var(--paper);
-  border: 1.5px solid var(--border);
-}
-
-.tour__bubble-card.is-active {
+/* Only visible when entering the active reading window (never pre-visible below minifigure) */
+.tour__bubble-card.is-visible {
+  pointer-events: auto;
   opacity: 1;
-  transform: translateY(0) scale(1);
+  transform: translate3d(0, 0, 0) scale(1);
+}
+
+.tour__bubble-card.is-past {
+  pointer-events: auto;
+  opacity: 0.22;
+  transform: translate3d(0, -14px, 0) scale(0.97);
+}
+
+.tour__bubble-header {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin-bottom: 0.55rem;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--ink-muted);
+}
+
+body.batman-mode .tour__bubble-header {
+  color: #FFD000;
 }
 
 .tour__bubble-text {
   margin: 0;
   font-family: var(--font-display);
-  font-size: clamp(1.125rem, 1.9vw, 2rem);
+  font-size: clamp(1.02rem, 1.42vw, 1.38rem);
   font-weight: 600;
-  line-height: 1.12;
+  line-height: 1.22;
   letter-spacing: -0.02em;
   color: var(--ink);
 }
 
 .tour__bubble-word {
   opacity: 0.18;
-  transition: opacity 0.16s ease;
+  transition: opacity 0.14s ease;
 }
 
 .tour__bubble-word.is-lit {
@@ -1153,7 +1514,7 @@ body.batman-mode .batman-trigger {
 }
 
 /* ============================================================================
-   ALL WORK (#work) & CERTIFICATIONS (#certifications) SECTIONS
+   ALL WORK (#work) & CERTIFICATIONS (#certifications) BENTO SECTIONS
    ============================================================================ */
 .bento-section {
   position: relative;
@@ -1179,29 +1540,33 @@ body.batman-mode .batman-trigger {
   grid-column: 1 / span 8;
   margin: 0;
   font-family: var(--font-display);
-  font-size: clamp(2.75rem, 7vw, 7.25rem);
-  font-weight: 600;
-  line-height: 0.9;
-  letter-spacing: -0.045em;
+  font-size: clamp(2.75rem, 6.6vw, 6.75rem);
+  font-weight: 700;
+  line-height: 0.92;
+  letter-spacing: -0.04em;
   color: var(--ink);
+  text-shadow: 1px 1px 0 #26282e, 2px 2px 0 #1f2126, 3px 3px 0 #181a1e, 4px 4px 0 #131518, 5px 5px 0 #0e0f12, 8px 14px 22px rgba(0, 0, 0, 0.28);
+  text-shadow: var(--extruded-title-shadow);
 }
 
 .bento-section__count {
   grid-column: 9 / span 4;
   margin: 0;
   text-align: right;
-  font-family: var(--font-sans);
-  font-size: 0.9375rem;
-  font-weight: 500;
-  color: var(--ink-muted);
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--ink-soft);
 }
 
 @media (max-width: 767px) {
   .bento-section__title {
-    grid-column: 1 / span 3;
+    grid-column: 1 / -1;
   }
   .bento-section__count {
-    grid-column: 4 / span 1;
+    grid-column: 1 / -1;
+    text-align: left;
+    margin-top: 0.5rem;
   }
 }
 
@@ -1246,22 +1611,23 @@ body.batman-mode .batman-trigger {
   }
 }
 
+/* Thick Matte-Plastic Bento Tiles with Top-Left Specular Rim & 3px Bottom Bevel */
 .bento-card {
   position: relative;
   display: flex;
   flex-direction: column;
-  background: var(--paper);
-  border: 1.5px solid color-mix(in srgb, var(--ink) 16%, transparent);
-  border-radius: 14px;
+  background: var(--tile-surface);
+  border: 1px solid var(--border);
+  border-radius: 18px;
   overflow: hidden;
   cursor: pointer;
-  transition: transform 0.35s var(--ease-out-expo), box-shadow 0.35s var(--ease-out-expo), border-color 0.25s ease;
+  box-shadow: var(--plastic-card-shadow);
+  transition: transform 0.32s var(--ease-out-expo), box-shadow 0.32s var(--ease-out-expo), border-color 0.25s ease;
 }
 
 .bento-card:hover {
-  transform: translateY(-4px);
-  border-color: var(--ink);
-  box-shadow: 6px 6px 0 var(--ink);
+  transform: translateY(-5px);
+  box-shadow: var(--plastic-card-shadow-hover);
 }
 
 .bento-card__media {
@@ -1270,7 +1636,7 @@ body.batman-mode .batman-trigger {
   aspect-ratio: 3 / 2;
   overflow: hidden;
   background: var(--card-tint, #E8ECEF);
-  border-bottom: 1px solid color-mix(in srgb, var(--ink) 10%, transparent);
+  border-bottom: 1px solid var(--border);
 }
 
 .bento-card__img {
@@ -1289,20 +1655,21 @@ body.batman-mode .batman-trigger {
   position: absolute;
   top: 0.75rem;
   left: 0.75rem;
-  padding: 0.25rem 0.65rem;
+  padding: 0.28rem 0.68rem;
   border-radius: 8px;
-  background: rgba(11, 11, 12, 0.84);
+  background: rgba(11, 12, 14, 0.86);
+  border: 1px solid rgba(255, 255, 255, 0.18);
   color: #FBFBF8;
-  font-family: var(--font-sans);
-  font-size: 0.75rem;
-  font-weight: 600;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
 }
 
 .bento-card__body {
-  padding: 1.15rem 1.25rem 1.35rem;
+  padding: 1.2rem 1.3rem 1.35rem;
   display: flex;
   flex-direction: column;
-  gap: 0.45rem;
+  gap: 0.5rem;
   flex: 1;
 }
 
@@ -1312,14 +1679,19 @@ body.batman-mode .batman-trigger {
   gap: 0.45rem;
   font-family: var(--font-mono);
   font-size: 0.74rem;
+  font-weight: 700;
   color: var(--ink-muted);
+}
+
+body.batman-mode .bento-card__meta {
+  color: #00F0FF;
 }
 
 .bento-card__title {
   margin: 0;
   font-family: var(--font-display);
   font-size: clamp(1.25rem, 1.75vw, 1.65rem);
-  font-weight: 600;
+  font-weight: 700;
   line-height: 1.08;
   letter-spacing: -0.025em;
   color: var(--ink);
@@ -1328,7 +1700,7 @@ body.batman-mode .batman-trigger {
 .bento-card__summary {
   margin: 0;
   font-size: 0.92rem;
-  line-height: 1.48;
+  line-height: 1.5;
   color: var(--ink-soft);
   display: -webkit-box;
   -webkit-line-clamp: 3;
@@ -1336,33 +1708,72 @@ body.batman-mode .batman-trigger {
   overflow: hidden;
 }
 
+/* Recessed Dark Plastic Terminal Box inside Bento Cards #10 (Insta Manager) & #12 (Voca) */
+.bento-terminal {
+  margin-top: 0.4rem;
+  padding: 0.65rem 0.8rem;
+  border-radius: 10px;
+  background: #0D0F14;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow:
+    inset 0 3px 6px rgba(0, 0, 0, 0.78),
+    inset 0 1px 2px rgba(0, 0, 0, 0.9),
+    0 1px 0 rgba(255, 255, 255, 0.45);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  line-height: 1.45;
+  color: #A7F3D0;
+}
+
+.bento-terminal__line {
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.bento-terminal__line:first-child {
+  color: #FDE047;
+  font-weight: 700;
+}
+
 .bento-card__tags {
   margin-top: auto;
   padding-top: 0.65rem;
   display: flex;
   flex-wrap: wrap;
-  gap: 0.35rem;
+  gap: 0.4rem;
 }
 
+/* Tactile 3D Plastic Keycap Tech-Stack Pills */
 .bento-tag {
   font-family: var(--font-sans);
-  font-size: 0.75rem;
-  font-weight: 500;
-  padding: 0.2rem 0.55rem;
-  border-radius: 6px;
-  background: color-mix(in srgb, var(--ink) 7%, transparent);
+  font-size: 0.74rem;
+  font-weight: 600;
+  padding: 0.22rem 0.58rem;
+  border-radius: 7px;
+  border: 1px solid var(--border);
+  background: var(--bg-cream);
   color: var(--ink-soft);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.75),
+    0 2px 0 var(--tile-bevel);
+  transition: transform 0.1s ease;
+}
+
+.bento-tag:active {
+  transform: translateY(2px);
 }
 
 .bento-card__footer {
   margin-top: 0.65rem;
   padding-top: 0.65rem;
-  border-top: 1px solid color-mix(in srgb, var(--ink) 10%, transparent);
+  border-top: 1px solid var(--border);
   display: flex;
   align-items: center;
   justify-content: space-between;
   font-size: 0.85rem;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .bento-card__open {
@@ -1376,7 +1787,7 @@ body.batman-mode .batman-trigger {
 }
 
 /* ============================================================================
-   FULL-VIEWPORT CASE STUDY WINDOW (.project-window — EXACT SEBG.CH CASE VIEW)
+   FULL-VIEWPORT CASE STUDY WINDOW (.project-window)
    ============================================================================ */
 .project-window-backdrop {
   position: fixed;
@@ -1384,15 +1795,15 @@ body.batman-mode .batman-trigger {
   z-index: 95;
   background: var(--window-bg, var(--bg-cream));
   overflow: hidden;
-  animation: windowFloodReveal 0.75s cubic-bezier(0.65, 0, 0.35, 1) both;
+  animation: windowFloodReveal 0.68s cubic-bezier(0.65, 0, 0.35, 1) both;
 }
 
 @keyframes windowFloodReveal {
   0% {
-    clip-path: circle(3.5rem at 6rem calc(100% - 6rem));
+    clip-path: circle(3.5rem at 5rem calc(100% - 5rem));
   }
   100% {
-    clip-path: circle(150vmax at 6rem calc(100% - 6rem));
+    clip-path: circle(150vmax at 5rem calc(100% - 5rem));
   }
 }
 
@@ -1414,10 +1825,10 @@ body.batman-mode .batman-trigger {
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  padding: 1.25rem var(--margin);
-  background: color-mix(in srgb, var(--window-bg, var(--bg-cream)) 88%, transparent);
+  padding: 1.15rem var(--margin);
+  background: color-mix(in srgb, var(--tile-surface) 90%, transparent);
   backdrop-filter: blur(12px);
-  border-bottom: 1px solid color-mix(in srgb, var(--ink) 10%, transparent);
+  border-bottom: 1px solid var(--border);
 }
 
 .project-window__topbar-right {
@@ -1434,18 +1845,17 @@ body.batman-mode .batman-trigger {
   scroll-behavior: smooth;
 }
 
-/* Case Hero (12-column grid matching sebg.ch/projects/[slug]) */
 .case-hero {
   padding-top: clamp(2.5rem, 6svh, 4.5rem);
   padding-bottom: clamp(3rem, 8svh, 6rem);
-  background: var(--window-tint, var(--bg-cream));
+  background-color: var(--window-tint, var(--bg-cream));
 }
 
 .case-hero__eyebrow {
   grid-column: 1 / -1;
-  font-family: var(--font-sans);
-  font-size: 0.9rem;
-  font-weight: 500;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  font-weight: 700;
   color: var(--ink-soft);
   margin-bottom: 0.75rem;
 }
@@ -1454,12 +1864,13 @@ body.batman-mode .batman-trigger {
   grid-column: 1 / span 9;
   margin: 0;
   font-family: var(--font-display);
-  font-size: clamp(2.75rem, 6.8vw, 6.75rem);
-  font-weight: 600;
-  line-height: 0.9;
-  letter-spacing: -0.045em;
+  font-size: clamp(2.5rem, 6.2vw, 6.25rem);
+  font-weight: 700;
+  line-height: 0.92;
+  letter-spacing: -0.04em;
   text-wrap: balance;
   color: var(--ink);
+  text-shadow: var(--extruded-title-shadow);
 }
 
 .case-hero__meta {
@@ -1469,18 +1880,18 @@ body.batman-mode .batman-trigger {
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: var(--gutter);
   padding-top: 1.25rem;
-  border-top: 1px solid color-mix(in srgb, var(--ink) 15%, transparent);
+  border-top: 1px solid var(--border);
 }
 
 .case-hero__meta-item dt {
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   color: var(--ink-muted);
   margin-bottom: 0.25rem;
 }
 
 .case-hero__meta-item dd {
   margin: 0;
-  font-weight: 600;
+  font-weight: 700;
   font-size: 1rem;
   color: var(--ink);
 }
@@ -1490,10 +1901,9 @@ body.batman-mode .batman-trigger {
   margin-top: clamp(2rem, 5svh, 3.5rem);
 }
 
-/* Case Narrative Section (Lead + Offset Copy + Metrics) */
 .case-narrative {
   padding-block: clamp(4rem, 12svh, 8rem);
-  background: var(--bg-cream);
+  background-color: var(--bg-cream);
   row-gap: clamp(2.5rem, 6svh, 4.5rem);
 }
 
@@ -1501,9 +1911,9 @@ body.batman-mode .batman-trigger {
   grid-column: 1 / span 8;
   margin: 0;
   font-family: var(--font-display);
-  font-size: clamp(1.75rem, 3.2vw, 3.25rem);
+  font-size: clamp(1.65rem, 3vw, 3rem);
   font-weight: 600;
-  line-height: 1.06;
+  line-height: 1.1;
   letter-spacing: -0.03em;
   color: var(--ink);
 }
@@ -1514,9 +1924,9 @@ body.batman-mode .batman-trigger {
   flex-direction: column;
   gap: 1.5rem;
   font-family: var(--font-display);
-  font-size: clamp(1.2rem, 1.85vw, 1.85rem);
+  font-size: clamp(1.15rem, 1.75vw, 1.75rem);
   font-weight: 500;
-  line-height: 1.24;
+  line-height: 1.28;
   letter-spacing: -0.02em;
   color: var(--ink-soft);
 }
@@ -1534,9 +1944,10 @@ body.batman-mode .batman-trigger {
 
 .case-metric-card {
   padding: 1.25rem 1.35rem;
-  border-radius: 14px;
-  background: var(--paper);
-  border: 1.5px solid color-mix(in srgb, var(--ink) 15%, transparent);
+  border-radius: 16px;
+  background: var(--tile-surface);
+  border: 1px solid var(--border);
+  box-shadow: var(--plastic-card-shadow);
   display: flex;
   flex-direction: column;
   gap: 0.35rem;
@@ -1544,22 +1955,21 @@ body.batman-mode .batman-trigger {
 
 .case-metric-card strong {
   font-family: var(--font-display);
-  font-size: clamp(1.65rem, 2.6vw, 2.5rem);
-  font-weight: 600;
+  font-size: clamp(1.65rem, 2.5vw, 2.35rem);
+  font-weight: 700;
   line-height: 1;
   letter-spacing: -0.03em;
   color: var(--ink);
 }
 
 .case-metric-card span {
-  font-size: 0.88rem;
+  font-size: 0.86rem;
   color: var(--ink-soft);
 }
 
-/* Case Showcase Gallery (Full 12-Col Browser + Dual 6-Col Browsers + Triple Mobile Frames) */
 .case-gallery {
   padding-block: clamp(4rem, 12svh, 8rem);
-  background: var(--stone);
+  background-color: var(--stone);
   row-gap: var(--gutter);
 }
 
@@ -1572,11 +1982,11 @@ body.batman-mode .batman-trigger {
 }
 
 .case-browser-frame {
-  background: var(--paper);
-  border: 1.5px solid color-mix(in srgb, var(--ink) 16%, transparent);
-  border-radius: 14px;
+  background: var(--tile-surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 20px 50px rgba(11, 11, 12, 0.12);
+  box-shadow: var(--plastic-card-shadow);
 }
 
 .case-browser-screen {
@@ -1597,15 +2007,14 @@ body.batman-mode .batman-trigger {
 
 .case-browser-caption {
   padding: 0.85rem 1.15rem;
-  border-top: 1px solid color-mix(in srgb, var(--ink) 10%, transparent);
+  border-top: 1px solid var(--border);
   font-family: var(--font-sans);
   font-size: 0.9rem;
-  font-weight: 500;
+  font-weight: 600;
   color: var(--ink-soft);
-  background: var(--paper);
+  background: var(--tile-surface);
 }
 
-/* Triple Mobile Mockups Row inside Case Study (matching sebg.ch col-start-3 / 6 / 9) */
 .case-phones-row {
   grid-column: 1 / -1;
   margin-top: clamp(2.5rem, 6svh, 4.5rem);
@@ -1625,11 +2034,10 @@ body.batman-mode .batman-trigger {
   grid-column: 10 / span 3;
 }
 
-/* Full-Bleed Next Project Footer (.case-next) */
 .case-next {
   padding-top: clamp(4rem, 12svh, 7rem);
   padding-bottom: clamp(6rem, 16svh, 10rem);
-  background: #0B0B0C;
+  background-color: #1A1A1A;
   color: #FBFBF8;
   row-gap: 1.5rem;
 }
@@ -1638,7 +2046,7 @@ body.batman-mode .batman-trigger {
   grid-column: 1 / -1;
   font-family: var(--font-mono);
   font-size: 0.85rem;
-  color: rgba(251, 251, 248, 0.6);
+  color: rgba(251, 251, 248, 0.65);
 }
 
 .case-next__header {
@@ -1653,20 +2061,22 @@ body.batman-mode .batman-trigger {
 .case-next__title {
   margin: 0;
   font-family: var(--font-display);
-  font-size: clamp(2.5rem, 6vw, 5.75rem);
-  font-weight: 600;
-  line-height: 0.9;
+  font-size: clamp(2.5rem, 5.8vw, 5.5rem);
+  font-weight: 700;
+  line-height: 0.92;
   letter-spacing: -0.04em;
   color: #FBFBF8;
+  text-shadow: var(--extruded-title-shadow);
 }
 
 .case-next__preview {
   grid-column: 1 / span 8;
   margin-top: 1rem;
-  border-radius: 14px;
+  border-radius: 16px;
   overflow: hidden;
   aspect-ratio: 16 / 10;
-  border: 1.5px solid rgba(251, 251, 248, 0.2);
+  border: 1px solid rgba(251, 251, 248, 0.22);
+  box-shadow: 0 20px 44px rgba(0, 0, 0, 0.5);
   cursor: pointer;
 }
 
@@ -1683,18 +2093,22 @@ body.batman-mode .batman-trigger {
 }
 
 /* ============================================================================
-   CONTACT FOOTER (#contact — EXACT SEBG.CH DARK INK SECTION)
+   CONTACT FOOTER (#contact — MATTE CHARCOAL ABS #1A1A1A + 3D EXTRUDED HEADING)
    ============================================================================ */
 .footer {
   position: relative;
   z-index: 10;
   min-height: 100svh;
-  background: #0B0B0C;
+  background-color: #1A1A1A;
   color: #FBFBF8;
-  padding-top: clamp(4rem, 14svh, 8rem);
+  padding-top: clamp(4rem, 13svh, 7.5rem);
   padding-bottom: var(--margin);
   display: grid;
   grid-template-rows: 1fr auto;
+}
+
+body.batman-mode .footer {
+  background-color: #0B0C0E;
 }
 
 .footer__top {
@@ -1704,11 +2118,13 @@ body.batman-mode .batman-trigger {
 .footer__title {
   margin: 0;
   font-family: var(--font-display);
-  font-size: clamp(3rem, 8vw, 8.25rem);
-  font-weight: 600;
-  line-height: 0.9;
+  font-size: clamp(2.85rem, 7.4vw, 7.5rem);
+  font-weight: 700;
+  line-height: 0.92;
   letter-spacing: -0.045em;
   color: #FBFBF8;
+  text-shadow: 1px 1px 0 #26282e, 2px 2px 0 #1f2126, 3px 3px 0 #181a1e, 4px 4px 0 #131518, 5px 5px 0 #0e0f12, 8px 14px 22px rgba(0, 0, 0, 0.28);
+  text-shadow: var(--extruded-title-shadow);
 }
 
 .footer__lead {
@@ -1717,60 +2133,70 @@ body.batman-mode .batman-trigger {
   font-size: clamp(1.25rem, 2vw, 2rem);
   font-weight: 500;
   letter-spacing: -0.02em;
-  color: rgba(251, 251, 248, 0.65);
+  color: rgba(251, 251, 248, 0.72);
 }
 
 .footer__email {
   display: inline-block;
   margin-top: 1.75rem;
   font-family: var(--font-display);
-  font-size: clamp(1.5rem, 3.4vw, 3.25rem);
-  font-weight: 400;
+  font-size: clamp(1.4rem, 3.2vw, 3.1rem);
+  font-weight: 600;
   letter-spacing: -0.03em;
-  color: #FBFBF8;
+  color: #FFD000;
   text-decoration: underline;
-  text-decoration-color: rgba(251, 251, 248, 0.4);
-  text-decoration-thickness: 1px;
+  text-decoration-color: rgba(255, 208, 0, 0.45);
+  text-decoration-thickness: 2px;
   text-underline-offset: 0.18em;
   background: transparent;
   border: none;
   padding: 0;
   text-align: left;
-  transition: text-decoration-color 0.2s ease, color 0.2s ease;
+  transition: text-decoration-color 0.2s ease, transform 0.2s ease;
 }
 
 .footer__email:hover {
-  color: #FACC15;
-  text-decoration-color: #FACC15;
+  text-decoration-color: #FFD000;
+  transform: translateY(-2px);
 }
 
 .footer__links {
   margin-top: 2.25rem;
   display: flex;
   flex-wrap: wrap;
-  gap: 1.75rem;
+  gap: 1.5rem;
 }
 
 .footer__social-link {
   font-family: var(--font-display);
-  font-size: clamp(1.35rem, 2.2vw, 2.15rem);
+  font-size: clamp(1.25rem, 2vw, 1.95rem);
   font-weight: 600;
   letter-spacing: -0.03em;
   color: #FBFBF8;
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  transition: color 0.2s ease, transform 0.2s ease;
+  padding: 0.35rem 0.85rem;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    0 3px 0 #090A0D;
+  transition: color 0.2s ease, transform 0.15s ease, background-color 0.2s ease;
 }
 
 .footer__social-link:hover {
-  color: #FACC15;
-  transform: translate(2px, -2px);
+  color: #111215;
+  background: #FFD000;
+  border-color: #C9A000;
+  transform: translateY(-2px);
 }
 
 .footer__bottom {
   grid-column: 1 / -1;
-  padding-top: 2rem;
+  padding-top: 1.75rem;
+  padding-right: 4rem;
   border-top: 1px solid rgba(251, 251, 248, 0.14);
   display: flex;
   flex-wrap: wrap;
@@ -1778,26 +2204,40 @@ body.batman-mode .batman-trigger {
   justify-content: space-between;
   gap: 1rem;
   font-size: 0.9375rem;
-  color: rgba(251, 251, 248, 0.55);
+  color: rgba(251, 251, 248, 0.62);
 }
 
 .footer__bottom-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 1.25rem;
+  align-items: center;
+  gap: 0.85rem;
 }
 
 .footer__action-btn {
-  background: transparent;
-  border: none;
-  padding: 0;
-  color: rgba(251, 251, 248, 0.6);
-  font-size: 0.9375rem;
-  transition: color 0.2s ease;
+  padding: 0.45rem 0.95rem;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: #262830;
+  color: #FBFBF8;
+  font-family: var(--font-sans);
+  font-size: 0.88rem;
+  font-weight: 600;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    0 3px 0 #090A0D;
+  transition: transform 0.14s ease, background-color 0.2s ease, color 0.2s ease;
 }
 
 .footer__action-btn:hover {
-  color: #FBFBF8;
+  background: #FFD000;
+  color: #111215;
+  border-color: #C9A000;
+  transform: translateY(-2px);
+}
+
+.footer__action-btn:active {
+  transform: translateY(2px);
 }
 
 /* ============================================================================
@@ -1805,8 +2245,8 @@ body.batman-mode .batman-trigger {
    ============================================================================ */
 @media (max-width: 1024px) {
   .tour__stage-wrap {
-    padding-top: 1.25rem;
-    padding-bottom: 34svh;
+    padding-top: 1.15rem;
+    padding-bottom: 30svh;
   }
 
   .tour__title-row,
@@ -1817,12 +2257,12 @@ body.batman-mode .batman-trigger {
   }
 
   .tour__viewport {
-    max-height: 48svh;
+    max-height: 46svh;
   }
 
   .tour__phone {
-    width: clamp(120px, 28vw, 175px);
-    bottom: -10%;
+    width: clamp(118px, 27vw, 170px);
+    bottom: -8%;
   }
 
   .tour__chapter--left .tour__phone {
@@ -1838,7 +2278,7 @@ body.batman-mode .batman-trigger {
   .tour__step,
   .tour__chapter--right .tour__step {
     grid-column: 1 / -1;
-    min-height: 38svh;
+    min-height: 75svh;
   }
 
   .case-hero__title,
@@ -1872,17 +2312,17 @@ body.batman-mode .batman-trigger {
 
 @media (max-width: 680px) {
   .mascot-anchor {
-    width: 190px;
-    height: 235px;
-    margin-left: -95px;
-    margin-top: -118px;
+    width: 185px;
+    height: 230px;
+    margin-left: -92px;
+    margin-top: -115px;
   }
 
   .mascot-anchor.is-badge {
-    width: 112px;
-    height: 112px;
-    margin-left: -56px;
-    margin-top: -56px;
+    width: 96px;
+    height: 96px;
+    margin-left: -48px;
+    margin-top: -48px;
   }
 
   .case-phones-row {

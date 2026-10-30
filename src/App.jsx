@@ -31,8 +31,11 @@ export default function App() {
   const [soundEnabled, setSoundEnabled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [activeTrick, setActiveTrick] = useState(null);
-  const [manualOutfit] = useState('classic');
+  const [manualOutfit, setManualOutfit] = useState('classic');
   const [playingEmojiId, setPlayingEmojiId] = useState(null);
+  const [activeEmotion, setActiveEmotion] = useState('neutral');
+  const [isReadingActive, setIsReadingActive] = useState(false);
+  const [scrollVelocityState, setScrollVelocityState] = useState(0);
 
   // Active in-site Case Study Window: { type: 'project' | 'cert', slug: string } | null
   const [activeModal, setActiveModal] = useState(null);
@@ -43,9 +46,10 @@ export default function App() {
     Object.fromEntries(TOUR_CHAPTERS.map((ch) => [ch.id, 0]))
   );
 
-  // Scroll illumination progress
+  // Scroll illumination progress & bubble visibility states
   const [aboutWordProgress, setAboutWordProgress] = useState(0);
   const [bubbleProgressMap, setBubbleProgressMap] = useState({});
+  const [bubbleStateMap, setBubbleStateMap] = useState({});
 
   // Mascot speech & stage state
   const [speechText, setSpeechText] = useState(HERO_IDLE_QUIPS[0]);
@@ -82,18 +86,19 @@ export default function App() {
   const lastScrollTimeRef = useRef(0);
   const lastBlipIndexRef = useRef(-1);
   const customSpeechUntilRef = useRef(0);
+  const emotionResetTimerRef = useRef(null);
   const tickleCounterRef = useRef(0);
   const lastTickleTimeRef = useRef(0);
   const lastMascotTapRef = useRef(0);
 
   // Mascot position physics (viewport pixel coordinates)
   const posRef = useRef({
-    x: typeof window !== 'undefined' ? window.innerWidth * 0.72 : 920,
-    y: typeof window !== 'undefined' ? window.innerHeight * 0.56 : 480,
+    x: typeof window !== 'undefined' ? window.innerWidth * 0.74 : 940,
+    y: typeof window !== 'undefined' ? window.innerHeight * 0.58 : 500,
     vx: 0,
     vy: 0,
-    targetX: typeof window !== 'undefined' ? window.innerWidth * 0.72 : 920,
-    targetY: typeof window !== 'undefined' ? window.innerHeight * 0.56 : 480,
+    targetX: typeof window !== 'undefined' ? window.innerWidth * 0.74 : 940,
+    targetY: typeof window !== 'undefined' ? window.innerHeight * 0.58 : 500,
     isDragging: false,
     dragOffsetX: 0,
     dragOffsetY: 0,
@@ -111,6 +116,7 @@ export default function App() {
   // -------------------------------------------------------------------------
   const activeOutfitId = useMemo(() => {
     if (batmanMode) return 'gotham';
+    if (manualOutfit && manualOutfit !== 'classic') return manualOutfit;
     if (
       stageState.sectionMode === 'tour' &&
       stageState.scrollOutfit &&
@@ -122,16 +128,35 @@ export default function App() {
   }, [batmanMode, stageState.sectionMode, stageState.scrollOutfit, manualOutfit]);
 
   // -------------------------------------------------------------------------
-  // HELPER: SPEAK TEMPORARY LINE WITH OPTIONAL SOUND BLIPS
+  // HELPER: TRIGGER TEMPORARY FACIAL EMOTION
   // -------------------------------------------------------------------------
-  const sayTemporarily = useCallback((text, durationMs = 4200, mood = 'happy') => {
-    customSpeechUntilRef.current = performance.now() + durationMs;
-    setSpeechText(text);
-    setSpeechLitRatio(1);
-    setSpeechVisible(true);
-    setStageState((prev) => ({ ...prev, mood }));
-    soundEngine.blip();
+  const triggerEmotion = useCallback((emotionName, durationMs = 2800) => {
+    if (emotionResetTimerRef.current) {
+      clearTimeout(emotionResetTimerRef.current);
+    }
+    setActiveEmotion(emotionName);
+    emotionResetTimerRef.current = setTimeout(() => {
+      setActiveEmotion('neutral');
+    }, durationMs);
   }, []);
+
+  // -------------------------------------------------------------------------
+  // HELPER: SPEAK TEMPORARY LINE WITH OPTIONAL SOUND BLIPS & EMOTION
+  // -------------------------------------------------------------------------
+  const sayTemporarily = useCallback(
+    (text, durationMs = 4200, mood = 'happy', emotionOverride = null) => {
+      customSpeechUntilRef.current = performance.now() + durationMs;
+      setSpeechText(text);
+      setSpeechLitRatio(1);
+      setSpeechVisible(true);
+      setStageState((prev) => ({ ...prev, mood }));
+      if (emotionOverride) {
+        triggerEmotion(emotionOverride, durationMs);
+      }
+      soundEngine.blip();
+    },
+    [triggerEmotion]
+  );
 
   // -------------------------------------------------------------------------
   // TOGGLE SOUND ENGINE
@@ -140,30 +165,63 @@ export default function App() {
     const nextState = soundEngine.toggle();
     setSoundEnabled(nextState);
     if (nextState) {
-      sayTemporarily('🔊 Sound effects enabled! Try Phoney’s Audio Emojis or my tricks.', 3400);
+      sayTemporarily(
+        '🔊 Sound effects enabled! Try Phoney’s Audio Emojis or my tricks.',
+        3400,
+        'happy',
+        'laugh'
+      );
     }
   }, [sayTemporarily]);
 
   // -------------------------------------------------------------------------
-  // TOGGLE BATMAN NOCTURNAL MODE
+  // TOGGLE LEGO BATMAN ("BATCAVE & BATCOMPUTER") MODE
   // -------------------------------------------------------------------------
-  const toggleBatmanMode = useCallback(() => {
-    setBatmanMode((prev) => {
-      const next = !prev;
+  const applyBatmanMode = useCallback(
+    (next) => {
+      setBatmanMode(next);
       document.body.classList.toggle('batman-mode', next);
-      soundEngine.playTrickSound('superhero');
+      soundEngine.setBatmanMode(next);
+      soundEngine.batmanTransform(next);
       if (next) {
-        sayTemporarily(
-          "🦇 I'm Batman. Gotham nocturnal mode activated — cape and cowl locked in.",
-          4500,
-          'surprised'
-        );
+        setManualOutfit('gotham');
+        sayTemporarily(OWNER_PROFILE.batmanHeroQuip, 5200, 'surprised', 'surprised');
       } else {
-        sayTemporarily('☀️ Back to daylight builder mode!', 3200, 'happy');
+        setManualOutfit('classic');
+        sayTemporarily('☀️ Back to daylight LEGO studio mode!', 3200, 'happy', 'laugh');
       }
-      return next;
-    });
-  }, [sayTemporarily]);
+    },
+    [sayTemporarily]
+  );
+
+  const toggleBatmanMode = useCallback(() => {
+    applyBatmanMode(!batmanMode);
+  }, [batmanMode, applyBatmanMode]);
+
+  // -------------------------------------------------------------------------
+  // SELECT OUTFIT FROM "DRESS ME UP" MENU
+  // -------------------------------------------------------------------------
+  const handleSelectOutfit = useCallback(
+    (outfitId) => {
+      setMenuOpen(false);
+      if (outfitId === 'gotham') {
+        applyBatmanMode(true);
+        return;
+      }
+      if (batmanMode) {
+        setBatmanMode(false);
+        document.body.classList.remove('batman-mode');
+        soundEngine.setBatmanMode(false);
+      }
+      setManualOutfit(outfitId);
+      soundEngine.pop();
+      const found = OUTFITS.find((o) => o.id === outfitId);
+      if (found) {
+        sayTemporarily(`👕 Switched to ${found.label}! ${found.tagline}`, 3400, 'happy', 'laugh');
+      }
+    },
+    [batmanMode, applyBatmanMode, sayTemporarily]
+  );
 
   // -------------------------------------------------------------------------
   // TRIGGER CHARACTER TRICK
@@ -190,7 +248,28 @@ export default function App() {
         sulk: '😤 Hmph. Nobody clicked my favorite project yet.',
       };
 
-      sayTemporarily(trickQuips[trickId] || `✨ Performing ${trickId}!`, 2800);
+      const trickEmotions = {
+        dance: 'laugh',
+        backflip: 'wow',
+        spin: 'surprised',
+        superhero: 'wow',
+        panic: 'surprised',
+        fly: 'laugh',
+        vanish: 'cheeky',
+        hiccup: 'surprised',
+        peekaboo: 'laugh',
+        selfie: 'cheeky',
+        dizzy: 'surprised',
+        sneeze: 'surprised',
+        sulk: 'sad',
+      };
+
+      sayTemporarily(
+        trickQuips[trickId] || `✨ Performing ${trickId}!`,
+        2800,
+        'happy',
+        trickEmotions[trickId] || 'laugh'
+      );
       const timer = setTimeout(() => {
         setActiveTrick((curr) => (curr === trickId ? null : curr));
       }, 2400);
@@ -200,7 +279,7 @@ export default function App() {
   );
 
   // -------------------------------------------------------------------------
-  // PLAY PHONEY AUDIO EMOJI
+  // PLAY PHONEY AUDIO EMOJI (EXACT WAV + FACIAL EMOTION)
   // -------------------------------------------------------------------------
   const handlePlayPhoneyEmoji = useCallback(
     (emojiItem, e) => {
@@ -211,7 +290,9 @@ export default function App() {
       }
       setPlayingEmojiId(emojiItem.id);
       soundEngine.playPhoneyEmoji(emojiItem.id);
-      sayTemporarily(emojiItem.quip, 3600, 'happy');
+      const targetEmotion =
+        emojiItem.id === 'wow' ? 'wow' : emojiItem.emotion || 'laugh';
+      sayTemporarily(emojiItem.quip, 3600, targetEmotion, targetEmotion);
       setStageState((prev) => ({ ...prev, gesture: 'cheer' }));
 
       setTimeout(() => {
@@ -220,42 +301,64 @@ export default function App() {
           ...prev,
           gesture: prev.gesture === 'cheer' ? null : prev.gesture,
         }));
-      }, 1100);
+      }, 1250);
     },
     [sayTemporarily]
   );
 
   // -------------------------------------------------------------------------
-  // OPEN / CLOSE IN-SITE CASE STUDY WINDOW
+  // MANUAL SLIDE SWITCHER KEYCAP HANDLER (1, 2, 3)
   // -------------------------------------------------------------------------
-  const openProjectWindow = useCallback((slug) => {
-    const project = ALL_WORK_BY_SLUG[slug];
-    if (!project) return;
-    soundEngine.whoosh();
-    setActiveModal({ type: 'project', slug });
-    setActiveModalSlideIdx(0);
-    setMenuOpen(false);
-    const firstComment =
-      project.characterComments?.[0] ||
-      `Welcome inside ${project.title}! Scroll through the full case study and slides.`;
-    customSpeechUntilRef.current = performance.now() + 8000;
-    setSpeechText(firstComment);
-    setSpeechLitRatio(1);
-    setSpeechVisible(true);
+  const handleSelectChapterSlide = useCallback((chapterId, slideIdx, e) => {
+    if (e) e.stopPropagation();
+    soundEngine.click();
+    setChapterSteps((prev) => ({ ...prev, [chapterId]: slideIdx }));
+    const bKey = `${chapterId}-${slideIdx}`;
+    const bEl = bubbleRefs.current[bKey];
+    if (bEl) {
+      bEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
   }, []);
 
-  const openCertWindow = useCallback((slug) => {
-    const cert = CERTIFICATIONS_BY_SLUG[slug];
-    if (!cert) return;
-    soundEngine.whoosh();
-    setActiveModal({ type: 'cert', slug });
-    setActiveModalSlideIdx(0);
-    setMenuOpen(false);
-    customSpeechUntilRef.current = performance.now() + 7000;
-    setSpeechText(`🎓 Verified Credential: ${cert.title} issued by ${cert.issuer}.`);
-    setSpeechLitRatio(1);
-    setSpeechVisible(true);
-  }, []);
+  // -------------------------------------------------------------------------
+  // OPEN / CLOSE IN-SITE CASE STUDY WINDOW
+  // -------------------------------------------------------------------------
+  const openProjectWindow = useCallback(
+    (slug) => {
+      const project = ALL_WORK_BY_SLUG[slug];
+      if (!project) return;
+      soundEngine.whoosh();
+      setActiveModal({ type: 'project', slug });
+      setActiveModalSlideIdx(0);
+      setMenuOpen(false);
+      const firstComment =
+        project.characterComments?.[0] ||
+        `Welcome inside ${project.title}! Scroll through the full case study and slides.`;
+      customSpeechUntilRef.current = performance.now() + 8000;
+      setSpeechText(firstComment);
+      setSpeechLitRatio(1);
+      setSpeechVisible(true);
+      triggerEmotion('laugh', 2200);
+    },
+    [triggerEmotion]
+  );
+
+  const openCertWindow = useCallback(
+    (slug) => {
+      const cert = CERTIFICATIONS_BY_SLUG[slug];
+      if (!cert) return;
+      soundEngine.whoosh();
+      setActiveModal({ type: 'cert', slug });
+      setActiveModalSlideIdx(0);
+      setMenuOpen(false);
+      customSpeechUntilRef.current = performance.now() + 7000;
+      setSpeechText(`🎓 Verified Credential: ${cert.title} issued by ${cert.issuer}.`);
+      setSpeechLitRatio(1);
+      setSpeechVisible(true);
+      triggerEmotion('laugh', 2200);
+    },
+    [triggerEmotion]
+  );
 
   const closeWindow = useCallback(() => {
     soundEngine.whoosh();
@@ -280,7 +383,7 @@ export default function App() {
   }, [activeModal, closeWindow]);
 
   // -------------------------------------------------------------------------
-  // GLOBAL POINTER TRACKING & SLEEP TIMER
+  // GLOBAL POINTER TRACKING, CURSOR BAT-LIGHT & SLEEP TIMER
   // -------------------------------------------------------------------------
   useEffect(() => {
     lastScrollTimeRef.current = performance.now();
@@ -289,6 +392,9 @@ export default function App() {
     const onPointerMove = (e) => {
       globalPointerRef.current.x = (e.clientX / window.innerWidth) * 2 - 1;
       globalPointerRef.current.y = -((e.clientY / window.innerHeight) * 2 - 1);
+      document.documentElement.style.setProperty('--cursor-x', `${e.clientX}px`);
+      document.documentElement.style.setProperty('--cursor-y', `${e.clientY}px`);
+
       lastActivityRef.current = performance.now();
       if (isSleeping) {
         setIsSleeping(false);
@@ -313,7 +419,12 @@ export default function App() {
         posRef.current.hasCustomDropPos = true;
         setIsDraggingState(false);
         soundEngine.drop();
-        sayTemporarily('😮‍💨 Phew! Solid landing. Double-click me if you want a trick!', 3600);
+        sayTemporarily(
+          '😮‍💨 Phew! Solid landing. Double-click me if you want a trick!',
+          3600,
+          'happy',
+          'laugh'
+        );
       }
     };
 
@@ -343,13 +454,17 @@ export default function App() {
         !activeModal &&
         now > customSpeechUntilRef.current
       ) {
-        quipIndex = (quipIndex + 1) % HERO_IDLE_QUIPS.length;
-        setSpeechText(HERO_IDLE_QUIPS[quipIndex]);
+        if (batmanMode) {
+          setSpeechText(OWNER_PROFILE.batmanHeroQuip);
+        } else {
+          quipIndex = (quipIndex + 1) % HERO_IDLE_QUIPS.length;
+          setSpeechText(HERO_IDLE_QUIPS[quipIndex]);
+        }
         setSpeechLitRatio(1);
       }
     }, 6500);
     return () => clearInterval(interval);
-  }, [stageState.sectionMode, activeModal, isSleeping]);
+  }, [stageState.sectionMode, activeModal, isSleeping, batmanMode]);
 
   // -------------------------------------------------------------------------
   // SCROLL CHOREOGRAPHY: SECTION DETECTION, WORD LIGHTING, CHAPTER STEPS
@@ -360,7 +475,9 @@ export default function App() {
       const scrollY = window.scrollY;
       const dt = Math.max(16, now - lastScrollTimeRef.current);
       const dy = scrollY - lastScrollYRef.current;
-      scrollVelocityRef.current = clamp((dy / dt) * 18, -32, 32);
+      const vel = clamp((dy / dt) * 18, -32, 32);
+      scrollVelocityRef.current = vel;
+      setScrollVelocityState(vel);
       lastScrollYRef.current = scrollY;
       lastScrollTimeRef.current = now;
       lastActivityRef.current = now;
@@ -370,23 +487,20 @@ export default function App() {
       }
 
       const vh = window.innerHeight;
-      const vw = window.innerWidth;
-      const isMobile = vw <= 1024;
-      const characterTop = isMobile
-        ? posRef.current.y - 115
-        : Math.min(posRef.current.y - 140, vh * 0.62);
+      let anyReadingNow = false;
 
-      // 1. ABOUT WORD-BY-WORD SCROLL ILLUMINATION (Strict: only after scrolling above character)
+      // 1. ABOUT WORD-BY-WORD SCROLL ILLUMINATION (Comfortable reading zone: vh * 0.78 -> vh * 0.22)
       if (aboutRef.current) {
         const textEl = aboutRef.current.querySelector('.about__text') || aboutRef.current;
         const rect = textEl.getBoundingClientRect();
-        let p = 0;
-        if (rect.bottom <= characterTop) {
-          const totalRange = Math.max(120, characterTop - Math.max(96, rect.height * 0.45));
-          const traveled = characterTop - rect.bottom;
-          p = clamp(traveled / totalRange, 0, 1);
-        }
+        const startY = vh * 0.78;
+        const endY = vh * 0.22;
+        const p = clamp((startY - rect.top) / Math.max(120, startY - endY), 0, 1);
         setAboutWordProgress(p);
+
+        if (p > 0.03 && p < 0.97) {
+          anyReadingNow = true;
+        }
 
         const wordCount = OWNER_PROFILE.aboutText.split(/\s+/).length;
         const currentWordIdx = Math.floor(p * wordCount);
@@ -397,9 +511,11 @@ export default function App() {
       }
 
       // 2. EVALUATE GUIDED TOUR CHAPTERS & BUBBLES
+      // Strictly hide 2nd and 3rd bubbles until they enter the active reading window (bRect.top <= vh * 0.76)
       let detectedChapter = null;
       let detectedChapterStep = 0;
       const nextBubbleProgress = {};
+      const nextBubbleState = {};
       const nextChapterSteps = {};
 
       TOUR_CHAPTERS.forEach((ch) => {
@@ -417,17 +533,33 @@ export default function App() {
           const bEl = bubbleRefs.current[bKey];
           if (!bEl) return;
           const bRect = bEl.getBoundingClientRect();
-          const bCenter = bRect.top + bRect.height * 0.5;
+
+          // Reading zone: enters at 76% viewport height, completes at 26% viewport height
+          const enterY = vh * 0.76;
+          const finishY = vh * 0.26;
+          const exitY = vh * 0.12;
 
           let bp = 0;
-          if (bRect.bottom <= characterTop) {
-            const totalTravel = Math.max(100, characterTop - Math.max(88, bRect.height * 0.5));
-            const traveled = characterTop - bRect.bottom;
-            bp = clamp(traveled / totalTravel, 0, 1);
-          }
-          nextBubbleProgress[bKey] = bp;
+          let bState = 'hidden';
 
-          if (bCenter < vh * 0.72) {
+          if (bRect.top <= enterY && bRect.bottom >= exitY) {
+            bState = 'visible';
+            bp = clamp((enterY - bRect.top) / Math.max(110, enterY - finishY), 0, 1);
+            if (bp > 0.04 && bp < 0.96) {
+              anyReadingNow = true;
+            }
+          } else if (bRect.bottom < exitY) {
+            bState = 'past';
+            bp = 1;
+          } else {
+            bState = 'hidden';
+            bp = 0;
+          }
+
+          nextBubbleProgress[bKey] = bp;
+          nextBubbleState[bKey] = bState;
+
+          if (bRect.top <= vh * 0.68) {
             activeStepForChapter = idx;
           }
         });
@@ -438,7 +570,9 @@ export default function App() {
         }
       });
 
+      setIsReadingActive(anyReadingNow);
       setBubbleProgressMap(nextBubbleProgress);
+      setBubbleStateMap(nextBubbleState);
       setChapterSteps((prev) => {
         let changed = false;
         for (const k of Object.keys(nextChapterSteps)) {
@@ -450,33 +584,33 @@ export default function App() {
         return changed ? nextChapterSteps : prev;
       });
 
-      // 3. DETERMINE ACTIVE SECTION, BACKGROUND TINT & MASCOT TARGET POSE
+      // 3. DETERMINE ACTIVE SECTION, BASEPLATE ABS COLOR & MASCOT TARGET POSE
       const aboutRect = aboutRef.current?.getBoundingClientRect();
       const workRect = workRef.current?.getBoundingClientRect();
       const certsRect = certsRef.current?.getBoundingClientRect();
       const footerRect = footerRef.current?.getBoundingClientRect();
 
       let nextSectionMode = 'hero';
-      let nextBg = batmanMode ? '#0B0F19' : '#F6F2E9';
+      let nextBg = batmanMode ? '#0B0C0E' : '#EAE5DD';
       let nextMascotSide = 'right';
       let nextOutfit = 'classic';
       let nextFacingYaw = -0.28;
       let nextPointSide = 0;
       let nextIsBadge = false;
 
-      if (footerRect && footerRect.top < vh * 0.58) {
+      if (footerRect && footerRect.top < vh * 0.65) {
         nextSectionMode = 'footer';
-        nextBg = '#0B0B0C';
+        nextBg = batmanMode ? '#0B0C0E' : '#1A1A1A';
         nextMascotSide = 'right';
         nextOutfit = batmanMode ? 'gotham' : 'classic';
         nextFacingYaw = -0.35;
         if (now > customSpeechUntilRef.current) {
-          setSpeechText("Want to build something together? Click my email below and let's talk!");
+          setSpeechText("Got a project or role in mind? Click my email below and let's talk!");
           setSpeechVisible(true);
         }
       } else if (certsRect && certsRect.top < vh * 0.55 && certsRect.bottom > vh * 0.25) {
         nextSectionMode = 'certs';
-        nextBg = batmanMode ? '#0D1322' : '#EFECE2';
+        nextBg = batmanMode ? '#0B0C0E' : '#EAE5DD';
         nextIsBadge = true;
         nextOutfit = batmanMode ? 'gotham' : 'classic';
         nextFacingYaw = 0.24;
@@ -484,19 +618,20 @@ export default function App() {
           setSpeechText(
             'Verified credentials in Java DSA, Full-Stack MERN, Business Intelligence, R Programming & Google Developer Program.'
           );
-          setSpeechVisible(true);
+          setSpeechVisible(certsRect.top > vh * 0.15);
         }
       } else if (workRect && workRect.top < vh * 0.55 && workRect.bottom > vh * 0.2) {
         nextSectionMode = 'work';
-        nextBg = batmanMode ? '#0E1525' : '#F1F1EC';
+        nextBg = batmanMode ? '#0B0C0E' : '#EAE5DD';
         nextIsBadge = true;
         nextOutfit = batmanMode ? 'gotham' : 'classic';
         nextFacingYaw = 0.25;
         if (now > customSpeechUntilRef.current) {
           setSpeechText(
-            'Here are all 18 projects! Click any card to open its full case study window.'
+            batmanMode ? OWNER_PROFILE.bentoTooltipBatman : OWNER_PROFILE.bentoTooltipNormal
           );
-          setSpeechVisible(true);
+          // Only show the porthole tooltip briefly near the section header so it never blocks Card #01
+          setSpeechVisible(workRect.top > vh * 0.12);
         }
       } else if (detectedChapter) {
         nextSectionMode = 'tour';
@@ -514,7 +649,7 @@ export default function App() {
         }
       } else if (aboutRect && aboutRect.top < vh * 0.58 && aboutRect.bottom > vh * 0.25) {
         nextSectionMode = 'about';
-        nextBg = batmanMode ? '#0E1626' : '#F3EFE4';
+        nextBg = batmanMode ? '#0B0C0E' : '#EAE5DD';
         nextMascotSide = 'left';
         nextOutfit = batmanMode ? 'gotham' : 'classic';
         nextFacingYaw = 0.32;
@@ -524,11 +659,14 @@ export default function App() {
         }
       } else {
         nextSectionMode = 'hero';
-        nextBg = batmanMode ? '#0B0F19' : '#F6F2E9';
+        nextBg = batmanMode ? '#0B0C0E' : '#EAE5DD';
         nextMascotSide = 'right';
         nextOutfit = batmanMode ? 'gotham' : 'classic';
         nextFacingYaw = -0.28;
         if (now > customSpeechUntilRef.current) {
+          if (batmanMode) {
+            setSpeechText(OWNER_PROFILE.batmanHeroQuip);
+          }
           setSpeechVisible(true);
         }
       }
@@ -582,27 +720,28 @@ export default function App() {
 
       const isBadgeNow = Boolean(activeModal) || stageState.isBadge;
       if (isBadgeNow) {
-        p.targetX = isMobile ? 68 : 96;
-        p.targetY = isMobile ? vh - 72 : vh - 96;
+        p.targetX = isMobile ? 58 : 74;
+        p.targetY = isMobile ? vh - 64 : vh - 76;
       } else if (p.hasCustomDropPos) {
         p.targetX = clamp(p.customX, 80, vw - 80);
         p.targetY = clamp(p.customY, 110, vh - 90);
       } else if (stageState.sectionMode === 'hero') {
         p.targetX = isMobile ? vw * 0.5 : vw * 0.78;
-        p.targetY = isMobile ? vh * 0.74 : vh * 0.56;
+        p.targetY = isMobile ? vh * 0.74 : vh * 0.58;
       } else if (stageState.sectionMode === 'about') {
-        p.targetX = isMobile ? vw * 0.25 : vw * 0.22;
-        p.targetY = isMobile ? vh * 0.78 : vh * 0.56;
+        p.targetX = isMobile ? vw * 0.25 : vw * 0.2;
+        p.targetY = isMobile ? vh * 0.78 : vh * 0.58;
       } else if (stageState.sectionMode === 'tour') {
+        // BUG FIX #1: Place minifigure lower (vh * 0.68) so its head never overlaps Tour Note text
         if (stageState.mascotSide === 'left') {
-          p.targetX = isMobile ? vw * 0.2 : vw * 0.18;
+          p.targetX = isMobile ? vw * 0.2 : vw * 0.17;
         } else {
-          p.targetX = isMobile ? vw * 0.8 : vw * 0.82;
+          p.targetX = isMobile ? vw * 0.8 : vw * 0.83;
         }
-        p.targetY = isMobile ? vh * 0.82 : vh * 0.62;
+        p.targetY = isMobile ? vh * 0.82 : vh * 0.68;
       } else if (stageState.sectionMode === 'footer') {
         p.targetX = isMobile ? vw * 0.72 : vw * 0.76;
-        p.targetY = isMobile ? vh * 0.75 : vh * 0.54;
+        p.targetY = isMobile ? vh * 0.72 : vh * 0.52;
       }
 
       if (!p.isDragging) {
@@ -641,7 +780,12 @@ export default function App() {
     p.dragOffsetY = e.clientY - p.y;
     setIsDraggingState(true);
     soundEngine.grab();
-    sayTemporarily('🫨 Whoa! Careful with the yellow hair—where are we flying?', 3000, 'surprised');
+    sayTemporarily(
+      '🫨 Whoa! Careful with the ABS plastic hair — where are we flying?',
+      3000,
+      'surprised',
+      'surprised'
+    );
   };
 
   const handleMascotClick = () => {
@@ -663,7 +807,12 @@ export default function App() {
       if (tickleCounterRef.current > 10) {
         tickleCounterRef.current = 0;
         soundEngine.giggle();
-        sayTemporarily('😂 Haha, stop! That tickles! Double-click me for a trick!', 3200, 'happy');
+        sayTemporarily(
+          '😂 Haha, stop! That tickles! Double-click me for a trick!',
+          3200,
+          'laugh',
+          'laugh'
+        );
       }
     } else if (now - lastTickleTimeRef.current > 800) {
       tickleCounterRef.current = 0;
@@ -707,17 +856,46 @@ export default function App() {
   }, [activeModalProject, activeModalSlideIdx]);
 
   const isBadgeActive = Boolean(activeModal) || stageState.isBadge;
+  const isFooterInView = stageState.sectionMode === 'footer' && !activeModal;
+  const isWalkingNow = Math.abs(scrollVelocityState) > 1.2;
 
   return (
     <div className="app-shell">
       <div id="batsignal-glow" aria-hidden="true" />
 
       {/* =====================================================================
-          FIXED SOUND TOGGLE (BOTTOM RIGHT — SEBG.CH)
+          FLOATING CHARACTER ACTION CONTROLS + SOUND TOGGLE (BUG FIX #3)
+          Automatically hides action buttons & offsets mute button in Footer
           ===================================================================== */}
+      <div
+        className={`floating-char-controls ${isFooterInView ? 'is-hidden' : ''}`}
+        aria-hidden={isFooterInView}
+      >
+        <button
+          type="button"
+          className="button"
+          onClick={() => {
+            soundEngine.pop();
+            setMenuOpen((prev) => !prev);
+          }}
+        >
+          <span>✨ Do a trick</span>
+        </button>
+        <button
+          type="button"
+          className="button"
+          onClick={() => {
+            soundEngine.pop();
+            setMenuOpen((prev) => !prev);
+          }}
+        >
+          <span>👕 Dress me up</span>
+        </button>
+      </div>
+
       <button
         type="button"
-        className="button sound-toggle"
+        className={`button sound-toggle ${isFooterInView ? 'sound-toggle--footer-offset' : ''}`}
         aria-pressed={soundEnabled}
         aria-label={soundEnabled ? 'Mute sound effects' : 'Enable sound effects'}
         title={soundEnabled ? 'Sound On' : 'Sound Off'}
@@ -725,19 +903,35 @@ export default function App() {
       >
         {soundEnabled ? (
           <svg width="20" height="20" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-            <path d="M7.28 2.22a.75.75 0 0 1 .47.7v10.16a.75.75 0 0 1-1.28.53L3.44 10.5H1.75A.75.75 0 0 1 1 9.75v-3.5a.75.75 0 0 1 .75-.75h1.69l3.03-3.11a.75.75 0 0 1 .81-.17Z" fill="currentColor" />
-            <path d="M10 5.5a3.5 3.5 0 0 1 0 5M12 3a6.5 6.5 0 0 1 0 10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+            <path
+              d="M7.28 2.22a.75.75 0 0 1 .47.7v10.16a.75.75 0 0 1-1.28.53L3.44 10.5H1.75A.75.75 0 0 1 1 9.75v-3.5a.75.75 0 0 1 .75-.75h1.69l3.03-3.11a.75.75 0 0 1 .81-.17Z"
+              fill="currentColor"
+            />
+            <path
+              d="M10 5.5a3.5 3.5 0 0 1 0 5M12 3a6.5 6.5 0 0 1 0 10"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+            />
           </svg>
         ) : (
           <svg width="20" height="20" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-            <path d="M7.28 2.22a.75.75 0 0 1 .47.7v10.16a.75.75 0 0 1-1.28.53L3.44 10.5H1.75A.75.75 0 0 1 1 9.75v-3.5a.75.75 0 0 1 .75-.75h1.69l3.03-3.11a.75.75 0 0 1 .81-.17Z" fill="currentColor" />
-            <path d="M10.5 6l4 4m0-4l-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+            <path
+              d="M7.28 2.22a.75.75 0 0 1 .47.7v10.16a.75.75 0 0 1-1.28.53L3.44 10.5H1.75A.75.75 0 0 1 1 9.75v-3.5a.75.75 0 0 1 .75-.75h1.69l3.03-3.11a.75.75 0 0 1 .81-.17Z"
+              fill="currentColor"
+            />
+            <path
+              d="M10.5 6l4 4m0-4l-4 4"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+            />
           </svg>
         )}
       </button>
 
       {/* =====================================================================
-          FIXED 3D MASCOT LAYER (HERO / TOUR STAGE / CORNER BADGE IN CASE VIEW)
+          FIXED 3D MASCOT LAYER (HERO / TOUR STAGE / PORTHOLE BADGE)
           ===================================================================== */}
       <div
         className={`mascot-layer ${activeModal ? 'mascot-layer--window-open' : ''}`}
@@ -770,20 +964,36 @@ export default function App() {
             </div>
           )}
 
-          {/* Trick Selection Menu (Double-click character or click Do a trick) */}
+          {/* Upward-Anchored Dress Me Up & Trick Selection Popover Menu */}
           {menuOpen && (
-            <div className="mascot-menu" role="dialog" aria-label="Mascot tricks menu">
+            <div className="mascot-menu" role="dialog" aria-label="Mascot outfits and tricks menu">
               <div className="mascot-menu__header">
-                <span className="mascot-menu__title">Pick a trick</span>
+                <span className="mascot-menu__title">Dress me up & Tricks</span>
                 <button
                   type="button"
                   className="mascot-menu__close"
                   onClick={() => setMenuOpen(false)}
-                  aria-label="Close tricks menu"
+                  aria-label="Close menu"
                 >
                   ✕
                 </button>
               </div>
+
+              <span className="mascot-menu__section-label">👕 OUTFITS</span>
+              <div className="mascot-menu__grid">
+                {OUTFITS.map((o) => (
+                  <button
+                    key={o.id}
+                    type="button"
+                    className={`mascot-menu__btn ${activeOutfitId === o.id ? 'is-active' : ''}`}
+                    onClick={() => handleSelectOutfit(o.id)}
+                  >
+                    {o.shortLabel}
+                  </button>
+                ))}
+              </div>
+
+              <span className="mascot-menu__section-label">✨ TRICKS</span>
               <div className="mascot-menu__grid">
                 {MASCOT_TRICKS.map((t) => (
                   <button
@@ -819,20 +1029,21 @@ export default function App() {
               soundEngine.pop();
               setMenuOpen((prev) => !prev);
             }}
-            title="Drag me around, or double-click me to pick a trick!"
+            title="Drag me around, or double-click me to pick an outfit or trick!"
           >
             <LegoScene
-              outfit={activeOutfitId}
-              trick={activeTrick}
-              gesture={stageState.gesture}
+              outfitId={activeOutfitId}
               mood={stageState.mood}
-              isBadge={isBadgeActive}
-              isDragging={isDraggingState}
-              isSleeping={isSleeping}
-              facingYaw={stageState.facingYaw}
-              pointSide={stageState.pointSide}
-              scrollVelocityRef={scrollVelocityRef}
-              mascotPosRef={posRef}
+              emotion={activeEmotion}
+              isReading={isReadingActive}
+              scrollVelocity={scrollVelocityState}
+              accent="#FFD000"
+              trickState={activeTrick}
+              onCharacterClick={handleMascotClick}
+              isWalking={isWalkingNow}
+              walkDirection={stageState.mascotSide === 'left' ? 1 : -1}
+              isGrabbed={isDraggingState}
+              badgeMode={isBadgeActive}
               globalPointerRef={globalPointerRef}
             />
           </div>
@@ -844,13 +1055,15 @@ export default function App() {
           ===================================================================== */}
       <main>
         {/* -------------------------------------------------------------------
-            1. HERO SECTION (12-COLUMN GRID — SEBG.CH)
+            1. HERO SECTION (12-COLUMN GRID + 3D LEGO BRICK CTAS)
             ------------------------------------------------------------------- */}
         <section ref={heroRef} id="hero" className="hero grid-page bg-grid">
           <header className="hero__top">
             <p className="hero__name">
               <span className="hero__name-primary">{OWNER_PROFILE.name}</span>
-              <span className="hero__name-sub">{OWNER_PROFILE.roleTitle}</span>
+              <span className="hero__name-sub">
+                {batmanMode ? OWNER_PROFILE.batmanRoleTitle : OWNER_PROFILE.roleTitle}
+              </span>
             </p>
 
             <div className="hero__header-actions">
@@ -894,17 +1107,16 @@ export default function App() {
                 type="button"
                 className="batman-trigger"
                 onClick={toggleBatmanMode}
-                title="Click to toggle Batman Nocturnal Mode!"
+                title="Click to toggle LEGO Batman Batcave Mode!"
               >
-                <span>🦇 {OWNER_PROFILE.heroBatmanWord}</span>
+                <span>{OWNER_PROFILE.heroBatmanWord}.</span>
               </button>
-              <span>.</span>
             </h1>
           </div>
         </section>
 
         {/* -------------------------------------------------------------------
-            2. ABOUT SECTION (STICKY 145SVH — WORD-BY-WORD SCROLL ILLUMINATION)
+            2. ABOUT SECTION (QUICK INTRO FROM GOOGLE SITES PORTFOLIO)
             ------------------------------------------------------------------- */}
         <section ref={aboutRef} id="about" className="about bg-grid">
           <div className="about__sticky grid-page">
@@ -925,9 +1137,9 @@ export default function App() {
         </section>
 
         {/* -------------------------------------------------------------------
-            3. GUIDED TOUR CHAPTERS (ALL 5 PROJECTS IN EXACT ORDER)
-               1. MediStudyGo -> 2. Phoney -> 3. Masterplayer Prints ->
-               4. TruGifting Solutions -> 5. OmniRoute Session Sync
+            3. GUIDED TOUR CHAPTERS (EXACT GOOGLE SITES SEQUENCE):
+               Slide 1: MediStudyGo -> Slide 2: Phoney -> Slide 3: TruGifting ->
+               Slide 4: Masterplayer & TruGifting -> Slide 5: OmniRoute Session Sync
             ------------------------------------------------------------------- */}
         <div className="tour" id="guided-tour">
           {TOUR_CHAPTERS.map((chapter, chapterIdx) => {
@@ -954,12 +1166,35 @@ export default function App() {
                   <div className="tour__title-row">
                     <div className="tour__title-block">
                       <span className="tour__eyebrow">
-                        0{chapterIdx + 1} / 0{TOUR_CHAPTERS.length} · Featured case study
+                        <span className="tour__log-stud" aria-hidden="true" />
+                        <span>
+                          {batmanMode
+                            ? chapter.batmanCode
+                            : `${chapter.code} // FEATURED CASE STUDY`}
+                        </span>
                       </span>
                       <h2 className="tour__title">{chapter.title}</h2>
                     </div>
 
                     <div className="tour__actions">
+                      <div
+                        className="tour__slide-switchers"
+                        role="group"
+                        aria-label={`${chapter.title} slide switcher`}
+                      >
+                        {chapter.desktopSlides.map((_, sIdx) => (
+                          <button
+                            key={sIdx}
+                            type="button"
+                            className={`keycap-btn ${activeStep === sIdx ? 'is-active' : ''}`}
+                            onClick={(e) => handleSelectChapterSlide(chapter.id, sIdx, e)}
+                            aria-label={`Slide ${sIdx + 1}`}
+                          >
+                            {sIdx + 1}
+                          </button>
+                        ))}
+                      </div>
+
                       <button
                         type="button"
                         className="button button--yellow"
@@ -1027,6 +1262,7 @@ export default function App() {
                                   alt={slide.alt || chapter.title}
                                   className="tour__screen-img"
                                   loading={chapterIdx === 0 && sIdx === 0 ? 'eager' : 'lazy'}
+                                  fetchPriority={chapterIdx === 0 && sIdx === 0 ? 'high' : 'auto'}
                                 />
                               </div>
                             ))}
@@ -1051,7 +1287,7 @@ export default function App() {
                         </div>
                       </div>
 
-                      {/* Overlapping 3D Phone Mockup with synced vertical screen stack */}
+                      {/* Overlapping Realistic 3D Dark-Metallic Smartphone Hardware with Dynamic Island */}
                       <div
                         className="tour__phone"
                         onClick={() => openProjectWindow(chapter.projectSlug)}
@@ -1103,7 +1339,7 @@ export default function App() {
                       </div>
                     </div>
 
-                    {/* Phoney Interactive 6-Slot Audio Emoji Quick Tray */}
+                    {/* Phoney Interactive 6-Slot Audio Emoji Quick Tray (Exact SVG Icons + WAVs) */}
                     {chapter.hasPhoneySoundboard && (
                       <div
                         className="phoney-soundboard"
@@ -1114,7 +1350,7 @@ export default function App() {
                             🔊 LIVE AUDIO EMOJI QUICK TRAY
                           </span>
                           <span className="phoney-soundboard__sub">
-                            Tap any slot to hear Phoney’s real in-call sound:
+                            Tap any keycap to hear Phoney’s real in-call sound:
                           </span>
                         </div>
 
@@ -1129,7 +1365,16 @@ export default function App() {
                               }`}
                               onClick={(e) => handlePlayPhoneyEmoji(item, e)}
                             >
-                              <span>{item.emoji}</span>
+                              {item.icon ? (
+                                <img
+                                  src={item.icon}
+                                  alt=""
+                                  className="phoney-emoji-btn__icon"
+                                  aria-hidden="true"
+                                />
+                              ) : (
+                                <span>{item.emoji}</span>
+                              )}
                               <span>{item.label}</span>
                             </button>
                           ))}
@@ -1139,13 +1384,14 @@ export default function App() {
                   </div>
                 </div>
 
-                {/* Scrolling Speech Bubbles in Mascot Column */}
+                {/* Scrolling Tour Notes in Mascot Column (2nd & 3rd hidden until entering reading zone) */}
                 <div className="tour__lines grid-page">
                   {chapter.bubbles.map((bubbleText, bIdx) => {
                     const bKey = `${chapter.id}-${bIdx}`;
                     const bp = bubbleProgressMap[bKey] ?? 0;
+                    const bState = bubbleStateMap[bKey] || (bIdx === 0 ? 'visible' : 'hidden');
                     const words = bubbleText.split(/\s+/);
-                    const isBubbleActive = activeStep === bIdx || bp > 0.08;
+                    const stepCode = `0${chapterIdx + 1}.0${bIdx + 1}`;
 
                     return (
                       <div
@@ -1156,8 +1402,22 @@ export default function App() {
                         className="tour__step"
                       >
                         <div
-                          className={`tour__bubble-card ${isBubbleActive ? 'is-active' : ''}`}
+                          className={`tour__bubble-card ${
+                            bState === 'visible'
+                              ? 'is-visible'
+                              : bState === 'past'
+                              ? 'is-past'
+                              : ''
+                          }`}
                         >
+                          <div className="tour__bubble-header">
+                            <span className="tour__log-stud" aria-hidden="true" />
+                            <span>
+                              {batmanMode
+                                ? `BATCOMPUTER LOG // FILE ${stepCode}`
+                                : `${stepCode} // ${chapter.title.toUpperCase()}`}
+                            </span>
+                          </div>
                           <p className="tour__bubble-text">
                             {words.map((w, wIdx) => {
                               const wLit = bp >= wIdx / Math.max(1, words.length);
@@ -1188,7 +1448,9 @@ export default function App() {
             <div className="bento-section__header">
               <h2 className="bento-section__title">All work</h2>
               <p className="bento-section__count">
-                {ALL_PROJECTS.length} Projects · Click any card to inspect
+                {batmanMode
+                  ? `${ALL_PROJECTS.length} Classified Batcomputer Files · Click to inspect`
+                  : `${ALL_PROJECTS.length} Projects · Click any card to inspect`}
               </p>
             </div>
 
@@ -1203,7 +1465,7 @@ export default function App() {
                   }}
                   onClick={() => openProjectWindow(project.slug)}
                   onMouseEnter={() => {
-                    customSpeechUntilRef.current = performance.now() + 2800;
+                    customSpeechUntilRef.current = performance.now() + 2600;
                     setSpeechText(`${project.title} — ${project.subtitle}`);
                     setSpeechVisible(true);
                   }}
@@ -1220,7 +1482,7 @@ export default function App() {
 
                   <div className="bento-card__body">
                     <div className="bento-card__meta">
-                      <span>{project.number}</span>
+                      <span>#{project.number}</span>
                       <span>·</span>
                       <span>{project.year}</span>
                       <span>·</span>
@@ -1229,6 +1491,17 @@ export default function App() {
 
                     <h3 className="bento-card__title">{project.title}</h3>
                     <p className="bento-card__summary">{project.summary}</p>
+
+                    {/* Recessed Dark Plastic Terminal Box inside Cards #10 (Insta Manager) & #12 (Voca) */}
+                    {project.terminalLines && (
+                      <div className="bento-terminal" aria-label={`${project.title} telemetry`}>
+                        {project.terminalLines.map((line, lIdx) => (
+                          <p key={lIdx} className="bento-terminal__line">
+                            {line}
+                          </p>
+                        ))}
+                      </div>
+                    )}
 
                     <div className="bento-card__tags">
                       {project.stack.slice(0, 4).map((tech) => (
@@ -1340,12 +1613,12 @@ export default function App() {
         </section>
 
         {/* -------------------------------------------------------------------
-            6. CONTACT FOOTER (#contact — EXACT SEBG.CH DARK INK LAYOUT)
+            6. CONTACT FOOTER (#contact — MATTE CHARCOAL ABS #1A1A1A, NO RESUME)
             ------------------------------------------------------------------- */}
         <footer ref={footerRef} id="contact" className="footer grid-page bg-grid">
           <div className="footer__top">
-            <h2 className="footer__title">Get in touch</h2>
-            <p className="footer__lead">Got a project or role in mind? Let’s talk.</p>
+            <h2 className="footer__title">Got a project?</h2>
+            <p className="footer__lead">Need a product-minded developer or AI builder? Let’s talk.</p>
 
             <button
               type="button"
@@ -1357,7 +1630,8 @@ export default function App() {
                 sayTemporarily(
                   `📋 Copied ${OWNER_PROFILE.email} to your clipboard! Talk soon!`,
                   4200,
-                  'happy'
+                  'laugh',
+                  'laugh'
                 );
               }}
               title="Click to copy email address"
@@ -1393,20 +1667,11 @@ export default function App() {
                 <span>Google Developer</span>
                 <span aria-hidden="true">↗</span>
               </a>
-              <a
-                href={OWNER_PROFILE.resumeUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="footer__social-link"
-              >
-                <span>Resume PDF</span>
-                <span aria-hidden="true">↗</span>
-              </a>
             </div>
           </div>
 
           <div className="footer__bottom">
-            <span>© 2026 {OWNER_PROFILE.name} · Built with Three.js & WebAudio</span>
+            <span>© 2026 {OWNER_PROFILE.name} · Built with React 19, Three.js & WebAudio</span>
 
             <div className="footer__bottom-actions">
               <button
@@ -1417,14 +1682,24 @@ export default function App() {
                   setMenuOpen(true);
                 }}
               >
-                Do a trick
+                ✨ Do a trick
+              </button>
+              <button
+                type="button"
+                className="footer__action-btn"
+                onClick={() => {
+                  soundEngine.pop();
+                  setMenuOpen(true);
+                }}
+              >
+                👕 Dress me up
               </button>
               <button
                 type="button"
                 className="footer__action-btn"
                 onClick={toggleBatmanMode}
               >
-                {batmanMode ? 'Daylight Mode' : 'Batman Mode'}
+                {batmanMode ? '☀️ Daylight Studio' : '🦇 Batman'}
               </button>
             </div>
           </div>
@@ -1432,18 +1707,17 @@ export default function App() {
       </main>
 
       {/* =====================================================================
-          FULL-VIEWPORT CASE STUDY WINDOW (.project-window — SEBG.CH CASE VIEW)
+          FULL-VIEWPORT CASE STUDY WINDOW (.project-window)
           ===================================================================== */}
       {activeModalProject && (
         <div
           className="project-window-backdrop"
           style={{
-            '--window-bg': batmanMode ? '#0B0F19' : '#F6F2E9',
-            '--window-tint': batmanMode ? '#111827' : activeModalProject.surfaceTint,
+            '--window-bg': batmanMode ? '#0B0C0E' : '#EAE5DD',
+            '--window-tint': batmanMode ? '#14161D' : activeModalProject.surfaceTint,
           }}
         >
           <div className="project-window" role="dialog" aria-modal="true">
-            {/* Top Navigation Bar */}
             <header className="project-window__topbar">
               <button type="button" className="button" onClick={closeWindow}>
                 <span>← Back</span>
@@ -1476,16 +1750,17 @@ export default function App() {
               </div>
             </header>
 
-            {/* Scrollable Case Study Content */}
             <div
               ref={modalScrollRef}
               className="project-window__scroll"
               onScroll={handleModalScroll}
             >
-              {/* 1. CASE HERO (12-column grid) */}
               <section className="case-hero grid-page bg-grid">
                 <span className="case-hero__eyebrow">
-                  PROJECT {activeModalProject.number} · {activeModalProject.category}
+                  <span className="tour__log-stud" aria-hidden="true" />{' '}
+                  {batmanMode
+                    ? `BATCOMPUTER FILE // #${activeModalProject.number} · ${activeModalProject.category}`
+                    : `PROJECT ${activeModalProject.number} · ${activeModalProject.category}`}
                 </span>
                 <h1 className="case-hero__title">{activeModalProject.title}</h1>
 
@@ -1525,7 +1800,6 @@ export default function App() {
                 </div>
               </section>
 
-              {/* 2. CASE NARRATIVE & IMPACT METRICS */}
               <section className="case-narrative grid-page bg-grid">
                 <p className="case-reveal">{activeModalProject.summary}</p>
 
@@ -1541,7 +1815,7 @@ export default function App() {
                           🔊 TRY PHONEY’S 6 DEFAULT AUDIO EMOJIS
                         </span>
                         <span className="phoney-soundboard__sub">
-                          Click any slot to trigger the live call sound:
+                          Click any keycap to trigger the real in-call sound:
                         </span>
                       </div>
                       <div className="phoney-soundboard__grid">
@@ -1555,7 +1829,16 @@ export default function App() {
                             }`}
                             onClick={(e) => handlePlayPhoneyEmoji(item, e)}
                           >
-                            <span>{item.emoji}</span>
+                            {item.icon ? (
+                              <img
+                                src={item.icon}
+                                alt=""
+                                className="phoney-emoji-btn__icon"
+                                aria-hidden="true"
+                              />
+                            ) : (
+                              <span>{item.emoji}</span>
+                            )}
                             <span>{item.label}</span>
                           </button>
                         ))}
@@ -1576,7 +1859,6 @@ export default function App() {
                 )}
               </section>
 
-              {/* 3. CASE SHOWCASE GALLERY (Full 12-Col + Dual 6-Col + Triple Mobile) */}
               <section className="case-gallery grid-page bg-grid">
                 {activeModalProject.slides?.map((slide, sIdx) => (
                   <div
@@ -1605,7 +1887,6 @@ export default function App() {
                   </div>
                 ))}
 
-                {/* Triple Mobile Mockups Row when mobileSlides exist */}
                 {activeModalProject.mobileSlides &&
                   activeModalProject.mobileSlides.length > 0 && (
                     <div className="case-phones-row">
@@ -1640,7 +1921,6 @@ export default function App() {
                   )}
               </section>
 
-              {/* 4. NEXT PROJECT SECTION (.case-next) */}
               {adjacentProjects?.next && (
                 <section className="case-next grid-page bg-grid">
                   <span className="case-next__eyebrow">Next project</span>
@@ -1684,8 +1964,8 @@ export default function App() {
         <div
           className="project-window-backdrop"
           style={{
-            '--window-bg': batmanMode ? '#0B0F19' : '#F6F2E9',
-            '--window-tint': batmanMode ? '#111827' : activeModalCert.surfaceTint,
+            '--window-bg': batmanMode ? '#0B0C0E' : '#EAE5DD',
+            '--window-tint': batmanMode ? '#14161D' : activeModalCert.surfaceTint,
           }}
         >
           <div className="project-window" role="dialog" aria-modal="true">

@@ -1,10 +1,15 @@
 // Procedural WebAudio Synthesizer inspired by Sebastien Graf (sebg.ch)
 // + Phoney's 6 Default In-Call Audio Emojis (Cheer, Faaah, Fart, Womp Womp, Wow, Yay!)
 
+const BATMAN_PITCH_RATIO = Math.pow(2, -4 / 12); // ~0.7937005 (-4 semitones)
+
 class SoundEngine {
   constructor() {
     this.ctx = null;
     this.enabled = true;
+    this.volume = 0.85;
+    this.isBatmanMode = false;
+    this.audioCache = {};
     this.lastBlipAt = 0;
 
     if (typeof window !== 'undefined') {
@@ -20,6 +25,10 @@ class SoundEngine {
       window.addEventListener('pointerdown', unlock, { passive: true });
       window.addEventListener('keydown', unlock, { passive: true });
     }
+  }
+
+  setBatmanMode(isBatman) {
+    this.isBatmanMode = Boolean(isBatman);
   }
 
   ensureContext() {
@@ -77,17 +86,97 @@ class SoundEngine {
   }
 
   batmanTransform(isBatman = true) {
+    this.isBatmanMode = Boolean(isBatman);
+    if (!this.enabled) return;
+
     if (isBatman) {
-      // Deep Gotham bass drop + bat-sonar shimmer
-      this.tone(110, 0.45, 'sawtooth', 0.08, 0, 55);
-      this.tone(220, 0.38, 'triangle', 0.06, 0.04, 110);
-      this.tone(880, 0.18, 'sine', 0.05, 0.18, 1320);
+      const ctx = this.ensureContext();
+      if (!ctx) return;
+
+      const now = ctx.currentTime;
+
+      // a) Dramatic low-brass / sub-bass swell (80Hz -> 150Hz sawtooth through low-pass BiquadFilterNode 160Hz -> 950Hz over 0.55s)
+      const brassOsc = ctx.createOscillator();
+      const subOsc = ctx.createOscillator();
+      const brassFilter = ctx.createBiquadFilter();
+      const brassGain = ctx.createGain();
+
+      brassOsc.type = 'sawtooth';
+      brassOsc.frequency.setValueAtTime(80, now);
+      brassOsc.frequency.exponentialRampToValueAtTime(150, now + 0.55);
+
+      subOsc.type = 'triangle';
+      subOsc.frequency.setValueAtTime(40, now);
+      subOsc.frequency.exponentialRampToValueAtTime(75, now + 0.55);
+
+      brassFilter.type = 'lowpass';
+      brassFilter.Q.setValueAtTime(3.2, now);
+      brassFilter.frequency.setValueAtTime(160, now);
+      brassFilter.frequency.exponentialRampToValueAtTime(950, now + 0.55);
+
+      brassGain.gain.setValueAtTime(0.0001, now);
+      brassGain.gain.linearRampToValueAtTime(0.11, now + 0.08);
+      brassGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.55);
+
+      brassOsc.connect(brassFilter);
+      subOsc.connect(brassFilter);
+      brassFilter.connect(brassGain);
+      brassGain.connect(ctx.destination);
+
+      brassOsc.start(now);
+      subOsc.start(now);
+      brassOsc.stop(now + 0.56);
+      subOsc.stop(now + 0.56);
+
+      // b) Rapid LEGO brick assembly clicks (6 rapid crisp high-mid percussive clicks spaced every 55ms)
+      for (let i = 0; i < 6; i += 1) {
+        const clickDelay = i * 0.055;
+        const baseFreq = 920 + i * 115;
+        this.tone(baseFreq, 0.028, 'square', 0.055, clickDelay, baseFreq * 1.45, true);
+        this.noise(0.022, 0.045, clickDelay, 2400 + i * 220, 'bandpass');
+      }
+
+      // c) Filtered white-noise cape swoosh (0.42s bandpass noise sweep)
+      const swooshDelay = 0.14;
+      const swooshDur = 0.42;
+      const swooshStart = now + swooshDelay;
+      const swooshLen = Math.max(1, Math.floor(ctx.sampleRate * swooshDur));
+      const swooshBuf = ctx.createBuffer(1, swooshLen, ctx.sampleRate);
+      const swooshData = swooshBuf.getChannelData(0);
+      for (let i = 0; i < swooshLen; i += 1) {
+        swooshData[i] = Math.random() * 2 - 1;
+      }
+
+      const swooshSrc = ctx.createBufferSource();
+      swooshSrc.buffer = swooshBuf;
+
+      const swooshFilter = ctx.createBiquadFilter();
+      swooshFilter.type = 'bandpass';
+      swooshFilter.Q.setValueAtTime(1.8, swooshStart);
+      swooshFilter.frequency.setValueAtTime(320, swooshStart);
+      swooshFilter.frequency.exponentialRampToValueAtTime(1850, swooshStart + swooshDur * 0.45);
+      swooshFilter.frequency.exponentialRampToValueAtTime(420, swooshStart + swooshDur);
+
+      const swooshGain = ctx.createGain();
+      swooshGain.gain.setValueAtTime(0.0001, swooshStart);
+      swooshGain.gain.linearRampToValueAtTime(0.09, swooshStart + 0.09);
+      swooshGain.gain.exponentialRampToValueAtTime(0.0001, swooshStart + swooshDur);
+
+      swooshSrc.connect(swooshFilter);
+      swooshFilter.connect(swooshGain);
+      swooshGain.connect(ctx.destination);
+      swooshSrc.start(swooshStart);
+      swooshSrc.stop(swooshStart + swooshDur + 0.01);
     } else {
       this.bell();
     }
   }
 
   trick(trickId = 'dance') {
+    if (trickId === 'superhero') {
+      this.batmanTransform(true);
+      return;
+    }
     if (typeof this[trickId] === 'function') {
       this[trickId]();
     } else {
@@ -95,19 +184,27 @@ class SoundEngine {
     }
   }
 
-  tone(freq, duration, type = 'sine', volume = 0.08, delay = 0, freqEnd = null) {
+  playTrickSound(trickId) {
+    return trickId === 'superhero' ? this.batmanTransform(true) : this.trick(trickId);
+  }
+
+  tone(freq, duration, type = 'sine', volume = 0.08, delay = 0, freqEnd = null, rawPitch = false) {
     if (!this.enabled) return;
     const ctx = this.ensureContext();
     if (!ctx) return;
+
+    const pitchScale = this.isBatmanMode && !rawPitch ? BATMAN_PITCH_RATIO : 1;
+    const adjustedFreq = Math.max(20, freq * pitchScale);
+    const adjustedFreqEnd = freqEnd !== null && freqEnd !== undefined ? Math.max(20, freqEnd * pitchScale) : null;
 
     const start = ctx.currentTime + delay;
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
 
     osc.type = type;
-    osc.frequency.setValueAtTime(freq, start);
-    if (freqEnd) {
-      osc.frequency.exponentialRampToValueAtTime(Math.max(20, freqEnd), start + duration);
+    osc.frequency.setValueAtTime(adjustedFreq, start);
+    if (adjustedFreqEnd !== null) {
+      osc.frequency.exponentialRampToValueAtTime(adjustedFreqEnd, start + duration);
     }
 
     gain.gain.setValueAtTime(0.0001, start);
@@ -267,6 +364,16 @@ class SoundEngine {
     this.ensureContext();
 
     const fileMap = {
+      cheer: '/sounds/original/cheer.wav',
+      faaah: '/sounds/original/faaah.wav',
+      fart: '/sounds/original/fart.wav',
+      wompwomp: '/sounds/original/womp-womp.wav',
+      womp: '/sounds/original/womp-womp.wav',
+      wow: '/sounds/original/wow.wav',
+      yay: '/sounds/original/yay.wav',
+    };
+
+    const fallbackMap = {
       cheer: '/media/sounds/phoney/cheer.wav',
       faaah: '/media/sounds/phoney/faaah.wav',
       fart: '/media/sounds/phoney/fart.wav',
@@ -277,11 +384,27 @@ class SoundEngine {
     };
 
     const soundUrl = fileMap[id];
+    const fallbackUrl = fallbackMap[id];
+    const targetVolume = Math.max(0, Math.min(1, this.volume ?? 0.85));
+
     if (soundUrl && typeof Audio !== 'undefined') {
       try {
         const audio = new Audio(soundUrl);
-        audio.volume = Math.min(1, this.volume * 1.2);
+        audio.volume = targetVolume;
+        this.audioCache[id] = audio;
         audio.play().catch(() => {
+          if (fallbackUrl) {
+            try {
+              const fallbackAudio = new Audio(fallbackUrl);
+              fallbackAudio.volume = targetVolume;
+              fallbackAudio.play().catch(() => {
+                this.synthesizePhoneyEmoji(id);
+              });
+              return;
+            } catch {
+              // Fall back to synthesis
+            }
+          }
           this.synthesizePhoneyEmoji(id);
         });
         return;
