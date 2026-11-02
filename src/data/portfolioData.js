@@ -1,1491 +1,1210 @@
+import { PROJECT_ASSET_MANIFEST } from './projectAssets';
+
 export const OWNER_PROFILE = {
   name: 'Avichal Goyal',
-  roleTitle: 'Software Developer',
-  batmanRoleTitle: 'Software Developer // Gotham Night Shift',
-  heroLeadBeforeBatman:
-    'I’m a product-minded software engineer who builds web products, AI tools, and automations that make real-world work easier. And occasionally, I’m ',
-  heroBatmanWord: 'Batman',
-  aboutText:
-    'Hi, I am Avichal Goyal. I graduated with my B.Tech in Computer Science from SRM University (2021–2025), and I am a full-stack developer with deep hands-on knowledge of AI tools and products. I love helping businesses build real-world software that saves hours of manual work. After building core automation and CRM systems at MediStudyGo, I parted ways to begin my own independent journey — shipping commercial platforms, native Android apps, and open-source AI tools.',
-  batmanHeroQuip:
-    'I only code in black. And sometimes, very, very dark grey. Scroll down to inspect the Batcomputer.',
-  bentoTooltipNormal:
-    'All 18 projects in a Bento box! Click any project to inspect it right inside the site.',
-  bentoTooltipBatman:
-    'All 18 Batcomputer files in a Bento box! Click any classified project to inspect it right inside the site.',
-  location: 'New Delhi / NCR, India',
+  shortName: 'Avichal',
+  handle: 'avichal15',
+  role: 'AI Systems Engineer, Product Ops & Full-Stack Builder',
+  headlineLead: 'I build products, websites, and',
+  headlineAccent: 'AI systems.',
+  subheadline:
+    'Welcome to my portfolio! Here I showcase my work, my process, and of course, the occasional turn into',
+  batmanLabel: 'Batman.',
+  location: 'Bengaluru / Greater Noida / Meerut, India',
+  availability: "I'm taking on new work.",
   email: 'avichalgoyal15@gmail.com',
-  phone: '+91 9667665882',
+  phone: '+91 8171952726',
+  websiteUrl: 'https://avichalgoyal.me',
   githubUrl: 'https://github.com/avichal15',
   linkedinUrl: 'https://www.linkedin.com/in/avichalgoyal007/',
-  googleDeveloperUrl: 'https://developers.google.com/profile/badges/community/gear',
-  gothamModeNote:
-    'Includes a LEGO Batman Batcave & Batcomputer transformation mode.',
+  resumeUrl: '/resume.pdf',
+  heroGreetingNormal: 'Hey there! Welcome to my LEGO studio — scroll down for the guided tour!',
+  heroGreetingBatman: 'I am vengeance. I am the night. Let us inspect the Batcomputer.',
+  bentoTooltipNormal:
+    'Click any of the 10 verified builds to expand its full case study — or press the bat-signal to switch into Gotham mode!',
+  bentoTooltipBatman:
+    'All 10 public case files in the Batcomputer are unlocked. Select a dossier to inspect the architecture.',
 };
 
-export const PROFILE = OWNER_PROFILE;
-
-// Phoney's exact 6 Default Quick Tray Audio Emojis (verified from phoney.avichalgoyal.me)
-export const PHONEY_AUDIO_EMOJIS = [
+export const CHARACTER_OUTFITS = [
   {
-    slot: 1,
-    id: 'cheer',
-    emoji: '👏',
-    icon: '/reactions/emoji_u1f44f.svg',
-    src: '/sounds/original/cheer.wav',
-    emotion: 'laugh',
-    label: 'Cheer',
-    color: '#FACC15',
-    quip: '👏 Crowd goes wild! Instant applause right inside the call.',
-  },
-  {
-    slot: 2,
-    id: 'faaah',
-    emoji: '😱',
-    icon: '/reactions/emoji_u1f631.svg',
-    src: '/sounds/original/faaah.wav',
-    emotion: 'surprised',
-    label: 'Faaah',
-    color: '#F97316',
-    quip: '😱 FAAAAH! For dramatic plot twists on the line.',
-  },
-  {
-    slot: 3,
-    id: 'fart',
-    emoji: '💨',
-    icon: '/reactions/emoji_u1f4a8.svg',
-    src: '/sounds/original/fart.wav',
-    emotion: 'cheeky',
-    label: 'Fart',
-    color: '#22C55E',
-    quip: '💨 Pffft! Because every serious friend group needs a raspberry button.',
-  },
-  {
-    slot: 4,
-    id: 'wompwomp',
-    emoji: '😑',
-    icon: '/reactions/emoji_u1f611.svg',
-    src: '/sounds/original/womp-womp.wav',
-    emotion: 'sad',
-    label: 'Womp Womp',
-    color: '#38BDF8',
-    quip: '😑 Womp womp... sad trombone when plans get cancelled.',
-  },
-  {
-    slot: 5,
-    id: 'wow',
-    emoji: '🤩',
-    icon: '/reactions/emoji_u1f929.svg',
-    src: '/sounds/original/wow.wav',
-    emotion: 'surprised',
-    label: 'Wow',
-    color: '#A855F7',
-    quip: '🤩 Woooow! High-energy hype without interrupting the speaker.',
-  },
-  {
-    slot: 6,
-    id: 'yay',
-    emoji: '🙌',
-    icon: '/reactions/emoji_u1f64c.svg',
-    src: '/sounds/original/yay.wav',
-    emotion: 'laugh',
-    label: 'Yay!',
-    color: '#EC4899',
-    quip: '🙌 YAY! Celebration fanfare delivered in under 180ms.',
-  },
-];
-
-export const AUDIO_EMOJIS = PHONEY_AUDIO_EMOJIS;
-
-export const OUTFITS = [
-  {
-    id: 'classic',
-    label: 'Classic Builder Suit',
-    shortLabel: 'Builder',
+    id: 'builder',
+    label: 'Builder',
+    badge: 'DEFAULT',
     atlasKey: 'base',
-    hairColor: '#1f1610',
-    accent: '#FFD000',
     showHelmet: false,
     showCape: false,
-    tagline: 'Product-minded software developer ready to ship.',
+    description: 'Studio yellow hoodie & black trousers — everyday product builder rig.',
+    torsoColor: '#facc15',
+    legsColor: '#18181b',
+    accentColor: '#111827',
+    hat: 'hair',
+    quote: 'Fresh yellow bricks, clean commits, zero filler!',
+  },
+  {
+    id: 'batman',
+    label: 'Batman',
+    badge: 'GOTHAM',
+    atlasKey: 'gotham',
+    showHelmet: true,
+    showCape: true,
+    description: 'Armored dark knight suit with scalloped cape, cowl, and utility belt.',
+    torsoColor: '#18181b',
+    legsColor: '#09090b',
+    accentColor: '#facc15',
+    hat: 'cowl',
+    quote: 'It is not who I am underneath, but what I ship that defines me.',
   },
   {
     id: 'doctor',
-    label: 'MediStudyGo Clinical Coat',
-    shortLabel: 'MedTech',
+    label: 'Surgeon / EdTech',
+    badge: 'CHAPTER 01',
     atlasKey: 'doctor',
-    hairColor: '#1f1610',
-    accent: '#14B8A6',
     showHelmet: false,
     showCape: false,
-    tagline: 'EdTech, LMS operations, and 50,000+ medical learners.',
+    description: 'Clinical lab coat, stethoscope, and scrub trousers for MediStudyGo.',
+    torsoColor: '#f8fafc',
+    legsColor: '#0284c7',
+    accentColor: '#0ea5e9',
+    hat: 'hair',
+    quote: 'Paging Dr. Avichal — medical syllabus diagnostics ready!',
   },
   {
     id: 'techy',
-    label: 'Phoney & Systems AI Suit',
-    shortLabel: 'Systems AI',
+    label: 'Android / Audio',
+    badge: 'CHAPTER 02',
     atlasKey: 'techy',
-    hairColor: '#1f1610',
-    accent: '#3B82F6',
     showHelmet: false,
     showCape: false,
-    tagline: 'Android telecom services, Audio Emojis, and AI session bridges.',
+    description: 'Cobalt developer jacket with studio headphones for Phoney.',
+    torsoColor: '#4f46e5',
+    legsColor: '#1e1b4b',
+    accentColor: '#38bdf8',
+    hat: 'headphones',
+    quote: 'Testing in-call Audio Emojis on a custom Android dialer!',
   },
   {
     id: 'masterplayer',
-    label: 'Masterplayer 3D Studio Flannel',
-    shortLabel: '3D Studio',
+    label: '3D Print Maker',
+    badge: 'CHAPTER 04',
     atlasKey: 'masterplayer',
-    hairColor: '#1f1610',
-    accent: '#EF4444',
     showHelmet: false,
     showCape: false,
-    tagline: '360° WebGL garment customizer & B2B print commerce.',
+    description: 'Custom apparel & 3D commerce studio rig for Masterplayer & TruGifting.',
+    torsoColor: '#ea580c',
+    legsColor: '#1c1917',
+    accentColor: '#fbbf24',
+    hat: 'cap',
+    quote: 'Interactive 3D garment previews ready for custom printing!',
+  },
+];
+
+// Full outfit lookup including legacy aliases ('classic', 'gotham', 'exec', 'maker', 'hacker')
+export const OUTFITS = [
+  ...CHARACTER_OUTFITS,
+  {
+    id: 'classic',
+    label: 'Builder',
+    atlasKey: 'base',
+    showHelmet: false,
+    showCape: false,
   },
   {
     id: 'gotham',
-    label: 'Batman Nocturnal Rig',
-    shortLabel: 'Batman',
+    label: 'Batman',
     atlasKey: 'gotham',
-    hairColor: '#141821',
-    accent: '#FFD000',
     showHelmet: true,
     showCape: true,
-    tagline: 'I only code in black. And sometimes, very, very dark grey.',
+  },
+  {
+    id: 'exec',
+    label: 'Commerce Director',
+    atlasKey: 'masterplayer',
+    showHelmet: false,
+    showCape: false,
+  },
+  {
+    id: 'maker',
+    label: '3D Print Maker',
+    atlasKey: 'masterplayer',
+    showHelmet: false,
+    showCape: false,
+  },
+  {
+    id: 'hacker',
+    label: 'AI Infra Architect',
+    atlasKey: 'techy',
+    showHelmet: false,
+    showCape: false,
   },
 ];
 
-export const MASCOT_TRICKS = [
-  { id: 'dance', label: 'Dance' },
-  { id: 'backflip', label: 'Backflip' },
-  { id: 'spin', label: '360° Spin' },
-  { id: 'superhero', label: 'Superhero Landing' },
-  { id: 'panic', label: 'Panic' },
-  { id: 'fly', label: 'Fly' },
-  { id: 'vanish', label: 'Vanish' },
-  { id: 'hiccup', label: 'Hiccup' },
-  { id: 'peekaboo', label: 'Peekaboo' },
-  { id: 'selfie', label: 'Take a Selfie' },
-  { id: 'dizzy', label: 'Get Dizzy' },
-  { id: 'sneeze', label: 'Sneeze' },
-  { id: 'sulk', label: 'Sulk' },
-];
-
-export const TRICKS = MASCOT_TRICKS.map((t) => t.id);
-
-export const HERO_IDLE_QUIPS = [
-  "Hi, I'm Avichal! Scroll down and I'll walk you through my story and favorite builds.",
-  "Oh hi, you're here! Want the guided tour?",
-  'Psst. You can grab and drag me around — or double-click me for a trick.',
-  'Move your cursor around me... careful, I might be ticklish.',
-  'Click "Batman." in the headline if you want to enter the Batcave.',
-];
-
-// ============================================================================
-// 5 GUIDED TOUR CHAPTERS IN EXACT GOOGLE SITES SEQUENCE & STORYTELLING VOICE:
-// Slide 1: MediStudyGo -> Slide 2: Phoney -> Slide 3: TruGifting Solutions ->
-// Slide 4: Masterplayer Designs & Printing -> Slide 5: OmniRoute Session Sync
-// ============================================================================
-export const TOUR_CHAPTERS = [
+export const CHARACTER_TRICKS = [
   {
-    id: 'tour-medistudygo',
-    code: '01.01',
-    batmanCode: 'BATCOMPUTER LOG // FILE 01.01',
-    projectSlug: 'medistudygo',
-    title: 'MediStudyGo',
-    subtitle: 'Medical EdTech Platform & 7-System Learner Operations Engine',
-    role: 'Associate – Product & Platform Operations',
-    year: '2025 – 2026',
-    mascotSide: 'left',
-    outfit: 'doctor',
-    tint: '#FFD000',
-    bgLight: '#EAE5DD',
-    bgDark: '#0B0C0E',
-    liveUrl: 'https://medistudygo.com/',
-    hosts: [{ label: 'medistudygo.com', url: 'https://medistudygo.com/' }],
-    desktopSlides: [
-      {
-        src: '/media/projects/medistudygo-desktop.png',
-        alt: 'MediStudyGo live desktop storefront showing MBBS, BDS, BPT, and Nursing mind maps',
-        badge: 'LIVE STOREFRONT · 50,000+ LEARNERS',
-        caption: 'MBBS, BDS, BPT & Nursing Visual Mind Maps, Flashcards & NEET PG Revision Bundles',
-      },
-      {
-        src: '/media/projects/medistudygo-ops-desktop.png',
-        alt: 'MediStudyGo product catalog and 7-platform automated operations',
-        badge: '7-PLATFORM AUTOMATED BRAIN',
-        caption: 'Shopify ↔ Shiprocket ↔ DoubleTick WhatsApp ↔ Graphy LMS ↔ Brevo ↔ Razorpay ↔ Sheets',
-      },
-      {
-        src: '/media/projects/medistudygo-flashcards-desktop.png',
-        alt: 'MediStudyGo student learning experience and revision bundles',
-        badge: '29,500+ ACTIVE-RECALL FLASHCARDS',
-        caption: 'Automated order-to-entitlement provisioning & exam-season student broadcasts',
-      },
-    ],
-    mobileSlides: [
-      {
-        src: '/media/projects/medistudygo-mobile.png',
-        alt: 'MediStudyGo mobile storefront',
-      },
-      {
-        src: '/media/projects/medistudygo-mobile-2.png',
-        alt: 'MediStudyGo mobile courses & mind maps',
-      },
-      {
-        src: '/media/projects/medistudygo-mobile-3.png',
-        alt: 'MediStudyGo mobile student reviews & bundles',
-      },
-    ],
-    bubbles: [
-      'At MediStudyGo, the team was juggling seven separate apps by hand. I stepped in and wired Shopify, Shiprocket, DoubleTick WhatsApp, Graphy LMS, Brevo, Razorpay, and Google Sheets into one automated brain serving 50,000+ medical and dental students across India.',
-      'Whenever a student places an order now, courses unlock in Graphy automatically, Shiprocket dispatches print notes, and DoubleTick sends instant WhatsApp updates without anyone lifting a finger.',
-      'I also structured 29,500+ active-recall flashcards, visual mind maps, and automated cart-recovery workflows so peak NEET PG exam seasons ran with zero bottlenecks.',
-    ],
+    id: 'wave',
+    label: 'Studio Wave',
+    icon: '👋',
+    speech: 'Hey! Click any project card to expand its full interactive case study!',
+    batmanSpeech: 'Gotham acknowledges your presence.',
   },
   {
-    id: 'tour-phoney',
-    code: '02.01',
-    batmanCode: 'BATCOMPUTER LOG // FILE 02.01',
-    projectSlug: 'phoney',
-    title: 'Phoney',
-    subtitle: 'Expressive Android 15 InCallService Dialer & Live Audio Emoji Soundboard',
-    role: 'Creator & Lead Android / Web Engineer',
-    year: '2026',
-    mascotSide: 'right',
-    outfit: 'techy',
-    tint: '#A87FFB',
-    bgLight: '#BCC6E6',
-    bgDark: '#0B0C0E',
-    liveUrl: 'https://phoney.avichalgoyal.me/',
-    repoUrl: 'https://github.com/avichal15',
-    hosts: [{ label: 'phoney.avichalgoyal.me', url: 'https://phoney.avichalgoyal.me/' }],
-    hasPhoneySoundboard: true,
-    desktopSlides: [
-      {
-        src: '/media/projects/phoney-desktop.png',
-        alt: 'Phoney interactive 3D web showcase at phoney.avichalgoyal.me',
-        badge: 'PHONEY · ANDROID 15 DIALER',
-        caption: 'Out of pocket. Into your calls. Companion 3D web showcase + native Android dialer.',
-      },
-      {
-        src: '/media/projects/phoney-dialer-desktop.png',
-        alt: 'Phoney Android InCallService architecture and call screens',
-        badge: 'SILENT CALL RECORDING & INCALLSERVICE',
-        caption: 'Record call voice cleanly without awkward announcement alerts + instant contact search.',
-      },
-      {
-        src: '/media/projects/phoney-themes-desktop.png',
-        alt: 'Phoney 4 adaptive themes and 6-Slot Audio Emoji Quick Tray',
-        badge: 'LIVE IN-CALL AUDIO EMOJIS',
-        caption: 'Tap any of the 6 Quick Tray Audio Emojis below to hear them right now!',
-      },
-    ],
-    mobileSlides: [
-      {
-        src: '/screens/current-recents.webp',
-        alt: 'Phoney Recents screen on Android',
-      },
-      {
-        src: '/screens/current-sounds.webp',
-        alt: 'Phoney 6 default Audio Emojis Quick Tray on Android',
-      },
-      {
-        src: '/screens/current-privacy.webp',
-        alt: 'Phoney privacy & permissions screen on Android',
-      },
-    ],
-    bubbles: [
-      'Meet Phoney — my very first Android app, built from scratch for Android 15 and now open for beta testers! It replaces the stock phone dialer so you can record call voice cleanly without any awkward declaration announcement, and trigger live Audio Emojis mid-call to express exactly how you feel.',
-      'I engineered the native Kotlin & Jetpack Compose InCallService from the ground up, plus the interactive 3D web showcase at phoney.avichalgoyal.me.',
-      "Want to hear how it feels on a real call? Tap any of Phoney's 6 Quick Tray Audio Emojis right below — Cheer, Faaah, Fart, Womp Womp, Wow, or Yay!",
-    ],
+    id: 'backflip',
+    label: 'Brick Backflip',
+    icon: '🤸',
+    speech: '10/10 landing! Not a single LEGO stud came loose.',
+    batmanSpeech: 'Tactical aerial evasion complete.',
   },
   {
-    id: 'tour-trugifting',
-    code: '03.01',
-    batmanCode: 'BATCOMPUTER LOG // FILE 03.01',
-    projectSlug: 'trugifting-solutions',
-    title: 'TruGifting Solutions',
-    subtitle: 'Enterprise B2B Corporate Gifting, Custom Hamper Builder & 360+ Brand Vouchers',
-    role: 'Lead Full-Stack Product Engineer',
-    year: '2025 – 2026',
-    mascotSide: 'left',
-    outfit: 'classic',
-    tint: '#FB7185',
-    bgLight: '#EAE5DD',
-    bgDark: '#0B0C0E',
-    liveUrl: 'https://www.trugiftingsolutions.com/',
-    hosts: [
-      { label: 'trugiftingsolutions.com', url: 'https://www.trugiftingsolutions.com/' },
-      { label: 'masterplayerprints.com', url: 'https://www.masterplayerprints.com/' },
-    ],
-    desktopSlides: [
-      {
-        src: '/media/projects/trugifting-desktop.png',
-        alt: 'TruGifting Solutions enterprise corporate gifting storefront',
-        badge: 'TRUGIFTINGSOLUTIONS.COM · FIRST INDEPENDENT CLIENT',
-        caption: 'End-to-end B2B corporate gifting, onboarding kits, and festival hampers for enterprise teams.',
-      },
-      {
-        src: '/media/projects/trugifting-vouchers-desktop.png',
-        alt: 'TruGifting Solutions 360+ brand vouchers and employee R&R rewards catalog',
-        badge: '360+ BRAND VOUCHERS · R&R PAYOUTS',
-        caption: 'Instant digital gift cards, channel partner incentives, and multi-brand reward catalogs.',
-      },
-      {
-        src: '/media/projects/trugifting-hamper-desktop.png',
-        alt: 'TruGifting Solutions interactive custom hamper builder and pan-India fulfillment',
-        badge: 'INTERACTIVE HAMPER BUILDER · BULK QUOTES',
-        caption: 'Curate custom branded merchandise boxes with live MOQ pricing and B2B quote generation.',
-      },
-    ],
-    mobileSlides: [
-      {
-        src: '/media/projects/trugifting-mobile.png',
-        alt: 'TruGifting Solutions mobile storefront',
-      },
-      {
-        src: '/media/projects/trugifting-mobile-2.png',
-        alt: 'TruGifting Solutions mobile brand vouchers view',
-      },
-      {
-        src: '/media/projects/trugifting-mobile-3.png',
-        alt: 'TruGifting Solutions mobile welcome kits & hamper builder',
-      },
-    ],
-    bubbles: [
-      'Right after parting ways with MediStudyGo, TruGifting Solutions was the very first client project I landed on my own journey. I built their complete B2B corporate gifting platform from the ground up — making it simple for enterprise teams to explore curated hampers and request bulk quotes in seconds.',
-      'HR and procurement leaders across 50+ enterprise clients use it to browse 360+ instant digital brand vouchers for employee rewards and channel incentives.',
-      'I also designed the interactive custom hamper configurator with live MOQ tier pricing so corporate onboarding kits go from idea to pan-India dispatch effortlessly.',
-    ],
+    id: 'spin',
+    label: '360° Spin',
+    icon: '🌪️',
+    speech: 'Spinning through full-stack architecture at 60 FPS!',
+    batmanSpeech: 'Grapnel spin maneuver executed.',
   },
   {
-    id: 'tour-masterplayer',
-    code: '04.01',
-    batmanCode: 'BATCOMPUTER LOG // FILE 04.01',
-    projectSlug: 'masterplayer-designs-and-printing',
-    title: 'Masterplayer & TruGifting',
-    subtitle: 'Custom CRM, 360° WebGL Apparel Studio, Technical SEO & Digital Ads',
-    role: 'Lead Full-Stack, CRM & Growth Architect',
-    year: '2026',
-    mascotSide: 'right',
-    outfit: 'masterplayer',
-    tint: '#5EEAD4',
-    bgLight: '#EAE5DD',
-    bgDark: '#0B0C0E',
-    liveUrl: 'https://www.masterplayerprints.com/',
-    hosts: [
-      { label: 'masterplayerprints.com', url: 'https://www.masterplayerprints.com/' },
-      { label: 'trugiftingsolutions.com', url: 'https://www.trugiftingsolutions.com/' },
-    ],
-    desktopSlides: [
-      {
-        src: '/media/projects/masterplayer-desktop.png',
-        alt: 'Masterplayer Designs & Printing 360 WebGL 3D Customizer Studio',
-        badge: 'MASTERPLAYERPRINTS.COM · FULL-STACK + CRM + SEO',
-        caption: 'Custom CRM, website & backend, top Google SEO rankings, and digital ad management.',
-      },
-      {
-        src: '/media/projects/masterplayer-studio-desktop.png',
-        alt: 'Masterplayer 22 merchandise departments bento catalog',
-        badge: '22 ARCHITECTURAL MERCHANDISE DEPARTMENTS',
-        caption: 'Custom 240 GSM oversized tees, hoodies, corporate kits, drinkware, bags & trophies.',
-      },
-      {
-        src: '/media/projects/masterplayer-b2b-desktop.png',
-        alt: 'Masterplayer 3D print slot configurator and 18% GST B2B bulk calculator',
-        badge: '360° 3D PRINT SLOTS · 18% GST ENGINE',
-        caption: 'Spin garments in 360°, snap logos onto 5 print slots & calculate bulk GST quotes.',
-      },
-    ],
-    mobileSlides: [
-      {
-        src: '/media/projects/masterplayer-mobile.png',
-        alt: 'Masterplayer mobile 3D studio',
-      },
-      {
-        src: '/media/projects/masterplayer-mobile-2.png',
-        alt: 'Masterplayer mobile merchandise bento',
-      },
-      {
-        src: '/media/projects/masterplayer-mobile-3.png',
-        alt: 'Masterplayer mobile B2B quote engine',
-      },
-    ],
-    bubbles: [
-      'This is Masterplayer Designs and Printing — who I am collaborating with right now! I built their custom CRM, engineered their website and backend, optimized their technical SEO so they rank at the top of Google searches, and manage their digital ad campaigns end to end.',
-      'Inside the 360° WebGL Customizer Studio, buyers spin 240 GSM apparel in real time, strip white logo backgrounds in one click, and snap artwork onto 5 print slots.',
-      'Behind the storefront, my custom B2B quote engine calculates tiered bulk discounts with 18% GST input credit breakdowns across all 22 merchandise departments.',
-    ],
+    id: 'superhero',
+    label: 'Hero Landing',
+    icon: '⚡',
+    speech: 'Three-point superhero landing! Hard on the plastic knees.',
+    batmanSpeech: 'Vengeance lands without a sound.',
   },
   {
-    id: 'tour-session-sync',
-    code: '05.01',
-    batmanCode: 'BATCOMPUTER LOG // FILE 05.01',
-    projectSlug: 'omniroute-session-sync',
-    title: 'OmniRoute Session Sync',
-    subtitle: 'Automated Chrome MV3 Extension & Multi-Model AI Session Bridge',
-    role: 'Creator & Open-Source Contributor',
-    year: '2026',
-    mascotSide: 'left',
-    outfit: 'techy',
-    tint: '#38BDF8',
-    bgLight: '#EAE5DD',
-    bgDark: '#0B0C0E',
-    liveUrl: 'https://github.com/avichal15/session-sync',
-    repoUrl: 'https://github.com/avichal15/session-sync',
-    hosts: [
-      { label: 'github.com/avichal15/session-sync', url: 'https://github.com/avichal15/session-sync' },
-    ],
-    desktopSlides: [
-      {
-        src: '/media/projects/session-sync-desktop-1.png',
-        alt: 'OmniRoute Session Sync Chrome MV3 extension popup paired and unpaired states',
-        badge: 'SESSION-SYNC · CHROME MV3 TO CLI BRIDGE',
-        caption: 'Syncs live browser sessions across ChatGPT, Gemini, Qwen, Z.ai, Grok & DeepSeek.',
-      },
-      {
-        src: '/media/projects/session-sync-desktop-2.png',
-        alt: 'OmniRoute Session Sync multi-provider harvesting and cryptographic pairing pipeline',
-        badge: 'CRYPTOGRAPHIC PAIRING & FINGERPRINT ALIGNMENT',
-        caption: 'Harvests cookies, bearer tokens, UA & sec-ch-ua headers automatically.',
-      },
-      {
-        src: '/media/projects/session-sync-desktop-3.png',
-        alt: 'OmniRoute Session Sync real-time gateway diagnostics and heartbeat sync',
-        badge: 'ZERO-DOWNTIME TOKEN ROTATION',
-        caption: 'Background MV3 alarm heartbeats keep CLI tools and AI gateways authenticated 24/7.',
-      },
-    ],
-    mobileSlides: [
-      {
-        src: '/media/projects/session-sync-mobile-1.png',
-        alt: 'OmniRoute Session Sync paired extension popup',
-      },
-      {
-        src: '/media/projects/session-sync-mobile-2.png',
-        alt: 'OmniRoute Session Sync provider health telemetry',
-      },
-      {
-        src: '/media/projects/session-sync-mobile-3.png',
-        alt: 'OmniRoute Session Sync cryptographic token pairing view',
-      },
-    ],
-    bubbles: [
-      'The creator of OmniRoute highlighted a major pain point: expiring browser cookies kept breaking web AI models. I built and contributed OmniRoute Session Sync — an automated Chrome extension and local bridge that syncs live sessions across ChatGPT, Gemini, Qwen, Z.ai, Grok, and DeepSeek with zero downtime.',
-      'It pairs your browser with local or remote gateways using a cryptographic token, harvesting HttpOnly cookies, bearer tokens, and TLS/User-Agent fingerprint headers automatically.',
-      'With background Manifest V3 heartbeat alarms, your CLI agents and SDK pipelines stay authenticated 24/7 without ever copying cookies from DevTools again.',
-    ],
+    id: 'dance',
+    label: 'Deploy Dance',
+    icon: '🕺',
+    speech: 'When production builds pass with zero warnings!',
+    batmanSpeech: 'Even the Dark Knight celebrates a clean deployment.',
   },
 ];
 
-export const FEATURED_STORIES = TOUR_CHAPTERS.map((ch, idx) => ({
-  number: `0${idx + 1}`,
-  slug: ch.projectSlug,
-  title: ch.title,
-}));
+export const PHONEY_AUDIO_EMOJIS = [
+  {
+    id: 'cheer',
+    label: 'Cheer',
+    emoji: '👏',
+    src: '/sounds/original/cheer.wav',
+    reaction: 'Crowd goes wild! Ship it to production!',
+    mood: 'cheer',
+  },
+  {
+    id: 'faaah',
+    label: 'Faaah',
+    emoji: '😱',
+    src: '/sounds/original/faaah.wav',
+    reaction: 'Cinematic dramatic reveal triggered!',
+    mood: 'surprised',
+  },
+  {
+    id: 'fart',
+    label: 'Fart',
+    emoji: '💨',
+    src: '/sounds/original/fart.wav',
+    reaction: 'Classic in-call prank button! Every friend group tests this first.',
+    mood: 'laugh',
+  },
+  {
+    id: 'wompwomp',
+    label: 'Womp Womp',
+    emoji: '🎺',
+    src: '/sounds/original/womp-womp.wav',
+    reaction: 'Womp womp... when someone says they still use the stock dialer.',
+    mood: 'sad',
+  },
+  {
+    id: 'wow',
+    label: 'Wow',
+    emoji: '🤩',
+    src: '/sounds/original/wow.wav',
+    reaction: 'Real-time audio injection right inside an active phone call!',
+    mood: 'wow',
+  },
+  {
+    id: 'yay',
+    label: 'Yay!',
+    emoji: '🙌',
+    src: '/sounds/original/yay.wav',
+    reaction: 'Yay! Custom MP3/WAV soundboard slots unlocked!',
+    mood: 'dance',
+  },
+];
 
-// ============================================================================
-// ALL 18 VERIFIED PROJECTS FOR THE BENTO GRID (#work) & CASE STUDY WINDOW
-// Written in Avichal's relatable first-person storytelling style
-// ============================================================================
+export const ABOUT_STORY_PARAGRAPHS = [
+  {
+    id: 'about-p1',
+    lead: '01 // PRODUCT OPERATIONS MEETS FULL-STACK ENGINEERING',
+    text: 'I work at the intersection of product operations, full-stack web & Android engineering, and applied AI systems. Whether scaling a medical education storefront at MediStudyGo, shipping a custom Android phone app, or architecting B2B commerce platforms, I care about software that survives real users and real business constraints.',
+    bubbleTitle: '00.01 // STUDIO PHILOSOPHY',
+    bubbleText:
+      'I do not stop at Figma mocks or isolated scripts — I own the workflow from product discovery and UX engineering all the way to deployment and analytics.',
+    outfit: 'builder',
+  },
+  {
+    id: 'about-p2',
+    lead: '02 // COMMERCIAL WEB, ANDROID & OPEN-SOURCE INFRASTRUCTURE',
+    text: 'Across 10 public builds, my work spans commercial storefronts (MediStudyGo, TruGifting Solutions, Masterplayer Designs & Printing, Mahadev Plywood & Hardware), interactive social-impact experiences (Dhuri Hoon Mai), custom Android communication tools (Phoney), and open-source developer infrastructure (OmniRoute Session Sync, Gemini Web Antigravity Skill Stack, Insta Manager, Recruitment Funnel Analytics).',
+    bubbleTitle: '00.02 // PUBLIC PROOF OF WORK',
+    bubbleText:
+      'Every project in this portfolio is backed by a live deployed website, an inspectable public GitHub repository, or a real product interface.',
+    outfit: 'hacker',
+  },
+];
+
 export const ALL_PROJECTS = [
+  // 01 — MediStudyGo
   {
-    number: '01',
+    index: 1,
+    code: '01',
     slug: 'medistudygo',
+    id: 'medistudygo',
     title: 'MediStudyGo',
-    subtitle: 'Medical EdTech Platform & 7-System Learner Operations Engine',
-    category: 'EdTech & Operations',
-    year: '2025 – 2026',
-    role: 'Associate – Product & Platform Operations',
-    bentoSpan: 'col-6',
-    bentoTall: true,
-    accentColor: '#0D9488',
-    surfaceTint: '#E6F4F1',
+    shortTitle: 'MediStudyGo',
+    category: 'EdTech & Product Operations',
+    featured: true,
+    tourNumber: '01',
+    year: '2025 – Present',
+    role: 'Product Operations Associate & Growth/Storefront Engineer',
+    clientOrContext: 'MediStudyGo (Commercial EdTech Platform)',
+    status: 'Live Commercial Platform',
     liveUrl: 'https://medistudygo.com/',
     liveLabel: 'Visit medistudygo.com',
-    repoUrl: 'https://github.com/avichal15',
-    repoLabel: 'GitHub Profile',
-    coverImage: '/media/projects/medistudygo-desktop.png',
-    stack: [
-      'Shopify Storefront',
-      'Graphy LMS',
-      'Shiprocket API',
-      'DoubleTick WhatsApp',
-      'Brevo CRM',
-      'Razorpay Webhooks',
-      'Google Sheets Telemetry',
-    ],
+    repoUrl: null,
+    hosts: ['medistudygo.com'],
+    themeTint: '#E9D5FF',
+    stageBg: '#DDD6FE',
+    accentColor: '#6D28D9',
+    outfit: 'doctor',
+    characterSide: 'left',
+    preview: PROJECT_ASSET_MANIFEST.medistudygo.desktop[0].src,
+    mobilePreview: PROJECT_ASSET_MANIFEST.medistudygo.mobile[0].src,
+    assetProvenance: PROJECT_ASSET_MANIFEST.medistudygo,
+    tagline:
+      'High-yield visual medical, dental, and nursing exam preparation storefront and product operations engine.',
     summary:
-      'At MediStudyGo, the team was juggling seven separate apps by hand. I wired Shopify, Shiprocket, DoubleTick WhatsApp, Graphy LMS, Brevo, Razorpay, and Google Sheets into one automated brain serving 50,000+ medical and dental students.',
-    description: [
-      'Before I built the automation layer, every order required manual checks across Shopify, Razorpay, Graphy LMS, and Shiprocket. I connected all seven platforms so course entitlements unlock automatically the moment a student checks out.',
-      'I also structured and audited 29,500+ active-recall flashcards, visual mind maps, and NEET PG revision bundles while automating WhatsApp cart recovery and cohort analytics.',
+      'Scaled storefront merchandising, syllabus-mapped bundle architecture, and cross-functional product operations for MediStudyGo — serving MBBS, BDS, BPT, Nursing, and NEET PG learners.',
+    problem:
+      'Medical and nursing students face dense, fragmented textbooks across MBBS, BDS, Nursing, and NEET PG tracks. Discovering the exact syllabus-matched mind maps, revision notes, and bundles on desktop and mobile required clearer product hierarchy, faster storefront navigation, and tighter operational coordination between content, catalog, and support teams.',
+    solution:
+      'Structured the storefront experience around degree tracks (MBBS, BDS, BPT, Nursing, NEET PG), interactive before/after note comparisons, flipbook previews, and year-wise bundle packs while streamlining catalog operations, student onboarding flows, and mobile conversion paths.',
+    implementation: [
+      'Organized degree-wise and prof-year catalog taxonomy so students can filter mind maps, flashcards, and combo bundles in two taps.',
+      'Engineered interactive visual comparison and flipbook preview sections on medistudygo.com to demonstrate high-yield visual notes vs. dense textbook pages.',
+      'Coordinated product operations across catalog updates, bundle pricing, student support feedback loops, and mobile checkout optimization.',
     ],
+    stack: ['Product Operations', 'Shopify / Storefront UX', 'JavaScript', 'Conversion Optimization', 'EdTech Catalog Ops', 'Analytics'],
     metrics: [
-      { value: '50,000+', label: 'Medical, Dental & Nursing Learners' },
-      { value: '29,500+', label: 'Active-Recall Flashcards Structured' },
-      { value: '7 Platforms', label: 'Unified into One Automated Brain' },
+      { label: 'Academic Tracks', value: 'MBBS · BDS · Nursing · NEET PG' },
+      { label: 'Platform Status', value: 'Live at medistudygo.com' },
+      { label: 'Core Format', value: 'Visual Mind Maps & App Bundles' },
+    ],
+    characterComments: [
+      'Welcome to Chapter 01! At MediStudyGo, I work on Product Operations and storefront journeys for medical & nursing students.',
+      'Notice the interactive textbook-vs-mindmap comparison and flipbook preview — built so students can inspect real notes before buying.',
+      'Switch to slide 3 to see how year-wise combo bundles and mobile catalog cards are structured for fast exam-season checkout.',
     ],
     slides: [
       {
-        src: '/media/projects/medistudygo-desktop.png',
-        caption: 'MediStudyGo Live Storefront — MBBS, BDS, BPT & Nursing Visual Mind Maps & Revision Bundles',
+        step: '01.01',
+        title: 'Degree-First Storefront & NEET PG / MBBS Positioning',
+        caption:
+          'Live homepage hero on medistudygo.com guiding students directly into MBBS, BDS, BPT, Nursing, and NEET PG revision tracks.',
+        desktopImage: PROJECT_ASSET_MANIFEST.medistudygo.desktop[0].src,
+        mobileImage: PROJECT_ASSET_MANIFEST.medistudygo.mobile[0].src,
+        tourNote:
+          'Welcome to Chapter 01! At MediStudyGo, I bridge product operations and storefront UX so medical students find the right exam prep fast.',
       },
       {
-        src: '/media/projects/medistudygo-ops-desktop.png',
-        caption: 'MediStudyGo Product Catalog & 7-Platform Automated Fulfilment Flow',
+        step: '01.02',
+        title: 'High-Yield Visual Notes vs. Traditional Textbooks',
+        caption:
+          'Interactive visual comparison and trust metrics showcasing how clinical mind maps compress dense medical chapters into rapid revision sheets.',
+        desktopImage: PROJECT_ASSET_MANIFEST.medistudygo.desktop[1].src,
+        mobileImage: PROJECT_ASSET_MANIFEST.medistudygo.mobile[1].src,
+        tourNote:
+          'Students want proof before purchasing study material — we highlight real page comparisons and verified student outcomes.',
       },
       {
-        src: '/media/projects/medistudygo-flashcards-desktop.png',
-        caption: 'MediStudyGo Student Experience & 29,500+ Active-Recall Flashcards',
+        step: '01.03',
+        title: 'Interactive Flipbook Previews & Year-Wise Bundles',
+        caption:
+          'Inside-the-book flipbook reader and prof-year bundle cards designed for both desktop study sessions and mobile checkout.',
+        desktopImage: PROJECT_ASSET_MANIFEST.medistudygo.desktop[2].src,
+        mobileImage: PROJECT_ASSET_MANIFEST.medistudygo.mobile[2].src,
+        tourNote:
+          'Every screenshot here is captured directly from the live medistudygo.com storefront — zero popups, zero mixed assets.',
       },
-    ],
-    mobileSlides: [
-      { src: '/media/projects/medistudygo-mobile.png', alt: 'MediStudyGo mobile storefront' },
-      { src: '/media/projects/medistudygo-mobile-2.png', alt: 'MediStudyGo mobile catalog' },
-      { src: '/media/projects/medistudygo-mobile-3.png', alt: 'MediStudyGo mobile student view' },
-    ],
-    characterComments: [
-      'At MediStudyGo, I wired 7 separate platforms into one automated operations brain for 50,000+ students.',
-      'Orders on Shopify now provision Graphy LMS courses and Shiprocket print dispatches automatically.',
-      'During peak NEET PG exam windows, this system ran thousands of student enrollments with zero manual bottlenecks.',
     ],
   },
+
+  // 02 — Phoney
   {
-    number: '02',
+    index: 2,
+    code: '02',
     slug: 'phoney',
+    id: 'phoney',
     title: 'Phoney',
-    subtitle: 'Expressive Android 15 InCallService Dialer & Live Audio Emoji Soundboard',
-    category: 'Android 15 & WebAudio',
-    year: '2026',
-    role: 'Creator & Lead Engineer',
-    bentoSpan: 'col-6',
-    bentoTall: true,
-    accentColor: '#7C3AED',
-    surfaceTint: '#EAE6F8',
+    shortTitle: 'Phoney',
+    category: 'Android Development',
+    featured: true,
+    tourNumber: '02',
+    year: '2025 – 2026',
+    role: 'Creator & Lead Android / Web Engineer',
+    clientOrContext: 'Independent Product & Open Android Utility',
+    status: 'Live Product Showcase & Android Build',
     liveUrl: 'https://phoney.avichalgoyal.me/',
     liveLabel: 'Visit phoney.avichalgoyal.me',
     repoUrl: 'https://github.com/avichal15',
-    repoLabel: 'View on GitHub',
-    coverImage: '/media/projects/phoney-desktop.png',
-    hasPhoneySoundboard: true,
-    stack: [
-      'Kotlin',
-      'Jetpack Compose',
-      'Android 15 InCallService',
-      'Clean Call Recording',
-      'React 19',
-      'Three.js / WebGL',
-      'WebAudio API',
-    ],
+    hosts: ['phoney.avichalgoyal.me'],
+    themeTint: '#C7D2FE',
+    stageBg: '#BCC6E6',
+    accentColor: '#3730A3',
+    outfit: 'techy',
+    characterSide: 'right',
+    hasAudioEmojiTray: true,
+    preview: PROJECT_ASSET_MANIFEST.phoney.desktop[0].src,
+    mobilePreview: PROJECT_ASSET_MANIFEST.phoney.mobile[0].src,
+    assetProvenance: PROJECT_ASSET_MANIFEST.phoney,
+    tagline:
+      'Custom Android phone & contacts app featuring live in-call Audio Emojis, custom sound uploads, and consent-aware local call recording.',
     summary:
-      'Meet Phoney — my very first Android app, built from scratch for Android 15 and now open for beta testers! It replaces the stock dialer for clean call recording without awkward announcement alerts and live in-call Audio Emojis.',
-    description: [
-      'I wanted a phone app that felt personal, fast, and genuinely fun to use. So I built Phoney in Kotlin and Jetpack Compose on top of Android’s Telecom InCallService API — complete with clean call voice recording and a 6-slot Quick Tray of live Audio Emojis.',
-      'I also built the interactive 3D companion website at phoney.avichalgoyal.me so anyone can test Cheer, Faaah, Fart, Womp Womp, Wow, and Yay right in their browser before joining the Android beta.',
+      'An expressive Android dialer replacement that upgrades everyday voice calls with a real-time in-call Audio Emoji soundboard, custom audio slot imports, T9 smart contact search, and transparent on-device call recording controls.',
+    problem:
+      'Default Android dialers are rigid utilities that strip personality from voice calls and bury contact management, sound effects, and local call archiving behind fragmented system menus.',
+    solution:
+      'Built Phoney as a cohesive Android dialer and contacts replacement with an instant in-call Audio Emoji tray (6 built-in reactions plus custom MP3/WAV/OGG imports), clean T9 dialer ergonomics, and an explicit, user-controlled local call recording workflow that respects Android platform permissions and consent boundaries.',
+    implementation: [
+      'Engineered the Android InCallService UI and low-latency AudioTrack/MediaPlayer soundboard capable of triggering 6 built-in Audio Emojis plus user-uploaded clips during active calls.',
+      'Designed an explicit recording consent and device-compatibility flow storing recordings locally on-device with zero third-party cloud uploads.',
+      'Built the interactive web companion at phoney.avichalgoyal.me where visitors can test the live Audio Emoji soundboard before installing the APK.',
     ],
+    stack: ['Kotlin / Android SDK', 'InCallService API', 'Low-Latency AudioTrack', 'Local On-Device Storage', 'React Web Showcase'],
     metrics: [
-      { value: '6 Emojis', label: 'Live In-Call Audio Reactions' },
-      { value: '< 180ms', label: 'In-Call Sound Trigger Latency' },
-      { value: 'Android 15', label: 'Native Kotlin InCallService' },
+      { label: 'Default Audio Emojis', value: '6 Built-In + Custom Uploads' },
+      { label: 'Storage Architecture', value: '100% On-Device Local Storage' },
+      { label: 'Recording Flow', value: 'Explicit Consent & Permission Controls' },
+    ],
+    characterComments: [
+      'Chapter 02 is Phoney — my custom Android dialer! Try clicking the 6 Audio Emoji buttons in the tray below to hear them.',
+      'Beyond the 6 default reactions (Cheer, Faaah, Fart, Womp Womp, Wow, Yay!), users can import their own custom MP3 or WAV clips.',
+      'Phoney also includes local call recording with an explicit user consent flow and clear Android permission handling — everything stays on-device.',
     ],
     slides: [
       {
-        src: '/media/projects/phoney-desktop.png',
-        caption: 'Phoney Companion Web Showcase (phoney.avichalgoyal.me) — Out of pocket. Into your calls.',
+        step: '02.01',
+        title: 'Custom Android Dialer & Smart Contacts Replacement',
+        caption:
+          'Phoney replaces the stock phone app with a fast T9 dialer, recent call timeline, and expressive in-call controls.',
+        desktopImage: PROJECT_ASSET_MANIFEST.phoney.desktop[0].src,
+        mobileImage: PROJECT_ASSET_MANIFEST.phoney.mobile[0].src,
+        tourNote:
+          'Meet Phoney! I built this custom Android phone app to make voice calls expressive again. Click any Audio Emoji below to test the soundboard!',
       },
       {
-        src: '/media/projects/phoney-dialer-desktop.png',
-        caption: 'Native Kotlin InCallService Dialer — Clean Call Recording, Recents & Quick Tray',
+        step: '02.02',
+        title: 'Live In-Call Audio Emojis & Custom Sound Uploads',
+        caption:
+          'Trigger 6 built-in reactions (Cheer, Faaah, Fart, Womp Womp, Wow, Yay!) or load custom MP3/WAV clips directly from the in-call tray.',
+        desktopImage: PROJECT_ASSET_MANIFEST.phoney.desktop[1].src,
+        mobileImage: PROJECT_ASSET_MANIFEST.phoney.mobile[1].src,
+        tourNote:
+          'Users can fire instant sound reactions mid-call or map their own audio clips to the quick tray.',
       },
       {
-        src: '/media/projects/phoney-themes-desktop.png',
-        caption: '4 Adaptive Dialer Themes + 6-Slot Live Audio Emoji Quick Tray',
+        step: '02.03',
+        title: 'Consent-First Call Recording & On-Device Privacy',
+        caption:
+          'Transparent call recording workflow with explicit user consent controls, Android permission checks, and local-only storage.',
+        desktopImage: PROJECT_ASSET_MANIFEST.phoney.desktop[2].src,
+        mobileImage: PROJECT_ASSET_MANIFEST.phoney.mobile[2].src,
+        tourNote:
+          'Call recording is designed around explicit user consent and Android OS audio-routing rules, keeping all archives strictly on your device.',
       },
-    ],
-    mobileSlides: [
-      { src: '/screens/current-recents.webp', alt: 'Phoney Recents screen' },
-      { src: '/screens/current-sounds.webp', alt: 'Phoney 6-Slot Audio Emoji Quick Tray' },
-      { src: '/screens/current-privacy.webp', alt: 'Phoney Privacy & Permissions screen' },
-    ],
-    characterComments: [
-      'Phoney is my first Android app! It replaces your stock dialer with clean call recording and live Audio Emojis.',
-      'Tap any of the 6 Quick Tray buttons — Cheer, Faaah, Fart, Womp Womp, Wow, or Yay — to hear the real app sounds!',
-      'Everything runs locally on device with strict Android permission hygiene and zero contact uploads.',
     ],
   },
+
+  // 03 — TruGifting Solutions
   {
-    number: '03',
+    index: 3,
+    code: '03',
     slug: 'trugifting-solutions',
+    id: 'trugifting-solutions',
     title: 'TruGifting Solutions',
-    subtitle: 'Enterprise Corporate Gifting, Custom Hamper Builder & 360+ Brand Vouchers',
+    shortTitle: 'TruGifting Solutions',
     category: 'B2B E-Commerce',
+    featured: true,
+    tourNumber: '03',
     year: '2025 – 2026',
-    role: 'Lead Full-Stack Product Engineer',
-    bentoSpan: 'col-6',
-    bentoTall: false,
-    accentColor: '#D97706',
-    surfaceTint: '#FBF2E3',
+    role: 'Full-Stack Web & B2B E-Commerce Engineer',
+    clientOrContext: 'TruGifting Solutions (Corporate Gifting & Brand Vouchers)',
+    status: 'Live B2B Storefront',
     liveUrl: 'https://www.trugiftingsolutions.com/',
     liveLabel: 'Visit trugiftingsolutions.com',
-    repoUrl: 'https://github.com/avichal15',
-    repoLabel: 'GitHub Profile',
-    coverImage: '/media/projects/trugifting-desktop.png',
-    stack: [
-      'React 19',
-      'Vite',
-      'Custom Hamper Configurator',
-      '360+ Brand Vouchers',
-      'Enterprise R&R Workflows',
-      'Bulk Quote Engine',
-    ],
+    repoUrl: null,
+    hosts: ['trugiftingsolutions.com', 'www.trugiftingsolutions.com'],
+    themeTint: '#CCFBF1',
+    stageBg: '#B8EFEA',
+    accentColor: '#0F766E',
+    outfit: 'exec',
+    characterSide: 'left',
+    preview: PROJECT_ASSET_MANIFEST['trugifting-solutions'].desktop[0].src,
+    mobilePreview: PROJECT_ASSET_MANIFEST['trugifting-solutions'].mobile[0].src,
+    assetProvenance: PROJECT_ASSET_MANIFEST['trugifting-solutions'],
+    tagline:
+      'Enterprise corporate gifting, festive onboarding kits, and brand voucher distribution platform.',
     summary:
-      'Right after parting ways with MediStudyGo, TruGifting Solutions was the very first client project I landed on my own journey. I built their complete B2B corporate gifting platform from the ground up.',
-    description: [
-      'Landing TruGifting Solutions as my first independent client was a milestone I’m really proud of. I designed and engineered trugiftingsolutions.com so HR, procurement, and leadership teams can explore curated hampers and request bulk quotes in seconds.',
-      'The platform combines a 360+ instant digital brand voucher catalog with an interactive custom hamper builder, live MOQ tier pricing, and pan-India fulfillment workflows serving 50+ enterprise clients.',
+      'Designed and built the standalone B2B digital storefront for TruGifting Solutions — enabling HR, procurement, and enterprise teams to configure custom corporate hampers, browse brand vouchers, and submit tiered bulk inquiries.',
+    problem:
+      'Corporate procurement and HR teams ordering festive hampers, employee joining kits, and multi-brand digital vouchers needed a dedicated B2B catalog with clear MOQ tiers, GST-ready inquiry capture, and custom hamper configuration instead of static PDF brochures.',
+    solution:
+      'Delivered trugiftingsolutions.com as a dedicated B2B corporate gifting platform featuring a curated brand voucher showcase, an interactive custom hamper builder, and direct enterprise quote pipelines.',
+    implementation: [
+      'Architected the standalone B2B storefront at trugiftingsolutions.com with distinct navigation for physical corporate hampers and digital brand vouchers.',
+      'Built the interactive custom hamper configurator allowing HR buyers to select box styles, merchandise items, branding options, and recipient quantities.',
+      'Implemented mobile-first catalog browsing and instant WhatsApp/email procurement lead capture for rapid enterprise turnarounds.',
     ],
+    stack: ['React / Next.js', 'Tailwind CSS', 'B2B Catalog Architecture', 'Custom Hamper Builder', 'Enterprise Lead Flow'],
     metrics: [
-      { value: '50+ Clients', label: 'Enterprise & Corporate Teams Served' },
-      { value: '360+ Brands', label: 'Instant Digital Gift Vouchers' },
-      { value: '1st Client', label: 'Independent Full-Stack Launch' },
+      { label: 'Business Model', value: 'Dedicated B2B Corporate Gifting' },
+      { label: 'Core Modules', value: 'Brand Vouchers + Hamper Builder' },
+      { label: 'Live Domain', value: 'trugiftingsolutions.com' },
+    ],
+    characterComments: [
+      'Chapter 03 showcases TruGifting Solutions — a standalone B2B corporate gifting and brand voucher platform.',
+      'Enterprise buyers can browse digital brand vouchers or build custom employee onboarding and festive hampers step by step.',
+      'Every screen here comes strictly from trugiftingsolutions.com — completely independent from any other client storefront.',
     ],
     slides: [
       {
-        src: '/media/projects/trugifting-desktop.png',
-        caption: 'TruGifting Solutions — Enterprise Corporate Gifting & Employee R&R Platform',
+        step: '03.01',
+        title: 'Enterprise Corporate Gifting & Procurement Storefront',
+        caption:
+          'Live homepage at trugiftingsolutions.com built for HR leaders, channel partners, and enterprise procurement teams.',
+        desktopImage: PROJECT_ASSET_MANIFEST['trugifting-solutions'].desktop[0].src,
+        mobileImage: PROJECT_ASSET_MANIFEST['trugifting-solutions'].mobile[0].src,
+        tourNote:
+          'Chapter 03 is TruGifting Solutions — a standalone B2B corporate gifting platform built for HR and procurement teams.',
       },
       {
-        src: '/media/projects/trugifting-vouchers-desktop.png',
-        caption: '360+ Brand Vouchers & Channel Partner Incentive Program Architecture',
+        step: '03.02',
+        title: 'Multi-Brand Digital Voucher & Reward Catalog',
+        caption:
+          'Structured voucher catalog for employee rewards, channel incentives, and festive corporate distribution.',
+        desktopImage: PROJECT_ASSET_MANIFEST['trugifting-solutions'].desktop[1].src,
+        mobileImage: PROJECT_ASSET_MANIFEST['trugifting-solutions'].mobile[1].src,
+        tourNote:
+          'Procurement teams can evaluate brand voucher denominations alongside physical gifting options in one unified catalog.',
       },
       {
-        src: '/media/projects/trugifting-hamper-desktop.png',
-        caption: 'Interactive Custom Hamper Builder & Pan-India Welcome Kit Fulfillment',
+        step: '03.03',
+        title: 'Interactive Corporate Hamper & Onboarding Kit Builder',
+        caption:
+          'Step-by-step hamper builder for assembling custom-branded welcome kits and bulk festive gift boxes.',
+        desktopImage: PROJECT_ASSET_MANIFEST['trugifting-solutions'].desktop[2].src,
+        mobileImage: PROJECT_ASSET_MANIFEST['trugifting-solutions'].mobile[2].src,
+        tourNote:
+          'Instead of back-and-forth spreadsheets, buyers configure their hamper contents and submit structured bulk quote requests directly.',
       },
-    ],
-    mobileSlides: [
-      { src: '/media/projects/trugifting-mobile.png', alt: 'TruGifting mobile storefront' },
-      { src: '/media/projects/trugifting-mobile-2.png', alt: 'TruGifting mobile voucher catalog' },
-      { src: '/media/projects/trugifting-mobile-3.png', alt: 'TruGifting mobile welcome kits' },
-    ],
-    characterComments: [
-      'TruGifting Solutions was the very first client project I landed when I started my independent journey!',
-      'HR and procurement teams can browse 360+ brand vouchers or build custom welcome kits in seconds.',
-      'It now serves 50+ corporate teams with instant B2B quote generation and pan-India dispatch.',
     ],
   },
+
+  // 04 — Masterplayer Designs & Printing
   {
-    number: '04',
+    index: 4,
+    code: '04',
     slug: 'masterplayer-designs-and-printing',
+    id: 'masterplayer-designs-and-printing',
     title: 'Masterplayer Designs & Printing',
-    subtitle: 'Custom CRM, 360° WebGL Apparel Studio, Top Google SEO & Digital Ads',
-    category: '3D Commerce, CRM & SEO',
-    year: '2026',
-    role: 'Lead Full-Stack, CRM & Growth Architect',
-    bentoSpan: 'col-6',
-    bentoTall: false,
-    accentColor: '#DC2626',
-    surfaceTint: '#F7ECE4',
+    shortTitle: 'Masterplayer Designs & Printing',
+    category: '3D Commerce & Business Automation',
+    featured: true,
+    tourNumber: '04',
+    year: '2025 – Present',
+    role: 'Full-Stack 3D Commerce & Automation Engineer',
+    clientOrContext: 'Masterplayer Designs & Printing (Ongoing Client Collaboration)',
+    status: 'Live Storefront & Ongoing Engineering',
     liveUrl: 'https://www.masterplayerprints.com/',
     liveLabel: 'Visit masterplayerprints.com',
-    repoUrl: 'https://github.com/avichal15',
-    repoLabel: 'GitHub Profile',
-    coverImage: '/media/projects/masterplayer-desktop.png',
-    stack: [
-      'React 19',
-      'Three.js / WebGL',
-      'Custom B2B CRM',
-      'Technical SEO',
-      'Google & Meta Ads',
-      '18% GST Quote Engine',
-    ],
+    repoUrl: null,
+    hosts: ['masterplayerprints.com', 'www.masterplayerprints.com'],
+    themeTint: '#FFEDD5',
+    stageBg: '#FDE6C4',
+    accentColor: '#C2410C',
+    outfit: 'maker',
+    characterSide: 'right',
+    preview: PROJECT_ASSET_MANIFEST['masterplayer-designs-and-printing'].desktop[0].src,
+    mobilePreview: PROJECT_ASSET_MANIFEST['masterplayer-designs-and-printing'].mobile[0].src,
+    assetProvenance: PROJECT_ASSET_MANIFEST['masterplayer-designs-and-printing'],
+    tagline:
+      'Custom apparel & merchandise storefront featuring an interactive 3D garment customizer and print-order workflow.',
     summary:
-      'This is Masterplayer Designs and Printing — who I am collaborating with right now! I built their custom CRM, engineered their website and 360° 3D studio, ranked them at the top of Google via SEO, and run their digital ads.',
-    description: [
-      'With Masterplayer Designs and Printing, I own the entire technical and growth stack: I built their custom internal CRM for order tracking, engineered masterplayerprints.com with a 360° WebGL apparel customizer, and architected their 22-department B2B catalog.',
-      'Beyond the code, I overhauled their technical SEO and schema markup so they rank at the top of Google searches for custom printing, and I actively manage their digital ad campaigns to drive qualified B2B orders.',
+      'Built and actively evolving the digital commerce platform for Masterplayer Designs & Printing — combining a retail/bulk custom apparel catalog with an interactive 3D garment customization studio and automated order intake.',
+    problem:
+      'Custom printing customers ordering hoodies, oversized tees, jerseys, and branded merchandise struggled to visualize artwork placement, fabric colors, and print sizing before placing single or bulk orders.',
+    solution:
+      'Engineered masterplayerprints.com as a dedicated custom apparel and printing platform featuring category-driven merchandise discovery, an interactive 3D garment preview studio, and structured print-production order capture.',
+    implementation: [
+      'Developed the standalone storefront at masterplayerprints.com showcasing custom t-shirts, hoodies, sportswear, and promotional print categories.',
+      'Integrated an interactive 3D garment customizer allowing users to preview logo placement, garment colors, and print zones in real time.',
+      'Continuing ongoing engineering collaboration to expand automated quote estimation, print-ready artwork validation, and production pipeline tooling.',
     ],
+    stack: ['React / Vite', 'Three.js / WebGL 3D Studio', 'Tailwind CSS', 'Print Order Automation', 'Responsive Commerce'],
     metrics: [
-      { value: '22 Depts', label: 'Custom Apparel & Corporate Merch' },
-      { value: '360° 3D', label: 'Real-Time WebGL Garment Studio' },
-      { value: 'Top SEO', label: 'Custom CRM + Search & Ad Growth' },
+      { label: 'Core Capability', value: 'Interactive 3D Garment Customizer' },
+      { label: 'Engagement', value: 'Ongoing Client Engineering' },
+      { label: 'Live Domain', value: 'masterplayerprints.com' },
+    ],
+    characterComments: [
+      'Chapter 04 is Masterplayer Designs & Printing — a dedicated custom apparel and printing platform with an interactive 3D garment studio.',
+      'Customers can browse custom merchandise categories and preview their artwork directly on 3D apparel models before ordering.',
+      'This is an active, ongoing collaboration focused exclusively on masterplayerprints.com and its print production workflows.',
     ],
     slides: [
       {
-        src: '/media/projects/masterplayer-desktop.png',
-        caption: 'Masterplayer Prints — 360° Interactive 3D Apparel Studio & Storefront',
+        step: '04.01',
+        title: 'Custom Apparel & Printing Storefront Hero',
+        caption:
+          'Live storefront at masterplayerprints.com built for custom streetwear, team jerseys, and branded merchandise.',
+        desktopImage: PROJECT_ASSET_MANIFEST['masterplayer-designs-and-printing'].desktop[0].src,
+        mobileImage: PROJECT_ASSET_MANIFEST['masterplayer-designs-and-printing'].mobile[0].src,
+        tourNote:
+          'Welcome to Chapter 04! Masterplayer Designs & Printing is a standalone custom apparel and print platform.',
       },
       {
-        src: '/media/projects/masterplayer-studio-desktop.png',
-        caption: '22 Architectural Merchandise Departments — Apparel, Bags, Drinkware, Corporate Kits & Awards',
+        step: '04.02',
+        title: 'Apparel, Sportswear & Print Merchandise Catalog',
+        caption:
+          'Category showcase covering oversized tees, hoodies, sublimation jerseys, and custom print merchandise.',
+        desktopImage: PROJECT_ASSET_MANIFEST['masterplayer-designs-and-printing'].desktop[1].src,
+        mobileImage: PROJECT_ASSET_MANIFEST['masterplayer-designs-and-printing'].mobile[1].src,
+        tourNote:
+          'Visitors can explore garment specifications, fabric weights, and printing techniques across both desktop and mobile.',
       },
       {
-        src: '/media/projects/masterplayer-b2b-desktop.png',
-        caption: '5 Precision Print Slots + Custom CRM & 18% GST B2B Bulk Quote Engine',
+        step: '04.03',
+        title: 'Interactive 3D Garment Customizer & Order Pipeline',
+        caption:
+          'Real-time 3D apparel customization studio for testing colors, artwork placement, and bulk print specifications.',
+        desktopImage: PROJECT_ASSET_MANIFEST['masterplayer-designs-and-printing'].desktop[2].src,
+        mobileImage: PROJECT_ASSET_MANIFEST['masterplayer-designs-and-printing'].mobile[2].src,
+        tourNote:
+          'Our ongoing engineering roadmap continues expanding the 3D customizer and automated print-shop order workflows.',
       },
-    ],
-    mobileSlides: [
-      { src: '/media/projects/masterplayer-mobile.png', alt: 'Masterplayer mobile storefront' },
-      { src: '/media/projects/masterplayer-mobile-2.png', alt: 'Masterplayer mobile 3D merch studio' },
-      { src: '/media/projects/masterplayer-mobile-3.png', alt: 'Masterplayer mobile B2B catalog' },
-    ],
-    characterComments: [
-      'I’m actively collaborating with Masterplayer right now — handling their custom CRM, 3D website, SEO, and digital ads!',
-      'Buyers can spin 240 GSM tees in 360°, remove white logo backgrounds automatically, and place art on 5 print slots.',
-      'Our technical SEO and ad funnels bring B2B buyers straight into the live GST bulk quote calculator.',
     ],
   },
+
+  // 05 — OmniRoute Session Sync
   {
-    number: '05',
+    index: 5,
+    code: '05',
     slug: 'omniroute-session-sync',
+    id: 'omniroute-session-sync',
     title: 'OmniRoute Session Sync',
-    subtitle: 'Automated Chrome MV3 Extension & Multi-Model AI Session Bridge',
-    category: 'Open-Source AI Infrastructure',
+    shortTitle: 'OmniRoute Session Sync',
+    category: 'Open Source & AI Infrastructure',
+    featured: true,
+    tourNumber: '05',
     year: '2026',
-    role: 'Creator & Open-Source Contributor',
-    bentoSpan: 'col-8',
-    bentoTall: false,
+    role: 'Open-Source Creator & Systems Engineer',
+    clientOrContext: 'Community-Maintained Companion for the OmniRoute Ecosystem',
+    status: 'Public Open-Source Repository',
+    liveUrl: null,
+    liveLabel: null,
+    repoUrl: 'https://github.com/avichal15/omniroute-session-sync',
+    repoLabel: 'View GitHub Repo',
+    hosts: ['github.com/avichal15/omniroute-session-sync'],
+    themeTint: '#BAE6FD',
+    stageBg: '#BFDBFE',
     accentColor: '#0284C7',
-    surfaceTint: '#E4EEF9',
-    liveUrl: 'https://github.com/avichal15/session-sync',
-    liveLabel: 'View Session Sync Repo',
-    repoUrl: 'https://github.com/avichal15/session-sync',
-    repoLabel: 'github.com/avichal15/session-sync',
-    coverImage: '/media/projects/session-sync-desktop-1.png',
-    stack: [
-      'Chrome Manifest V3',
-      'JavaScript / Node.js',
-      'chrome.cookies API',
-      'Cryptographic Token Pairing',
-      'Background Alarms',
-      'Multi-Model AI Bridge',
-    ],
+    outfit: 'hacker',
+    characterSide: 'left',
+    preview: PROJECT_ASSET_MANIFEST['omniroute-session-sync'].desktop[0].src,
+    mobilePreview: null,
+    assetProvenance: PROJECT_ASSET_MANIFEST['omniroute-session-sync'],
+    tagline:
+      'Chrome MV3 extension and local loopback bridge that automatically syncs authenticated AI web sessions into OmniRoute.',
     summary:
-      'The creator of OmniRoute highlighted a major pain point: expiring browser cookies kept breaking web AI models. I built and contributed OmniRoute Session Sync to keep ChatGPT, Gemini, Qwen, Z.ai, Grok, and DeepSeek synced 24/7.',
-    description: [
-      'When I saw how often expiring browser cookies broke web-session AI gateways, I built OmniRoute Session Sync — a Chrome Manifest V3 extension and local daemon bridge that harvests live cookies, bearer tokens, and User-Agent/client-hint headers automatically.',
-      'Using cryptographic X-Session-Sync-Token pairing and background MV3 alarm heartbeats, it pushes fresh session state across ChatGPT, Gemini, Qwen, Z.ai, Grok, and DeepSeek with zero manual DevTools copy-pasting.',
+      'An open-source companion extension and local bridge that monitors authenticated browser cookies across ChatGPT, Gemini, Qwen, Z.ai, Grok, and DeepSeek — pushing fresh session credentials to an OmniRoute instance via its management API.',
+    problem:
+      'Developers running a local or self-hosted OmniRoute AI gateway alongside web-session-backed providers (ChatGPT, Gemini, Qwen, Z.ai, Grok, DeepSeek) face frequent cookie rotation and session expiration. Manually opening DevTools, copying cookies, and pasting tokens into the gateway breaks automated workflows every few hours.',
+    solution:
+      'Built OmniRoute Session Sync — a Chrome Manifest V3 extension paired with a loopback local bridge that watches target provider cookies via chrome.cookies and chrome.alarms, automatically syncing rotated credentials straight into OmniRoute (`Browser → Local Bridge → OmniRoute`).',
+    implementation: [
+      'Engineered the Chrome MV3 service worker using chrome.cookies.onChanged and periodic chrome.alarms heartbeats to detect credential rotation across 6 AI web providers.',
+      'Built a secure localhost pairing handshake (127.0.0.1) that authenticates the browser extension against the local bridge and pushes structured provider payloads to the OmniRoute management API (:20128).',
+      'Designed a compact dark-mode extension popup displaying live pairing status, per-provider cookie health indicators, manual sync triggers, and diagnostic logs.',
     ],
+    stack: ['Chrome Extension MV3', 'JavaScript / Node.js', 'chrome.cookies & chrome.alarms', 'Localhost Bridge API', 'OmniRoute Ecosystem'],
     metrics: [
-      { value: '6+ AI Hosts', label: 'ChatGPT · Gemini · Qwen · Grok · DeepSeek' },
-      { value: 'MV3 Alarms', label: 'Zero-Downtime Heartbeat Rotation' },
-      { value: 'Open Source', label: 'Contributed to OmniRoute Ecosystem' },
+      { label: 'Supported Providers', value: 'ChatGPT · Gemini · Qwen · Z.ai · Grok · DeepSeek' },
+      { label: 'Sync Pipeline', value: 'Browser → Local Bridge → OmniRoute' },
+      { label: 'License & Repo', value: 'Open Source on GitHub' },
+    ],
+    characterComments: [
+      'Chapter 05 is OmniRoute Session Sync — my open-source Chrome MV3 companion extension for the OmniRoute AI gateway ecosystem.',
+      'Switch to slide 2 to inspect the real Chrome extension popup UI showing both paired and unpaired states alongside the 6 supported AI providers.',
+      'Whenever ChatGPT, Gemini, Qwen, Z.ai, Grok, or DeepSeek rotates a session cookie in your browser, the local bridge updates OmniRoute automatically!',
     ],
     slides: [
       {
-        src: '/media/projects/session-sync-desktop-1.png',
-        caption: 'OmniRoute Session Sync — Chrome MV3 Extension Paired & Unpaired Diagnostic Views',
+        step: '05.01',
+        title: 'Automated Web-Session Continuity for OmniRoute',
+        caption:
+          'Architectural key visual: Browser provider sessions flowing through the local loopback bridge into the OmniRoute gateway.',
+        desktopImage: PROJECT_ASSET_MANIFEST['omniroute-session-sync'].desktop[0].src,
+        mobileImage: null,
+        tourNote:
+          'Chapter 05 is OmniRoute Session Sync — an open-source companion tool that eliminates manual DevTools cookie copying for AI gateways.',
       },
       {
-        src: '/media/projects/session-sync-desktop-2.png',
-        caption: 'Multi-Provider Cookie & Bearer Token Harvesting Pipeline with Fingerprint Alignment',
+        step: '05.02',
+        title: 'Chrome MV3 Extension Popup UI (Paired & Unpaired States)',
+        caption:
+          'Authentic Chrome MV3 extension interface showing localhost bridge pairing, per-provider session status, and instant sync controls.',
+        desktopImage: PROJECT_ASSET_MANIFEST['omniroute-session-sync'].desktop[1].src,
+        mobileImage: null,
+        tourNote:
+          'Here is the actual Chrome MV3 popup UI — showing zero-config localhost pairing and live sync telemetry across all 6 AI providers.',
       },
       {
-        src: '/media/projects/session-sync-desktop-3.png',
-        caption: 'Real-Time Gateway Diagnostics, Per-Domain Health & One-Click Sync Controls',
+        step: '05.03',
+        title: '3-Stage Pipeline: Browser → Local Bridge → OmniRoute',
+        caption:
+          'Event-driven cookie change listeners and MV3 heartbeat alarms keep local OmniRoute instances authenticated without manual intervention.',
+        desktopImage: PROJECT_ASSET_MANIFEST['omniroute-session-sync'].desktop[2].src,
+        mobileImage: null,
+        tourNote:
+          'The full source code, MV3 manifest, and setup guide are publicly available on GitHub at avichal15/omniroute-session-sync.',
       },
-    ],
-    mobileSlides: [
-      { src: '/media/projects/session-sync-mobile-1.png', alt: 'Session Sync paired extension UI' },
-      { src: '/media/projects/session-sync-mobile-2.png', alt: 'Session Sync domain telemetry' },
-      { src: '/media/projects/session-sync-mobile-3.png', alt: 'Session Sync pairing handshake' },
-    ],
-    characterComments: [
-      'Expiring cookies used to break web AI gateways constantly — so I built OmniRoute Session Sync to fix it for good.',
-      'It pairs your browser with your local gateway using a cryptographic token and syncs session updates on the fly.',
-      'Check out the open-source repo at github.com/avichal15/session-sync!',
     ],
   },
+
+  // 06 — Gemini Web Antigravity Skill Stack
   {
-    number: '06',
-    slug: 'antigravity-gemini-skills',
+    index: 6,
+    code: '06',
+    slug: 'gemini-web-antigravity-stack',
+    id: 'gemini-web-antigravity-stack',
     title: 'Gemini Web Antigravity Skill Stack',
-    subtitle: '65+ Autonomous Agent Skills, MCP Harnesses & Multi-Model Council Router',
-    category: 'Agentic AI & MCP Architecture',
+    shortTitle: 'Gemini Web Antigravity Skill Stack',
+    category: 'Agentic AI & Developer Infrastructure',
+    featured: false,
+    tourNumber: null,
     year: '2026',
-    role: 'AI Systems Architect',
-    bentoSpan: 'col-4',
-    bentoTall: false,
-    accentColor: '#6366F1',
-    surfaceTint: '#ECECFB',
-    liveUrl: 'https://github.com/avichal15',
-    liveLabel: 'View Skill Stack',
-    repoUrl: 'https://github.com/avichal15',
-    repoLabel: 'GitHub',
-    coverImage: '/media/projects/antigravity-stack.png',
-    stack: [
-      'Gemini API',
-      'Model Context Protocol (MCP)',
-      'EmbeddingGemma 2',
-      'Obscura Engine',
-      'Multi-Agent Council',
-    ],
+    role: 'AI Systems Architect & Open-Source Author',
+    clientOrContext: 'Open-Source Agentic Engineering Framework',
+    status: 'Public Open-Source Repository',
+    liveUrl: null,
+    liveLabel: null,
+    repoUrl: 'https://github.com/avichal15/gemini-web-antigravity-stack',
+    repoLabel: 'View GitHub Repo',
+    hosts: ['github.com/avichal15/gemini-web-antigravity-stack'],
+    themeTint: '#E9D5FF',
+    stageBg: '#E9D5FF',
+    accentColor: '#7E22CE',
+    outfit: 'hacker',
+    characterSide: 'left',
+    preview: PROJECT_ASSET_MANIFEST['gemini-web-antigravity-stack'].desktop[0].src,
+    mobilePreview: null,
+    assetProvenance: PROJECT_ASSET_MANIFEST['gemini-web-antigravity-stack'],
+    tagline:
+      'Modular skill pack, MCP protocol bridges, vector memory immunization, and verification harnesses for agentic coding environments.',
     summary:
-      'I engineered my own 65-skill autonomous agent stack for Antigravity — combining multi-model council deliberation, EmbeddingGemma 2 semantic memory, and deterministic browser/CLI verification.',
-    description: [
-      'To make coding agents genuinely reliable on complex full-stack builds, I designed a modular skill & MCP ecosystem covering accessibility-tree browser testing (Obscura), mistake-immunizing semantic memory (EmbeddingGemma 2), and parallel multi-agent worktrees.',
-      'Each skill packages executable scripts, strict verification gates, and low-token telemetry so agents ship verified production software instead of placeholders.',
+      'An open-source collection of reusable agent skills, multi-model orchestration scripts, semantic memory hooks, and deterministic browser/CLI verification workflows built to make autonomous coding agents reliable on complex engineering tasks.',
+    problem:
+      'Out-of-the-box coding agents frequently suffer from context-window bloat, unverified UI claims, repeated tool mistakes across sessions, and sequential execution bottlenecks on multi-file repositories.',
+    solution:
+      'Engineered a structured skill stack combining bounded codebase scouting, multi-model architectural review, EmbeddingGemma semantic mistake memory ("antibodies"), and headless browser/DOM verification gates.',
+    implementation: [
+      'Packaged modular SKILL.md workflows with deterministic CLI helper scripts for browser DOM auditing, visual regression checks, and atomic Git hygiene.',
+      'Built a persistent semantic memory and mistake-immunization layer that indexes past bug fixes and blocks repeated antipatterns before tool execution.',
+      'Published the portable skill architecture and configuration templates openly on GitHub for agentic IDE users.',
     ],
+    stack: ['Python', 'Node.js / PowerShell', 'MCP Protocol', 'Vector Memory', 'Browser Automation', 'Agentic Workflows'],
     metrics: [
-      { value: '65+ Skills', label: 'Modular Agent & MCP Playbooks' },
-      { value: '85% Less', label: 'Context Token Overhead' },
-      { value: '3-Stage', label: 'Scout · Council · Verifier Loop' },
+      { label: 'Architecture', value: 'Scout → Council → Verifier Pipeline' },
+      { label: 'Memory Layer', value: 'Semantic Mistake Immunization' },
+      { label: 'Distribution', value: 'Open Source on GitHub' },
+    ],
+    characterComments: [
+      'The Gemini Web Antigravity Skill Stack packages reusable skills, memory hooks, and verification gates for autonomous coding agents.',
     ],
     slides: [
       {
-        src: '/media/projects/antigravity-stack.png',
-        caption: 'Gemini Web Antigravity Skill Stack — Multi-Model Council & MCP Orchestration Architecture',
+        step: '06.01',
+        title: 'Modular Agentic Skill Stack & 3-Stage Execution Pipeline',
+        caption:
+          'Conceptual architecture of the Scout, Multi-Model Council, and Deterministic Verifier pipeline.',
+        desktopImage: PROJECT_ASSET_MANIFEST['gemini-web-antigravity-stack'].desktop[0].src,
+        mobileImage: null,
+        tourNote:
+          'Modular skills and verification harnesses that turn raw LLM tool calls into disciplined software engineering workflows.',
+      },
+      {
+        step: '06.02',
+        title: 'Semantic Vector Memory & Browser Verification Gates',
+        caption:
+          'Connected MCP bridges, EmbeddingGemma episodic memory, and headless DOM inspection tools.',
+        desktopImage: PROJECT_ASSET_MANIFEST['gemini-web-antigravity-stack'].desktop[1].src,
+        mobileImage: null,
+        tourNote:
+          'Inspect the repository on GitHub at avichal15/gemini-web-antigravity-stack.',
       },
     ],
-    characterComments: [
-      'This is the 65-skill agentic backbone I built to orchestrate Gemini, MCP servers, and semantic memory!',
-    ],
   },
+
+  // 07 — Insta Manager
   {
-    number: '07',
-    slug: 'career-ops',
-    title: 'Career-Ops Multi-Agent Suite',
-    subtitle: 'JD Semantic Parser, LaTeX/PDF Resume Compiler & ATS Intelligence',
-    category: 'AI Agents & Developer Tools',
-    year: '2026',
-    role: 'AI Workflow Architect',
-    bentoSpan: 'col-4',
-    bentoTall: false,
-    accentColor: '#2563EB',
-    surfaceTint: '#E8EFFA',
-    liveUrl: 'https://github.com/avichal15',
-    liveLabel: 'View Suite',
-    repoUrl: 'https://github.com/avichal15',
-    repoLabel: 'GitHub',
-    coverImage: '/media/projects/career-ops.png',
-    stack: ['Python', 'Node.js', 'LaTeX PDF Compiler', 'Playwright Worker', 'SQLite'],
-    summary:
-      'Applying to roles manually takes hours of repetitive formatting. I built Career-Ops to parse job descriptions, match them against my real project evidence, and compile tailored 1-page LaTeX PDFs in 4 seconds.',
-    description: [
-      'Career-Ops reads a target role’s technical requirements, selects the most relevant verified engineering projects from my portfolio database, and compiles a clean, clickable 1-page PDF without ever inventing fake claims.',
-      'It also tracks application stages in SQLite and runs automated Playwright layout checks so every document renders with zero overflow.',
-    ],
-    metrics: [
-      { value: '95%+ ATS', label: 'Semantic Keyword & Evidence Match' },
-      { value: '4.2 Sec', label: '1-Page Clickable PDF Compilation' },
-      { value: '100%', label: 'Grounded Portfolio Fact Alignment' },
-    ],
-    slides: [
-      { src: '/media/projects/career-ops.png', caption: 'Career-Ops — Autonomous JD Parser & LaTeX Compiler' },
-    ],
-    characterComments: [
-      'I built Career-Ops so tailoring evidence-backed technical applications takes 4 seconds instead of 2 hours.',
-    ],
-  },
-  {
-    number: '08',
-    slug: 'chanakya-reel-ai',
-    title: 'Chanakya Reel AI',
-    subtitle: 'Autonomous Short-Form Video Generation & Beat-Synced FFmpeg Pipeline',
-    category: 'Generative AI & Media',
-    year: '2026',
-    role: 'AI Systems Engineer',
-    bentoSpan: 'col-4',
-    bentoTall: false,
-    accentColor: '#EAB308',
-    surfaceTint: '#F4F1E4',
-    liveUrl: 'https://github.com/avichal15',
-    liveLabel: 'View Pipeline',
-    repoUrl: 'https://github.com/avichal15',
-    repoLabel: 'GitHub',
-    coverImage: '/media/projects/chanakya-reel-ai.png',
-    stack: ['Python', 'FFmpeg', 'Gemini Vision', 'Whisper Timestamps', 'TTS Synthesis'],
-    summary:
-      'I wanted to turn timeless Indian strategy stories into cinematic vertical Reels automatically — so I built Chanakya Reel AI to script, voice, animate, and render 60fps 9:16 MP4s in under 90 seconds.',
-    description: [
-      'Given a single strategy prompt, the pipeline writes a high-retention hook and script, synthesizes expressive voiceovers, extracts millisecond word boundaries with Whisper, and generates studio keyframes.',
-      'FFmpeg then composites Ken Burns camera motion, audio ducking, and word-synced captions into a broadcast-ready 1080x1920 H.264 video.',
-    ],
-    metrics: [
-      { value: '1080x1920', label: '60fps Vertical Cinema Output' },
-      { value: '< 90s', label: 'Autonomous End-to-End Render' },
-      { value: 'Word-Sync', label: 'Millisecond Caption Alignment' },
-    ],
-    slides: [
-      { src: '/media/projects/chanakya-reel-ai.png', caption: 'Chanakya Reel AI — Autonomous Script-to-MP4 Vertical Video Engine' },
-    ],
-    characterComments: [
-      'Chanakya Reel AI turns a single strategy topic into a beat-synced 60fps vertical video in under 90 seconds.',
-    ],
-  },
-  {
-    number: '09',
-    slug: 'trading-swarm',
-    title: 'Algorithmic Trading Swarm',
-    subtitle: 'Multi-Agent Market Regime Detection & Monte Carlo Risk Engine',
-    category: 'Quantitative Systems',
-    year: '2026',
-    role: 'Quantitative Systems Engineer',
-    bentoSpan: 'col-4',
-    bentoTall: false,
-    accentColor: '#059669',
-    surfaceTint: '#E6F5EE',
-    liveUrl: 'https://github.com/avichal15',
-    liveLabel: 'View Architecture',
-    repoUrl: 'https://github.com/avichal15',
-    repoLabel: 'GitHub',
-    coverImage: '/media/projects/trading-swarm.png',
-    stack: ['Python', 'NumPy / Pandas', 'Monte Carlo Simulation', 'WebSocket Feeds', 'Risk Gate'],
-    summary:
-      'Single-indicator trading bots fail whenever market volatility shifts. I built Algorithmic Trading Swarm so multiple specialist agents vote on regime shifts behind a 10,000-path Monte Carlo risk gate.',
-    description: [
-      'Combines uncorrelated alpha factor agents — trend, mean-reversion, order-flow imbalance, and volatility regime classification — with strict Kelly-criterion position sizing.',
-      'Every candidate strategy must survive walk-forward optimization and 10,000-path Monte Carlo tail-risk stress testing before a single order is routed.',
-    ],
-    metrics: [
-      { value: '10,000x', label: 'Monte Carlo Drawdown Paths' },
-      { value: '< 50ms', label: 'Multi-Agent Signal Consensus' },
-      { value: 'Strict Gate', label: 'Automated Tail-Risk Protection' },
-    ],
-    slides: [
-      { src: '/media/projects/trading-swarm.png', caption: 'Algorithmic Trading Swarm — Multi-Agent Alpha & Monte Carlo Risk Gate' },
-    ],
-    characterComments: [
-      'Every signal in my Trading Swarm has to pass a 10,000-path Monte Carlo drawdown gate before execution.',
-    ],
-  },
-  {
-    number: '10',
+    index: 7,
+    code: '07',
     slug: 'insta-manager',
+    id: 'insta-manager',
     title: 'Insta Manager',
-    subtitle: 'Creator SPR Analytics, Carousel Retention Auditor & DM Funnel Engine',
-    category: 'Creator Growth & Automation',
-    year: '2026',
-    role: 'Product & Automation Engineer',
-    bentoSpan: 'col-4',
-    bentoTall: false,
-    accentColor: '#DB2777',
-    surfaceTint: '#F7E8F0',
-    liveUrl: 'https://github.com/avichal15',
-    liveLabel: 'View Studio',
-    repoUrl: 'https://github.com/avichal15',
-    repoLabel: 'GitHub',
-    coverImage: '/media/projects/insta-manager.png',
-    terminalLines: [
-      '$ insta-manager audit --reel "launch_v2.mp4"',
-      '✓ SPR (Sends/Reach): 4.8% [3.4x algorithmic weight]',
-      '✓ Keyword DM Funnel: 142 auto-replies dispatched (<1.2s)',
-    ],
-    stack: ['Node.js', 'React', 'Instagram Graph Bridge', 'SPR Telemetry', 'SQLite'],
+    shortTitle: 'Insta Manager',
+    category: 'Creator Tools & Automation',
+    featured: false,
+    tourNumber: null,
+    year: '2025 – 2026',
+    role: 'Creator & Full-Stack Automation Engineer',
+    clientOrContext: 'Open-Source Creator Workflow Tooling',
+    status: 'Public Open-Source Repository',
+    liveUrl: null,
+    liveLabel: null,
+    repoUrl: 'https://github.com/avichal15/Insta-manager',
+    repoLabel: 'View GitHub Repo',
+    hosts: ['github.com/avichal15/Insta-manager'],
+    themeTint: '#FCE7F3',
+    stageBg: '#FCE7F3',
+    accentColor: '#BE185D',
+    outfit: 'techy',
+    characterSide: 'right',
+    preview: PROJECT_ASSET_MANIFEST['insta-manager'].desktop[0].src,
+    mobilePreview: null,
+    assetProvenance: PROJECT_ASSET_MANIFEST['insta-manager'],
+    tagline:
+      'Keyboard-first desktop workspace and browser automation bridge for Instagram Reels review, scheduling reminders, and DM triage.',
     summary:
-      'While growing creator pages, I realized DM Sends-Per-Reach (SPR) drives 3–5x more distribution than likes. I built Insta Manager to audit carousel retention, trial reels, and keyword DM funnels.',
-    description: [
-      'Tracks high-weight algorithmic signals including DM shares per reach (SPR), watch completion rate (VCR), and 60-minute threaded reply velocity.',
-      'Automates keyword-triggered DM resource delivery and audits captions against SEO and 2-2-1 hashtag rules.',
+      'A creator productivity suite that enhances Instagram web workflows with keyboard-driven Reels scrubbing (J/K/L shortcuts), carousel frame inspection, scheduled draft reminders, and organized DM follow-up queues.',
+    problem:
+      'Creators and social media managers working on desktop browsers deal with clunky native video scrubbing, scattered DM threads, and manual content-review checklists when managing daily Reels and carousel pipelines.',
+    solution:
+      'Built Insta Manager to wrap Instagram web workflows in a keyboard-first control surface with frame-accurate video transport controls, DOM state inspection hooks, and structured outreach/publishing checklists.',
+    implementation: [
+      'Engineered keyboard shortcut bindings and media playback controllers for rapid Reels scrubbing, speed toggling, and carousel slide navigation.',
+      'Built a browser acceptance and DOM interaction bridge for deterministic creator-state inspection and draft workflow organization.',
+      'Published the source code on GitHub at avichal15/Insta-manager.',
     ],
+    stack: ['JavaScript / TypeScript', 'Browser DOM Bridge', 'Media Playback Controls', 'Creator Workflow Automation'],
     metrics: [
-      { value: '3–5x Weight', label: 'SPR Share Signal Optimization' },
-      { value: '20-Slide', label: 'Carousel Retention Telemetry' },
-      { value: '60-Min', label: 'Automated DM & Reply Loop' },
-    ],
-    slides: [
-      { src: '/media/projects/insta-manager.png', caption: 'Insta Manager — SPR Telemetry & Automated DM Funnel Engine' },
+      { label: 'Core UX', value: 'Keyboard-First Reels & Carousel Controls' },
+      { label: 'Workflow Scope', value: 'Draft Review & DM Queue Triage' },
+      { label: 'Repository', value: 'github.com/avichal15/Insta-manager' },
     ],
     characterComments: [
-      'Insta Manager focuses on the metrics that actually drive reach: DM Sends-Per-Reach and watch completion!',
+      'Insta Manager gives creators keyboard-driven Reels scrubbing, carousel inspection, and organized DM triage on desktop.',
+    ],
+    slides: [
+      {
+        step: '07.01',
+        title: 'Creator Workflow Studio & Keyboard-First Reels Timeline',
+        caption:
+          'Art-directed creator workspace concept highlighting J/K/L timeline scrubbing, draft status cards, and DM triage queues.',
+        desktopImage: PROJECT_ASSET_MANIFEST['insta-manager'].desktop[0].src,
+        mobileImage: null,
+        tourNote:
+          'Designed for creators who want desktop-grade keyboard shortcuts and structured publishing queues.',
+      },
+      {
+        step: '07.02',
+        title: 'Desktop Control Surface & Playback Inspector',
+        caption:
+          'Focused desktop workspace for managing Reels playback, audio sync checks, and outreach workflows.',
+        desktopImage: PROJECT_ASSET_MANIFEST['insta-manager'].desktop[1].src,
+        mobileImage: null,
+        tourNote:
+          'Explore the code on GitHub at avichal15/Insta-manager.',
+      },
     ],
   },
+
+  // 08 — Recruitment Funnel Analytics
   {
-    number: '11',
+    index: 8,
+    code: '08',
     slug: 'recruitment-funnel-analytics',
+    id: 'recruitment-funnel-analytics',
     title: 'Recruitment Funnel Analytics',
-    subtitle: 'Full-Funnel Hiring Attribution, Channel ROI & Automated Spend Optimizer',
-    category: 'BI & Decision Intelligence',
-    year: '2025 – 2026',
-    role: 'BI & Data Application Engineer',
-    bentoSpan: 'col-4',
-    bentoTall: false,
-    accentColor: '#0D9488',
-    surfaceTint: '#E6F4F1',
-    liveUrl: 'https://github.com/avichal15',
-    liveLabel: 'View Analytics App',
-    repoUrl: 'https://github.com/avichal15',
-    repoLabel: 'GitHub',
-    coverImage: '/media/projects/dashboard-overview.png',
-    stack: ['Python', 'Streamlit', 'Plotly', 'Pandas', 'SQLite', 'Rule-Based BI Engine'],
-    summary:
-      'Talent teams often waste budget on high-click job boards that never convert to hires. I built this interactive BI dashboard in Python, Streamlit, and SQLite to track 250K+ clicks through to qualified hires.',
-    description: [
-      'Models end-to-end recruitment attribution across Indeed, LinkedIn, Google Jobs, Programmatic, Meta, Referral, and Organic channels — slicing Cost-Per-Applicant ($18.88) and Cost-Per-Hire ($291) by geography, device, and job family.',
-      'Includes an automated Rule-Based Recommendations engine that flags inefficient LinkedIn spend, tablet form friction, and high-converting regional cohorts.',
-    ],
-    metrics: [
-      { value: '250.0K', label: 'Top-of-Funnel Clicks Modeled' },
-      { value: '$291 CPH', label: 'Channel & Geo Cost-Per-Hire Attribution' },
-      { value: 'SQLite + BI', label: 'Automated Spend Recommendations' },
-    ],
-    slides: [
-      {
-        src: '/media/projects/dashboard-overview.png',
-        caption: 'Executive Funnel Overview — 250K Clicks, 35K Applications, 9.6K Qualified & 1.8K Hires',
-      },
-      {
-        src: '/media/projects/channel-performance.png',
-        caption: 'Channel Efficiency & Device Conversion Analysis Across 7 Acquisition Sources',
-      },
-      {
-        src: '/media/projects/recommendations.png',
-        caption: 'Automated Rule-Based Spend & UX Recommendations Engine',
-      },
-    ],
-    characterComments: [
-      'I built this Streamlit + SQLite BI dashboard to show exactly which hiring channels produce real hires vs wasted clicks.',
-      'Notice how it flags Tablet form friction and recommends shifting budget toward top-converting regions automatically!',
-    ],
-  },
-  {
-    number: '12',
-    slug: 'voca-ai-voice-coach',
-    title: 'Voca — AI Voice Coach',
-    subtitle: 'Real-Time Prosody, Pace & Confidence Coaching Workspace',
-    category: 'AI Product & Speech Coaching',
-    year: '2025 – 2026',
-    role: 'Product & Full-Stack Engineer',
-    bentoSpan: 'col-4',
-    bentoTall: false,
-    accentColor: '#4F46E5',
-    surfaceTint: '#EAEAF8',
-    liveUrl: 'https://github.com/avichal15',
-    liveLabel: 'View Voca Coach',
-    repoUrl: 'https://github.com/avichal15',
-    repoLabel: 'GitHub',
-    coverImage: '/media/projects/microcoach-desktop.png',
-    terminalLines: [
-      '$ voca-coach stream --mic default --mode interview',
-      '✓ Pace: 138 WPM (Optimal) · Filler words: 0 detected',
-      '✓ Confidence & Clarity Score: 94/100 (+18% vs baseline)',
-    ],
-    stack: ['React', 'TypeScript', 'WebAudio API', 'Gemini Live API', 'PWA'],
-    summary:
-      'Practicing for interviews or pitches alone feels awkward without feedback. I built Voca — AI Voice Coach to analyze speaking pace, filler words, and vocal confidence in real time through 2-minute daily drills.',
-    description: [
-      'Combines WebAudio pitch/cadence tracking with Gemini feedback loops to turn intimidating communication goals into approachable 2-minute micro-coaching sessions.',
-      'Tracks streak momentum, WPM stability, and filler-word reduction across mobile and desktop.',
-    ],
-    metrics: [
-      { value: '2-Min', label: 'Daily Voice & Pitch Check-Ins' },
-      { value: 'Real-Time', label: 'WPM & Filler-Word Telemetry' },
-      { value: 'Zero Friction', label: 'Mobile & Desktop WebAudio PWA' },
-    ],
-    slides: [
-      { src: '/media/projects/microcoach-desktop.png', caption: 'Voca — AI Voice & Behavioral Micro-Coaching Workspace' },
-    ],
-    characterComments: [
-      'Voca listens to your speaking pace and filler words in real time so you can nail interviews and product pitches!',
-    ],
-  },
-  {
-    number: '13',
-    slug: 'zoho-crm-automation',
-    title: 'Zoho CRM ↔ 5-Channel Sync',
-    subtitle: 'Unified E-Commerce, Inventory & Logistics Webhook Orchestrator',
-    category: 'Enterprise Automation',
+    shortTitle: 'Recruitment Funnel Analytics',
+    category: 'Business Intelligence & Analytics',
+    featured: false,
+    tourNumber: null,
     year: '2025',
-    role: 'Backend & Integrations Engineer',
-    bentoSpan: 'col-4',
-    bentoTall: false,
-    accentColor: '#16A34A',
-    surfaceTint: '#E8F6EC',
-    liveUrl: 'https://github.com/avichal15',
-    liveLabel: 'View Integration',
-    repoUrl: 'https://github.com/avichal15',
-    repoLabel: 'GitHub',
-    coverImage: '/media/projects/zoho-crm-automation.png',
-    stack: ['Node.js', 'Zoho CRM API', 'Shopify', 'Amazon SP-API', 'Shiprocket', 'India Post'],
+    role: 'Data & Analytics Engineer',
+    clientOrContext: 'Open-Source BI & Decision-Support System',
+    status: 'Public Open-Source Repository',
+    liveUrl: null,
+    liveLabel: null,
+    repoUrl: 'https://github.com/avichal15/recruitment-funnel-dashboard',
+    repoLabel: 'View GitHub Repo',
+    hosts: ['github.com/avichal15/recruitment-funnel-dashboard'],
+    themeTint: '#DBEAFE',
+    stageBg: '#DBEAFE',
+    accentColor: '#1D4ED8',
+    outfit: 'exec',
+    characterSide: 'left',
+    preview: PROJECT_ASSET_MANIFEST['recruitment-funnel-analytics'].desktop[0].src,
+    mobilePreview: null,
+    assetProvenance: PROJECT_ASSET_MANIFEST['recruitment-funnel-analytics'],
+    tagline:
+      'End-to-end SQLite, Python, and Streamlit analytics suite modeling 250K ad clicks and 35K applications across recruitment channels.',
     summary:
-      'Sales and dispatch teams were losing hours reconciling CSVs across five portals. I built an idempotent webhook orchestrator that syncs Zoho CRM with Shopify, Amazon, Shiprocket, and India Post in real time.',
-    description: [
-      'Eliminated manual data entry across sales and logistics teams by unifying order ingestion, AWB tracking, and customer lifecycle updates.',
-      'Built idempotent retry queues, dead-letter error handling, and automated reconciliation dashboards.',
+      'A business intelligence and funnel diagnostics dashboard built with Python, SQLite, Pandas, and Streamlit — analyzing a realistic synthetic dataset of 250,000 recruitment ad clicks and 35,000 candidate applications to surface channel ROI, stage drop-offs, and automated budget reallocation recommendations.',
+    problem:
+      'Talent acquisition teams often track ad spend, career-site clicks, ATS stage transitions, and final hires in disconnected spreadsheets, obscuring which sourcing channels produce qualified hires versus high-volume drop-offs.',
+    solution:
+      'Built a reproducible SQLite + Streamlit analytics pipeline backed by a realistic synthetic recruitment dataset (250K clicks, 35K applications) that computes stage-by-stage conversion rates, cost-per-hire, time-to-fill, and rule-based budget recommendations.',
+    implementation: [
+      'Modeled a multi-table SQLite schema and synthetic data generator simulating 250,000 sourcing clicks and 35,000 candidate journeys across LinkedIn, Indeed, Referrals, Career Page, and Campus channels.',
+      'Built interactive Plotly funnel visualizations, cohort conversion matrices, and role-level cost-per-hire scorecards in Streamlit.',
+      'Implemented an automated bottleneck diagnostic engine that flags high-drop-off stages and suggests channel budget shifts.',
     ],
+    stack: ['Python', 'SQLite', 'Streamlit', 'Plotly', 'Pandas', 'BI Funnel Modeling'],
     metrics: [
-      { value: '5 Channels', label: 'Zoho · Shopify · Amazon · Logistics' },
-      { value: '100%', label: 'Idempotent Webhook Reliability' },
-      { value: 'Real-Time', label: 'Order & AWB Status Sync' },
-    ],
-    slides: [
-      { src: '/media/projects/zoho-crm-automation.png', caption: 'Zoho CRM ↔ 5-Channel E-Commerce & Logistics Sync Engine' },
+      { label: 'Synthetic Dataset Scope', value: '250K Clicks · 35K Applications' },
+      { label: 'Data Engine', value: 'SQLite + Pandas + Plotly' },
+      { label: 'Decision Layer', value: 'Automated Channel ROI Recommendations' },
     ],
     characterComments: [
-      'This pipeline connected Zoho CRM to Shopify, Amazon, Shiprocket, and India Post with zero manual CSV work.',
+      'Recruitment Funnel Analytics models 250K synthetic clicks and 35K applications in SQLite + Streamlit to diagnose hiring bottlenecks.',
+    ],
+    slides: [
+      {
+        step: '08.01',
+        title: 'Executive Hiring Funnel & Conversion Scorecard',
+        caption:
+          'Streamlit executive overview tracking clicks, applications, interviews, offers, and hires across sourcing channels (synthetic benchmark dataset).',
+        desktopImage: PROJECT_ASSET_MANIFEST['recruitment-funnel-analytics'].desktop[0].src,
+        mobileImage: null,
+        tourNote:
+          'Built with Python, SQLite, and Streamlit using a transparent 250K-click / 35K-application synthetic recruitment dataset.',
+      },
+      {
+        step: '08.02',
+        title: 'Channel Performance & Cost-Per-Hire Attribution',
+        caption:
+          'Comparative breakdown of sourcing channel efficiency, stage conversion velocity, and acquisition cost.',
+        desktopImage: PROJECT_ASSET_MANIFEST['recruitment-funnel-analytics'].desktop[1].src,
+        mobileImage: null,
+        tourNote:
+          'Highlights which channels drive actual offers and hires rather than raw top-of-funnel click volume.',
+      },
+      {
+        step: '08.03',
+        title: 'Automated Bottleneck Diagnosis & Budget Recommendations',
+        caption:
+          'Rule-based decision-support view recommending sourcing budget reallocations and interview stage improvements.',
+        desktopImage: PROJECT_ASSET_MANIFEST['recruitment-funnel-analytics'].desktop[2].src,
+        mobileImage: null,
+        tourNote:
+          'Full SQLite generator and Streamlit dashboard code are available at avichal15/recruitment-funnel-dashboard.',
+      },
     ],
   },
+
+  // 09 — Mahadev Plywood & Hardware
   {
-    number: '14',
+    index: 9,
+    code: '09',
     slug: 'mahadev-plywood',
+    id: 'mahadev-plywood',
     title: 'Mahadev Plywood & Hardware',
-    subtitle: 'B2B Architectural Timber Catalog, Sheet Calculator & Contractor Dispatch',
+    shortTitle: 'Mahadev Plywood & Hardware',
     category: 'B2B Commerce',
-    year: '2025 – 2026',
-    role: 'Full-Stack Developer',
-    bentoSpan: 'col-4',
-    bentoTall: false,
+    featured: false,
+    tourNumber: null,
+    year: '2026',
+    role: 'Full-Stack Web & 3D Interaction Engineer',
+    clientOrContext: 'Mahadev Buildcorp (Meerut Timber & Architectural Hardware)',
+    status: 'Live Deployed Website & Public Repo',
+    liveUrl: 'https://mahadev-plywood.vercel.app/',
+    liveLabel: 'Visit mahadev-plywood.vercel.app',
+    repoUrl: 'https://github.com/avichal15/Mahadev-Buildcorp',
+    repoLabel: 'View GitHub Repo',
+    hosts: ['mahadev-plywood.vercel.app', 'github.com/avichal15/Mahadev-Buildcorp'],
+    themeTint: '#FDE68A',
+    stageBg: '#FDE68A',
     accentColor: '#B45309',
-    surfaceTint: '#F5EFE6',
-    liveUrl: 'https://github.com/avichal15',
-    liveLabel: 'View Project',
-    repoUrl: 'https://github.com/avichal15',
-    repoLabel: 'GitHub',
-    coverImage: '/media/projects/mahadev-plywood.png',
-    stack: ['React 19', 'Vite', 'Sheet Estimator', 'Finish Visualizer', 'WhatsApp BOQ'],
+    outfit: 'builder',
+    characterSide: 'right',
+    preview: PROJECT_ASSET_MANIFEST['mahadev-plywood'].desktop[0].src,
+    mobilePreview: PROJECT_ASSET_MANIFEST['mahadev-plywood'].mobile[0].src,
+    assetProvenance: PROJECT_ASSET_MANIFEST['mahadev-plywood'],
+    tagline:
+      'Interactive 3D PlyStack showcase and 12-category B2B timber & architectural hardware specification platform for Meerut builders.',
     summary:
-      'For a regional timber and hardware distributor in Meerut & NCR, I built a digital catalog of 280+ SKUs and an interactive room-to-sheet BOQ calculator that sends instant contractor quotes over WhatsApp.',
-    description: [
-      'Structured 280+ SKUs across marine-grade plywood, HDHMR boards, blockboards, decorative veneers, and architectural fittings.',
-      'Built an interactive room-to-sheet calculator that estimates sheet counts, wastage margins, and hardware quantities for instant dealer quotes.',
+      'A tactile B2B trade storefront for Mahadev Plywood & Hardware (Garh Road, Meerut) featuring a scroll-driven 3D plywood stack hero ("Every Layer In Stock"), dual amber/cyan material themes, and a 165-SKU specification counter across 12 building-material categories.',
+    problem:
+      'Local contractors, interior designers, and carpenters sourcing marine plywood, laminates, adhesives, and architectural fittings frequently lose half a workday driving between fragmented suppliers because traditional timber yards lack an inspectable digital inventory.',
+    solution:
+      'Designed and engineered mahadev-plywood.vercel.app as an industrial-grade digital counter ("One Counter. The Whole Job.") with an interactive 3D PlyStack hero, brand-verified adhesive and hardware shelves (Mahacol, Pidilite, Jivanjor, Bondtile), and direct contractor call/quote dispatch.',
+    implementation: [
+      'Engineered the scroll-responsive 3D PlyStack hero in React and Three.js that separates individual timber veneer and core layers as the visitor scrolls.',
+      'Built an interactive 12-category, 165-SKU product specification stage covering marine plywood, blockboards, decorative laminates, mortise locks, channels, and adhesives.',
+      'Designed a high-contrast industrial dark UI with warm timber-amber and hardware-cyan accents tailored for fast mobile lookup on active construction sites.',
     ],
+    stack: ['React 19 / Vite', 'Three.js / WebGL 3D Stack', 'Tailwind CSS', 'GSAP Scroll Choreography', 'B2B Trade Catalog'],
     metrics: [
-      { value: '280+ SKUs', label: 'Timber, Laminate & Hardware Catalog' },
-      { value: '< 15ms', label: 'Instant BOQ Sheet Calculation' },
-      { value: '99 Score', label: 'Mobile Lighthouse Performance' },
-    ],
-    slides: [
-      { src: '/media/projects/mahadev-plywood.png', caption: 'Mahadev Plywood & Hardware — B2B Timber Catalog & BOQ Calculator' },
+      { label: 'Inventory Scope', value: '165 Types Across 12 Categories' },
+      { label: '3D Hero Engine', value: 'Interactive Scroll-Split PlyStack' },
+      { label: 'Live Deployment', value: 'mahadev-plywood.vercel.app' },
     ],
     characterComments: [
-      'Contractors and homeowners use this calculator to estimate plywood and laminate sheets in seconds.',
+      'Mahadev Plywood & Hardware brings an interactive 3D plywood stack and a 12-category B2B trade catalog to Meerut contractors and architects!',
+    ],
+    slides: [
+      {
+        step: '09.01',
+        title: 'Every Layer In Stock — Interactive 3D PlyStack Hero',
+        caption:
+          'Live homepage at mahadev-plywood.vercel.app featuring the illuminated 3D plywood stack and direct trade dispatch.',
+        desktopImage: PROJECT_ASSET_MANIFEST['mahadev-plywood'].desktop[0].src,
+        mobileImage: PROJECT_ASSET_MANIFEST['mahadev-plywood'].mobile[0].src,
+        tourNote:
+          'Captured live from mahadev-plywood.vercel.app — built for builders, carpenters, and architects in Meerut.',
+      },
+      {
+        step: '09.02',
+        title: 'Scroll-Driven Veneer & Core Layer Inspection',
+        caption:
+          'As visitors scroll, the 3D plywood stack separates to reveal structural core layers and material craftsmanship.',
+        desktopImage: PROJECT_ASSET_MANIFEST['mahadev-plywood'].desktop[1].src,
+        mobileImage: PROJECT_ASSET_MANIFEST['mahadev-plywood'].mobile[0].src,
+        tourNote:
+          'Combines tactile 3D product storytelling with practical trade specifications.',
+      },
+      {
+        step: '09.03',
+        title: 'One Counter, The Whole Job — 12-Category Trade Catalog',
+        caption:
+          'Adhesive brands (Mahacol, Pidilite, Jivanjor, Bondtile) and 165 material types organized for single-stop contractor fulfilment.',
+        desktopImage: PROJECT_ASSET_MANIFEST['mahadev-plywood'].desktop[2].src,
+        mobileImage: PROJECT_ASSET_MANIFEST['mahadev-plywood'].mobile[0].src,
+        tourNote:
+          'Inspect both the live site at mahadev-plywood.vercel.app and the source repo at avichal15/Mahadev-Buildcorp.',
+      },
     ],
   },
+
+  // 10 — Dhuri Hoon Mai
   {
-    number: '15',
-    slug: 'openinssist',
-    title: 'OpenInssist',
-    subtitle: 'Local-First AI Engineering Workspace with MCP Tool Execution',
-    category: 'AI Developer Tools',
+    index: 10,
+    code: '10',
+    slug: 'dhuri-hoon-mai',
+    id: 'dhuri-hoon-mai',
+    title: 'Dhuri Hoon Mai',
+    shortTitle: 'Dhuri Hoon Mai',
+    category: 'Creative Technology & Interactive Media',
+    featured: false,
+    tourNumber: null,
     year: '2026',
-    role: 'Systems Engineer',
-    bentoSpan: 'col-3',
-    bentoTall: false,
-    accentColor: '#6366F1',
-    surfaceTint: '#ECECFB',
-    liveUrl: 'https://github.com/avichal15',
-    liveLabel: 'View Project',
-    repoUrl: 'https://github.com/avichal15',
-    repoLabel: 'GitHub',
-    coverImage: '/media/projects/openinssist.png',
-    stack: ['TypeScript', 'React', 'Node.js', 'MCP Protocol', 'Vector Memory'],
+    role: 'Creative Technologist & Lead Frontend Architect',
+    clientOrContext: 'Dhuri Hoon Mai — Soch Se Kamyabi Tak (NGO & Social Enterprise)',
+    status: 'Live Deployed Website & Public Repo',
+    liveUrl: 'https://dhuri-hoon-mai.vercel.app/',
+    liveLabel: 'Visit dhuri-hoon-mai.vercel.app',
+    repoUrl: 'https://github.com/avichal15/Dhuri-Hoon-Mai',
+    repoLabel: 'View GitHub Repo',
+    hosts: ['dhuri-hoon-mai.vercel.app', 'github.com/avichal15/Dhuri-Hoon-Mai'],
+    themeTint: '#FCE7F3',
+    stageBg: '#FBCFE8',
+    accentColor: '#9D174D',
+    outfit: 'builder',
+    characterSide: 'left',
+    preview: PROJECT_ASSET_MANIFEST['dhuri-hoon-mai'].desktop[0].src,
+    mobilePreview: PROJECT_ASSET_MANIFEST['dhuri-hoon-mai'].mobile[0].src,
+    assetProvenance: PROJECT_ASSET_MANIFEST['dhuri-hoon-mai'],
+    tagline:
+      'Editorial NGO & social enterprise web platform featuring an interactive sponsorship impact simulator, 20-year timeline, and Gala 2026 showcase.',
     summary:
-      'I built OpenInssist as a local-first AI developer cockpit — uniting multi-model LLM routing, deterministic MCP tool execution, and persistent semantic project memory.',
-    description: [
-      'Provides a unified developer cockpit for code search, terminal execution, and episodic memory recall across local and cloud LLMs.',
+      'Designed and built the official multi-page editorial web experience for Dhuri Hoon Mai ("I Am The Axis of Change") — uniting grassroots women empowerment, Fearless Little Champs literacy, an interactive monthly sponsorship impact simulator, and the Grand Excellence Gala 2026.',
+    problem:
+      'Grassroots NGOs and social enterprises with two decades of real community work (2006–2026 across Delhi NCR) often struggle to communicate their institutional credibility, transparent donor impact, and flagship summit events through generic charity templates.',
+    solution:
+      'Engineered dhuri-hoon-mai.vercel.app as a bilingual-inspired editorial platform with a real-time sponsorship impact slider, a 2006–2026 historical milestone timeline, a 5-pillar program matrix, and a dedicated Grand Excellence Gala 2026 registration experience.',
+    implementation: [
+      'Built the interactive Pledging Simulator that dynamically calculates how monthly contributions (e.g., ₹1,500/mo to ₹25,000/mo) translate into school kits, nutrition, and artisan training.',
+      'Crafted an editorial typography system pairing serif headlines, Hindi Devanagari watermarks, custom magnetic cursor interactions, and mobile-first WhatsApp/call donor actions.',
+      'Architected multi-view routing across Home, 5-Pillar Programs, Gala 2026, Impact Stories, and Contact & Sponsorship portals.',
     ],
+    stack: ['React / Vite', 'Editorial UI & Motion Design', 'Interactive Impact Simulator', 'Responsive Architecture', 'Vercel'],
     metrics: [
-      { value: 'MCP Native', label: 'Deterministic Tool Execution' },
-      { value: 'Hybrid', label: 'Local + Frontier Cloud Routing' },
-      { value: 'Persistent', label: 'Semantic Project Memory' },
-    ],
-    slides: [
-      { src: '/media/projects/openinssist.png', caption: 'OpenInssist — Local-First AI Engineering Workspace' },
+      { label: 'Institutional Legacy', value: '2006 – 2026 (20 Years in Delhi NCR)' },
+      { label: 'Interactive Feature', value: 'Real-Time Sponsorship Impact Simulator' },
+      { label: 'Live Deployment', value: 'dhuri-hoon-mai.vercel.app' },
     ],
     characterComments: [
-      'OpenInssist brings MCP tools and semantic memory into a fast, local-first developer cockpit.',
-    ],
-  },
-  {
-    number: '16',
-    slug: 'rizzler',
-    title: 'Rizzler AI',
-    subtitle: 'Vision-Grounded Conversational Coach & Sub-Second Reply Engine',
-    category: 'Consumer AI App',
-    year: '2026',
-    role: 'Full-Stack Creator',
-    bentoSpan: 'col-3',
-    bentoTall: false,
-    accentColor: '#E11D48',
-    surfaceTint: '#F9E8EC',
-    liveUrl: 'https://github.com/avichal15',
-    liveLabel: 'View Project',
-    repoUrl: 'https://github.com/avichal15',
-    repoLabel: 'GitHub',
-    coverImage: '/media/projects/rizzler.png',
-    stack: ['React', 'Vision VLM', 'Streaming SSE', 'Node.js', 'PWA'],
-    summary:
-      'Staring at a text thread wondering how to reply? I built Rizzler AI so you can drop any chat screenshot and get witty, context-aware replies streamed in under 600ms.',
-    description: [
-      'Supports multi-persona tone sliders, instant screenshot OCR context extraction, and one-tap clipboard actions.',
-    ],
-    metrics: [
-      { value: '< 600ms', label: 'First-Token Streaming Reply' },
-      { value: 'Vision OCR', label: 'Instant Screenshot Context Parse' },
-      { value: '4 Tones', label: 'Calibrated Persona Modes' },
+      'Dhuri Hoon Mai ("I Am The Axis of Change") is an editorial social-impact platform featuring a live sponsorship impact simulator and 20-year timeline!',
     ],
     slides: [
-      { src: '/media/projects/rizzler.png', caption: 'Rizzler AI — Vision-Grounded Conversational Coach' },
-    ],
-    characterComments: [
-      'Drop any chat screenshot into Rizzler AI and it crafts a natural reply matched to your vibe.',
-    ],
-  },
-  {
-    number: '17',
-    slug: 'dhuri-hoon-main',
-    title: 'Dhuri Hoon Main',
-    subtitle: 'Interactive Audio-Visual Storytelling & Beat-Synced Web Experience',
-    category: 'Creative Coding & WebAudio',
-    year: '2026',
-    role: 'Creative Technologist',
-    bentoSpan: 'col-3',
-    bentoTall: false,
-    accentColor: '#CA8A04',
-    surfaceTint: '#F6F0DF',
-    liveUrl: 'https://github.com/avichal15',
-    liveLabel: 'View Project',
-    repoUrl: 'https://github.com/avichal15',
-    repoLabel: 'GitHub',
-    coverImage: '/media/projects/dhuri-hoon-main.png',
-    stack: ['React', 'WebAudio API', 'Canvas 2D / WebGL', 'Kinetic Typography'],
-    summary:
-      'An interactive audio-visual web piece I crafted that locks kinetic Hindi/English typography and particle shaders directly to the WebAudio frequency clock at 60fps.',
-    description: [
-      'Synchronizes visual scene transitions and lyric reveals directly to the WebAudio hardware clock at 60fps.',
-    ],
-    metrics: [
-      { value: '60fps', label: 'Audio-Reactive Visual Stage' },
-      { value: 'WebAudio', label: 'Hardware-Clock Lyric Sync' },
-      { value: 'Instant', label: 'Social Story Card Export' },
-    ],
-    slides: [
-      { src: '/media/projects/dhuri-hoon-main.png', caption: 'Dhuri Hoon Main — Interactive Audio-Visual Web Experience' },
-    ],
-    characterComments: [
-      'Every frame and lyric reveal here is locked directly to the WebAudio frequency spectrum.',
-    ],
-  },
-  {
-    number: '18',
-    slug: 'remotion-studio',
-    title: 'Remotion & Karo Launch Studio',
-    subtitle: 'Programmatic React-to-MP4 Video Engine & Keyboard-First Sprint Queue',
-    category: 'Programmatic Video & Productivity',
-    year: '2026',
-    role: 'Creative & Frontend Architect',
-    bentoSpan: 'col-3',
-    bentoTall: false,
-    accentColor: '#EA580C',
-    surfaceTint: '#F8EDE4',
-    liveUrl: 'https://github.com/avichal15',
-    liveLabel: 'View Studio',
-    repoUrl: 'https://github.com/avichal15',
-    repoLabel: 'GitHub',
-    coverImage: '/media/projects/remotion-studio.png',
-    stack: ['Remotion', 'React 19', 'Three.js', 'IndexedDB', 'Command Palette'],
-    summary:
-      'Instead of keyframing product videos by hand, I built a programmatic React-to-MP4 studio paired with Karo — my sub-50ms keyboard-first sprint queue.',
-    description: [
-      'Uses mathematical spring physics, parameterized React props, and automated FFmpeg audio mastering to render deterministic 60fps product launch trailers alongside a hotkey-driven sprint workspace.',
-    ],
-    metrics: [
-      { value: '60fps', label: 'Deterministic React-to-MP4 Render' },
-      { value: '< 50ms', label: 'Karo Command Palette Triage' },
-      { value: '3D Rig', label: 'Spring-Physics Camera Motion' },
-    ],
-    slides: [
-      { src: '/media/projects/remotion-studio.png', caption: 'Remotion Launch Studio — Programmatic React-to-MP4 Video Engine' },
-      { src: '/media/projects/karo.png', caption: 'Karo — Keyboard-First Action Queue & Sprint Timeboxer' },
-    ],
-    characterComments: [
-      'Why edit launch videos by hand when you can write React components and render 60fps MP4s deterministically?',
+      {
+        step: '10.01',
+        title: 'Dhuri Hoon Mai: The Central Axis of Life & Self-Reliance',
+        caption:
+          'Live editorial hero at dhuri-hoon-mai.vercel.app celebrating 20 years of women empowerment and child education across Delhi NCR.',
+        desktopImage: PROJECT_ASSET_MANIFEST['dhuri-hoon-mai'].desktop[0].src,
+        mobileImage: PROJECT_ASSET_MANIFEST['dhuri-hoon-mai'].mobile[0].src,
+        tourNote:
+          'Captured directly from the live dhuri-hoon-mai.vercel.app deployment — showcasing real community programs and verified impact metrics.',
+      },
+      {
+        step: '10.02',
+        title: 'Interactive Pledging Simulator & 2006–2026 Grassroots Timeline',
+        caption:
+          'Donors slide the monthly contribution bar to inspect real-time student sponsorship and artisan workshop allocation.',
+        desktopImage: PROJECT_ASSET_MANIFEST['dhuri-hoon-mai'].desktop[1].src,
+        mobileImage: PROJECT_ASSET_MANIFEST['dhuri-hoon-mai'].mobile[0].src,
+        tourNote:
+          'The interactive simulator turns abstract donations into tangible educational and vocational outcomes.',
+      },
+      {
+        step: '10.03',
+        title: 'Grand Excellence Gala 2026 & Five-Pillar Ecosystem',
+        caption:
+          'Flagship summit showcase and 5-pillar program architecture connecting grassroots literacy with commercial exhibition platforms.',
+        desktopImage: PROJECT_ASSET_MANIFEST['dhuri-hoon-mai'].desktop[2].src,
+        mobileImage: PROJECT_ASSET_MANIFEST['dhuri-hoon-mai'].mobile[0].src,
+        tourNote:
+          'Explore the live experience at dhuri-hoon-mai.vercel.app and the source code at avichal15/Dhuri-Hoon-Mai.',
+      },
     ],
   },
 ];
 
-export const ALL_WORK_BY_SLUG = Object.fromEntries(
-  ALL_PROJECTS.map((project) => [project.slug, project])
-);
+export const FEATURED_PROJECTS = ALL_PROJECTS.filter((project) => project.featured);
 
-// ============================================================================
-// 5 USER-APPROVED CERTIFICATIONS & CREDENTIALS (#certifications)
-// Zero mention of "Coursera" anywhere
-// ============================================================================
+export const PROJECT_COUNT = ALL_PROJECTS.length;
+
 export const CERTIFICATIONS = [
   {
-    number: '01',
-    slug: 'alpha-dsa-java',
-    title: 'Alpha — Data Structures & Algorithms in Java',
-    issuer: 'Apna College',
-    issueDate: '2024',
-    credentialId: '66369520abe8a8bb500f4cc4',
-    bentoSpan: 'col-6',
-    accentColor: '#EAB308',
-    surfaceTint: '#FAF3DF',
-    verifyUrl: 'https://drive.google.com/file/d/1XW-d99bUjhoESE_QPKTfft6neT_WcdFQ/view',
-    verifyLabel: 'View Official Certificate',
-    secondaryUrl: '/media/certifications/alpha-dsa-java.pdf',
-    secondaryLabel: 'View Certificate PDF',
-    coverImage: '/media/certifications/cert-alpha-dsa.png',
-    skills: [
-      'Java',
-      'Data Structures & Algorithms',
-      'Trees & Graphs',
-      'Dynamic Programming',
-      'Heaps & Hashing',
-      'Time & Space Complexity',
-    ],
+    id: 'wharton-ai',
+    slug: 'wharton-ai-business',
+    title: 'AI for Business Specialization',
+    issuer: 'The Wharton School — University of Pennsylvania',
+    date: '2025',
+    credentialType: 'Executive / University Specialization',
+    preview: '/media/certificates/wharton-ai.png',
+    verifyUrl: '/media/certificates/wharton-ai.png',
     summary:
-      'Completed intensive algorithmic problem-solving and data structures mastery in Java (Alpha Batch 3.0), covering 300+ problems across trees, graphs, dynamic programming, recursion, tries, and asymptotic complexity.',
-    highlights: [
-      'Mastered core and advanced data structures in Java: Arrays, Linked Lists, Stacks, Queues, Binary Trees, BSTs, Heaps, HashMaps, Tries, and Graph representations.',
-      'Solved 300+ algorithmic problems spanning Greedy strategies, Divide & Conquer, Backtracking, Segment Trees, and Dynamic Programming.',
-      'Applied strict time and space complexity optimization to production backend and systems engineering challenges.',
-    ],
+      'Applied AI strategy, machine learning analytics, people management, and ethical governance for enterprise operations.',
+    skills: ['AI Strategy', 'Predictive Analytics', 'Enterprise Governance', 'Business Operations'],
   },
   {
-    number: '02',
-    slug: 'full-stack-web-development-delta',
-    title: 'Full-Stack Web Development (Delta — MERN Stack)',
-    issuer: 'Apna College',
-    issueDate: '2024',
-    credentialId: 'DELTA-5.0-MERN',
-    bentoSpan: 'col-6',
-    accentColor: '#2563EB',
-    surfaceTint: '#E8EFFA',
-    verifyUrl: 'https://www.apnacollege.in/course/delta-5',
-    verifyLabel: 'View Program Curriculum',
-    coverImage: '/media/certifications/cert-delta-webdev.png',
-    skills: [
-      'React',
-      'Node.js',
-      'Express.js',
-      'MongoDB & SQL',
-      'REST APIs',
-      'JWT & OAuth Security',
-      'Modern CSS & Tailwind',
-    ],
+    id: 'bits-ai',
+    slug: 'bits-pilani-ai',
+    title: 'Artificial Intelligence & Machine Learning Foundations',
+    issuer: 'BITS Pilani',
+    date: '2025',
+    credentialType: 'Academic Credential',
+    preview: '/media/certificates/bits-ai.png',
+    verifyUrl: '/media/certificates/bits-ai.png',
     summary:
-      'Comprehensive end-to-end full-stack web engineering track covering modern frontend architecture in React, scalable Node.js & Express APIs, relational and NoSQL database design, authentication, and cloud deployment.',
-    highlights: [
-      'Engineered responsive, accessible frontend interfaces using semantic HTML5, modern CSS Grid/Flexbox, JavaScript ES6+, and React component architectures.',
-      'Built production RESTful APIs with Node.js and Express, implementing session/JWT authentication, middleware validation, and rate-limiting.',
-      'Designed normalized SQL schemas and MongoDB document models with indexing, aggregation pipelines, and cloud deployment workflows.',
-    ],
+      'Foundational coursework in statistical learning, neural architectures, data pipelines, and applied problem solving.',
+    skills: ['Machine Learning', 'Python Data Stack', 'Model Evaluation', 'Problem Formulation'],
   },
   {
-    number: '03',
-    slug: 'foundations-of-business-intelligence',
-    title: 'Foundations of Business Intelligence',
-    issuer: 'Google',
-    issueDate: 'May 14, 2024',
-    credentialId: 'GD9A2LQJSAG2',
-    bentoSpan: 'col-4',
-    accentColor: '#0284C7',
-    surfaceTint: '#E5F2FA',
-    verifyUrl: '/media/certifications/cert-google-bi.png',
-    verifyLabel: 'View Verified Credential',
-    coverImage: '/media/certifications/cert-google-bi.png',
-    skills: [
-      'Business Intelligence',
-      'ETL & Data Pipelines',
-      'Data Modeling',
-      'KPI Dashboards',
-      'Stakeholder Reporting',
-      'Decision Intelligence',
-    ],
+    id: 'pwc-analytics',
+    slug: 'pwc-power-bi-analytics',
+    title: 'Power BI & Business Analytics Virtual Case Experience',
+    issuer: 'PwC',
+    date: '2025',
+    credentialType: 'Industry Simulation',
+    preview: '/media/certificates/pwc-analytics.png',
+    verifyUrl: '/media/certificates/pwc-analytics.png',
     summary:
-      'Authorized by Google and signed by Amanda Brophy (Global Director of Google Career Certificates). Validates core expertise in transforming raw operational data into actionable BI pipelines, dimensional models, and executive KPI dashboards.',
-    highlights: [
-      'Mastered the end-to-end Business Intelligence lifecycle: stakeholder requirement gathering, data source auditing, ETL pipeline design, and metric governance.',
-      'Designed high-signal executive dashboards and cohort monitoring models that directly power product and e-commerce operations.',
-      'Applied BI frameworks to unify multi-channel order, fulfillment, and learner retention telemetry in production.',
-    ],
+      'Executive KPI dashboarding, customer churn diagnostics, and data-driven stakeholder storytelling.',
+    skills: ['Business Intelligence', 'KPI Modeling', 'Root-Cause Analysis', 'Executive Reporting'],
   },
   {
-    number: '04',
-    slug: 'programming-in-r-data-science',
-    title: 'Programming in R & Data Science Analytics',
-    issuer: 'Google & IIT Madras (NPTEL)',
-    issueDate: '2023 – 2024',
-    credentialId: 'NPTEL23CS97S35830272',
-    bentoSpan: 'col-4',
-    accentColor: '#0D9488',
-    surfaceTint: '#E6F4F1',
-    verifyUrl: 'https://archive.nptel.ac.in/noc/Ecertificate/?q=NPTEL23CS97S3583027210022409',
-    verifyLabel: 'Verify Official Certificate',
-    secondaryUrl: '/media/certifications/programming-in-r-data-science.pdf',
-    secondaryLabel: 'View Certificate PDF',
-    coverImage: '/media/certifications/cert-google-r.png',
-    skills: [
-      'R Programming',
-      'Tidyverse & dplyr',
-      'ggplot2 Visualization',
-      'Statistical Modeling',
-      'Regression & Classification',
-      'Linear Algebra in R',
-    ],
+    id: 'Prompt-Engineering',
+    slug: 'ibm-prompt-engineering',
+    title: 'Generative AI & Prompt Engineering',
+    issuer: 'IBM',
+    date: '2025',
+    credentialType: 'Technical Certification',
+    preview: '/media/certificates/Prompt-Engineering.png',
+    verifyUrl: '/media/certificates/Prompt-Engineering.png',
     summary:
-      'Verified credential in R programming, statistical data analysis, and engineering data science. Covers RStudio workflows, Tidyverse data wrangling, ggplot2 visualization, hypothesis testing, linear/logistic regression, and clustering.',
-    highlights: [
-      'Wrote vectorized R scripts, custom functions, and Tidyverse (dplyr, tidyr, readr) pipelines to clean, transform, and model complex datasets.',
-      'Implemented linear algebra foundations, optimization algorithms, multivariate regression, and classification models in R.',
-      'Created publication-grade visual diagnostics and reproducible analytical reports using ggplot2 and R Markdown.',
-    ],
+      'Structured prompt design, chain-of-thought orchestration, and LLM reliability patterns for production applications.',
+    skills: ['LLM Orchestration', 'Structured Outputs', 'Prompt Engineering', 'Agentic Workflows'],
   },
   {
-    number: '05',
-    slug: 'google-developer-program-credentials',
-    title: 'Google Developer Program & Gen AI Academy APAC',
-    issuer: 'Google for Developers',
-    issueDate: '2025 – 2026',
-    credentialId: 'GDP-GENAI-APAC-C3',
-    bentoSpan: 'col-4',
-    accentColor: '#D97706',
-    surfaceTint: '#FBF2E3',
-    verifyUrl: 'https://developers.google.com/profile/badges/community/gear',
-    verifyLabel: 'View Google Developer Badge',
-    secondaryUrl: 'https://me.developers.google.com/u/me',
-    secondaryLabel: 'Google Developer Profile',
-    coverImage: '/media/certifications/cert-google-dev-program.png',
-    skills: [
-      'Gemini API',
-      'Vertex AI',
-      'Gen AI Academy APAC',
-      'Google Cloud Architecture',
-      'Agentic Workflows',
-      'Google Developer Program',
-    ],
+    id: 'tata-genai',
+    slug: 'tata-genai-analytics',
+    title: 'GenAI Powered Data Analytics',
+    issuer: 'Tata Group (Forage)',
+    date: '2025',
+    credentialType: 'Industry Simulation',
+    preview: '/media/certificates/tata-genai.png',
+    verifyUrl: '/media/certificates/tata-genai.png',
     summary:
-      'Active Google Developer Program Premium member and Gen AI Academy APAC (Cohort 3) credential holder, recognized with official Google for Developers Community Gear and Cloud AI badges.',
-    highlights: [
-      'Completed the Google Developer Program Gen AI Academy APAC Edition (Cohort 3), building production multimodal and agentic applications with Gemini and Vertex AI.',
-      'Earned the official Google for Developers Community Gear credential and Premium Tier developer benefits on me.developers.google.com.',
-      'Shipped live Gemini Vision, Google Vids, and Vertex AI integrations across production web and creative automation systems.',
-    ],
+      'Exploratory data analysis, risk profiling, and AI-assisted collections strategy design.',
+    skills: ['Data Analytics', 'GenAI Decision Systems', 'Risk Modeling', 'Strategy'],
+  },
+  {
+    id: 'jpmorgan-swe',
+    slug: 'jpmorgan-software-engineering',
+    title: 'Software Engineering Job Simulation',
+    issuer: 'JPMorgan Chase & Co.',
+    date: '2025',
+    credentialType: 'Industry Simulation',
+    preview: '/media/certificates/jpmorgan-swe.png',
+    verifyUrl: '/media/certificates/jpmorgan-swe.png',
+    summary:
+      'Financial data feed integration, frontend perspective visualization, and patch verification.',
+    skills: ['Software Engineering', 'React / TypeScript', 'Data Feeds', 'Verification'],
+  },
+  {
+    id: 'deloitte-tech',
+    slug: 'deloitte-technology-consulting',
+    title: 'Technology & Data Analytics Simulation',
+    issuer: 'Deloitte',
+    date: '2025',
+    credentialType: 'Industry Simulation',
+    preview: '/media/certificates/deloitte-tech.png',
+    verifyUrl: '/media/certificates/deloitte-tech.png',
+    summary:
+      'Telemetry data classification, operational dashboarding, and enterprise system architecture proposals.',
+    skills: ['Data Telemetry', 'Systems Architecture', 'Consulting', 'Dashboard Design'],
+  },
+  {
+    id: 'outskill-genai',
+    slug: 'outskill-generative-ai',
+    title: 'Generative AI Mastermind & Automation',
+    issuer: 'Outskill',
+    date: '2025',
+    credentialType: 'Technical Intensive',
+    preview: '/media/certificates/outskill-genai.png',
+    verifyUrl: '/media/certificates/outskill-genai.png',
+    summary:
+      'Multi-tool AI automation workflows, custom agent pipelines, and rapid product prototyping.',
+    skills: ['AI Automation', 'Agent Pipelines', 'Rapid Prototyping'],
   },
 ];
 
-export const CERTIFICATIONS_BY_SLUG = Object.fromEntries(
-  CERTIFICATIONS.map((cert) => [cert.slug, cert])
-);
-
-export function getAdjacentProjects(slug) {
-  const index = ALL_PROJECTS.findIndex((p) => p.slug === slug);
-  if (index === -1) {
-    return {
-      prev: ALL_PROJECTS[ALL_PROJECTS.length - 1],
-      next: ALL_PROJECTS[0],
-    };
-  }
-  const prev = ALL_PROJECTS[(index - 1 + ALL_PROJECTS.length) % ALL_PROJECTS.length];
-  const next = ALL_PROJECTS[(index + 1) % ALL_PROJECTS.length];
-  return { prev, next };
+export function findProjectBySlug(slug) {
+  if (!slug) return null;
+  const clean = String(slug).trim().toLowerCase();
+  return (
+    ALL_PROJECTS.find(
+      (p) => p.slug.toLowerCase() === clean || p.id.toLowerCase() === clean
+    ) || null
+  );
 }
 
-export function getAdjacentCertifications(slug) {
-  const index = CERTIFICATIONS.findIndex((c) => c.slug === slug);
-  if (index === -1) {
-    return {
-      prev: CERTIFICATIONS[CERTIFICATIONS.length - 1],
-      next: CERTIFICATIONS[0],
-    };
-  }
-  const prev = CERTIFICATIONS[(index - 1 + CERTIFICATIONS.length) % CERTIFICATIONS.length];
-  const next = CERTIFICATIONS[(index + 1) % CERTIFICATIONS.length];
-  return { prev, next };
+export function findCertificationBySlug(slug) {
+  if (!slug) return null;
+  const clean = String(slug).trim().toLowerCase();
+  return (
+    CERTIFICATIONS.find(
+      (c) => c.slug.toLowerCase() === clean || c.id.toLowerCase() === clean
+    ) || null
+  );
 }
