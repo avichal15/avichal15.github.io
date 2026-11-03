@@ -6,17 +6,15 @@ const BATMAN_PITCH_RATIO = Math.pow(2, -4 / 12); // ~0.7937005 (-4 semitones)
 class SoundEngine {
   constructor() {
     this.ctx = null;
-    this.enabled = true;
+    // Strictly muted by default; never autoplay until explicit user interaction
+    this.enabled = false;
     this.volume = 0.85;
     this.isBatmanMode = false;
     this.audioCache = {};
+    this.activeAudio = null;
     this.lastBlipAt = 0;
 
     if (typeof window !== 'undefined') {
-      const saved = window.localStorage?.getItem('avichal-sound');
-      if (saved === '0') {
-        this.enabled = false;
-      }
       const unlock = () => {
         if (this.enabled) {
           this.ensureContext();
@@ -29,6 +27,30 @@ class SoundEngine {
 
   setBatmanMode(isBatman) {
     this.isBatmanMode = Boolean(isBatman);
+  }
+
+  setEnabled(flag) {
+    const next = Boolean(flag);
+    const wasEnabled = this.enabled;
+    this.enabled = next;
+    if (!next) {
+      this.stopActiveAudio();
+    } else if (!wasEnabled) {
+      this.ensureContext();
+    }
+    return this.enabled;
+  }
+
+  stopActiveAudio() {
+    if (this.activeAudio) {
+      try {
+        this.activeAudio.pause();
+        this.activeAudio.currentTime = 0;
+      } catch {
+        // Ignore audio reset errors
+      }
+      this.activeAudio = null;
+    }
   }
 
   ensureContext() {
@@ -45,16 +67,8 @@ class SoundEngine {
   }
 
   toggle() {
-    this.enabled = !this.enabled;
-    if (typeof window !== 'undefined') {
-      try {
-        window.localStorage?.setItem('avichal-sound', this.enabled ? '1' : '0');
-      } catch {
-        // ignore storage errors
-      }
-    }
+    this.setEnabled(!this.enabled);
     if (this.enabled) {
-      this.ensureContext();
       this.bell();
     }
     return this.enabled;
@@ -63,6 +77,20 @@ class SoundEngine {
   toggleMute() {
     const enabled = this.toggle();
     return !enabled;
+  }
+
+  click() {
+    this.tone(540, 0.032, 'triangle', 0.048, 0, 780);
+  }
+
+  wake() {
+    this.tone(440, 0.09, 'sine', 0.055, 0, 587.33);
+    this.tone(587.33, 0.14, 'triangle', 0.05, 0.06, 880);
+  }
+
+  sleep() {
+    this.tone(523.25, 0.12, 'sine', 0.05, 0, 392);
+    this.tone(392, 0.18, 'triangle', 0.045, 0.08, 261.63);
   }
 
   pop() {
@@ -95,7 +123,6 @@ class SoundEngine {
 
       const now = ctx.currentTime;
 
-      // a) Dramatic low-brass / sub-bass swell (80Hz -> 150Hz sawtooth through low-pass BiquadFilterNode 160Hz -> 950Hz over 0.55s)
       const brassOsc = ctx.createOscillator();
       const subOsc = ctx.createOscillator();
       const brassFilter = ctx.createBiquadFilter();
@@ -128,7 +155,6 @@ class SoundEngine {
       brassOsc.stop(now + 0.56);
       subOsc.stop(now + 0.56);
 
-      // b) Rapid LEGO brick assembly clicks (6 rapid crisp high-mid percussive clicks spaced every 55ms)
       for (let i = 0; i < 6; i += 1) {
         const clickDelay = i * 0.055;
         const baseFreq = 920 + i * 115;
@@ -136,7 +162,6 @@ class SoundEngine {
         this.noise(0.022, 0.045, clickDelay, 2400 + i * 220, 'bandpass');
       }
 
-      // c) Filtered white-noise cape swoosh (0.42s bandpass noise sweep)
       const swooshDelay = 0.14;
       const swooshDur = 0.42;
       const swooshStart = now + swooshDelay;
@@ -188,14 +213,15 @@ class SoundEngine {
     return trickId === 'superhero' ? this.batmanTransform(true) : this.trick(trickId);
   }
 
-  tone(freq, duration, type = 'sine', volume = 0.08, delay = 0, freqEnd = null, rawPitch = false) {
-    if (!this.enabled) return;
+  tone(freq, duration, type = 'sine', volume = 0.08, delay = 0, freqEnd = null, rawPitch = false, forcePlay = false) {
+    if (!this.enabled && !forcePlay) return;
     const ctx = this.ensureContext();
     if (!ctx) return;
 
     const pitchScale = this.isBatmanMode && !rawPitch ? BATMAN_PITCH_RATIO : 1;
     const adjustedFreq = Math.max(20, freq * pitchScale);
-    const adjustedFreqEnd = freqEnd !== null && freqEnd !== undefined ? Math.max(20, freqEnd * pitchScale) : null;
+    const adjustedFreqEnd =
+      freqEnd !== null && freqEnd !== undefined ? Math.max(20, freqEnd * pitchScale) : null;
 
     const start = ctx.currentTime + delay;
     const osc = ctx.createOscillator();
@@ -217,8 +243,8 @@ class SoundEngine {
     osc.stop(start + duration + 0.01);
   }
 
-  noise(duration, volume = 0.06, delay = 0, filterFreq = 1200, filterType = 'bandpass') {
-    if (!this.enabled) return;
+  noise(duration, volume = 0.06, delay = 0, filterFreq = 1200, filterType = 'bandpass', forcePlay = false) {
+    if (!this.enabled && !forcePlay) return;
     const ctx = this.ensureContext();
     if (!ctx) return;
 
@@ -248,7 +274,6 @@ class SoundEngine {
     src.stop(start + duration + 0.01);
   }
 
-  // Character speech blip (plays as words highlight on scroll or in speech bubbles)
   blip(char = 'a') {
     if (!this.enabled) return;
     const now = performance.now();
@@ -296,7 +321,6 @@ class SoundEngine {
   }
 
   sneeze() {
-    // "Ah... choo!"
     this.tone(360, 0.14, 'triangle', 0.06, 0, 620);
     this.noise(0.18, 0.11, 0.15, 1400, 'bandpass');
     this.tone(520, 0.14, 'sawtooth', 0.06, 0.15, 210);
@@ -311,6 +335,23 @@ class SoundEngine {
     [330, 392, 494, 523, 659, 523, 659, 784].forEach((f, i) => {
       this.tone(f, 0.08, 'square', 0.04, i * 0.085, f * 1.04);
     });
+  }
+
+  backflip() {
+    this.whoosh();
+    this.tone(300, 0.22, 'triangle', 0.07, 0.04, 820);
+    this.tone(660, 0.14, 'sine', 0.06, 0.28, 440);
+  }
+
+  spin() {
+    for (let i = 0; i < 5; i += 1) {
+      this.tone(360 + i * 90, 0.07, 'sine', 0.055, i * 0.055, 480 + i * 110);
+    }
+  }
+
+  wave() {
+    this.tone(523.25, 0.09, 'sine', 0.06, 0, 659.25);
+    this.tone(659.25, 0.12, 'triangle', 0.055, 0.08, 783.99);
   }
 
   panic() {
@@ -355,20 +396,22 @@ class SoundEngine {
 
   // ============================================================================
   // PHONEY'S 6 DEFAULT QUICK TRAY AUDIO EMOJIS
-  // 1: Cheer 👏 | 2: Faaah 😱 | 3: Fart 💨 | 4: Womp Womp 😑 | 5: Wow 🤩 | 6: Yay! 🙌
+  // Explicit user click on an Audio Emoji button plays that sample cleanly
+  // while stopping any overlapping clip.
   // ============================================================================
   playPhoneyEmoji(id) {
-    if (!this.enabled) {
-      this.enabled = true;
-    }
+    this.stopActiveAudio();
     this.ensureContext();
 
+    const normalized = String(id || '').toLowerCase();
     const fileMap = {
       cheer: '/sounds/original/cheer.wav',
       faaah: '/sounds/original/faaah.wav',
+      faah: '/sounds/original/faaah.wav',
       fart: '/sounds/original/fart.wav',
       wompwomp: '/sounds/original/womp-womp.wav',
       womp: '/sounds/original/womp-womp.wav',
+      sad: '/sounds/original/womp-womp.wav',
       wow: '/sounds/original/wow.wav',
       yay: '/sounds/original/yay.wav',
     };
@@ -376,73 +419,79 @@ class SoundEngine {
     const fallbackMap = {
       cheer: '/media/sounds/phoney/cheer.wav',
       faaah: '/media/sounds/phoney/faaah.wav',
+      faah: '/media/sounds/phoney/faaah.wav',
       fart: '/media/sounds/phoney/fart.wav',
       wompwomp: '/media/sounds/phoney/womp-womp.wav',
       womp: '/media/sounds/phoney/womp-womp.wav',
+      sad: '/media/sounds/phoney/womp-womp.wav',
       wow: '/media/sounds/phoney/wow.wav',
       yay: '/media/sounds/phoney/yay.wav',
     };
 
-    const soundUrl = fileMap[id];
-    const fallbackUrl = fallbackMap[id];
+    const soundUrl = fileMap[normalized];
+    const fallbackUrl = fallbackMap[normalized];
     const targetVolume = Math.max(0, Math.min(1, this.volume ?? 0.85));
 
     if (soundUrl && typeof Audio !== 'undefined') {
       try {
         const audio = new Audio(soundUrl);
         audio.volume = targetVolume;
-        this.audioCache[id] = audio;
+        this.activeAudio = audio;
+        this.audioCache[normalized] = audio;
         audio.play().catch(() => {
           if (fallbackUrl) {
             try {
               const fallbackAudio = new Audio(fallbackUrl);
               fallbackAudio.volume = targetVolume;
+              this.activeAudio = fallbackAudio;
               fallbackAudio.play().catch(() => {
-                this.synthesizePhoneyEmoji(id);
+                this.synthesizePhoneyEmoji(normalized, true);
               });
               return;
             } catch {
               // Fall back to synthesis
             }
           }
-          this.synthesizePhoneyEmoji(id);
+          this.synthesizePhoneyEmoji(normalized, true);
         });
         return;
       } catch {
         // Fall back to synthesis
       }
     }
-    this.synthesizePhoneyEmoji(id);
+    this.synthesizePhoneyEmoji(normalized, true);
   }
 
-  synthesizePhoneyEmoji(id) {
+  synthesizePhoneyEmoji(id, forcePlay = true) {
     switch (id) {
       case 'cheer': {
         for (let i = 0; i < 9; i += 1) {
-          this.noise(0.055, 0.075, i * 0.048, 1500 + (i % 3) * 350, 'bandpass');
+          this.noise(0.055, 0.075, i * 0.048, 1500 + (i % 3) * 350, 'bandpass', forcePlay);
         }
         [523.25, 659.25, 783.99, 1046.5].forEach((freq, idx) => {
-          this.tone(freq, 0.28, 'triangle', 0.055, 0.06 + idx * 0.045, freq * 1.03);
+          this.tone(freq, 0.28, 'triangle', 0.055, 0.06 + idx * 0.045, freq * 1.03, false, forcePlay);
         });
         break;
       }
-      case 'faaah': {
-        this.noise(0.12, 0.08, 0, 1800, 'highpass');
-        this.tone(620, 0.52, 'sawtooth', 0.065, 0.05, 290);
-        this.tone(930, 0.48, 'triangle', 0.05, 0.06, 435);
-        this.tone(310, 0.55, 'sine', 0.07, 0.05, 165);
+      case 'faaah':
+      case 'faah': {
+        this.noise(0.12, 0.08, 0, 1800, 'highpass', forcePlay);
+        this.tone(620, 0.52, 'sawtooth', 0.065, 0.05, 290, false, forcePlay);
+        this.tone(930, 0.48, 'triangle', 0.05, 0.06, 435, false, forcePlay);
+        this.tone(310, 0.55, 'sine', 0.07, 0.05, 165, false, forcePlay);
         break;
       }
       case 'fart': {
-        this.tone(135, 0.36, 'sawtooth', 0.095, 0, 62);
+        this.tone(135, 0.36, 'sawtooth', 0.095, 0, 62, false, forcePlay);
         for (let i = 0; i < 7; i += 1) {
-          this.tone(115 - i * 6, 0.045, 'square', 0.06, i * 0.045, 72);
+          this.tone(115 - i * 6, 0.045, 'square', 0.06, i * 0.045, 72, false, forcePlay);
         }
-        this.noise(0.32, 0.065, 0.02, 260, 'lowpass');
+        this.noise(0.32, 0.065, 0.02, 260, 'lowpass', forcePlay);
         break;
       }
       case 'wompwomp':
-      case 'womp': {
+      case 'womp':
+      case 'sad': {
         const notes = [
           { f1: 466.16, f2: 446.0, d: 0.22, t: 0 },
           { f1: 440.0, f2: 420.0, d: 0.22, t: 0.24 },
@@ -450,25 +499,25 @@ class SoundEngine {
           { f1: 392.0, f2: 330.0, d: 0.46, t: 0.72 },
         ];
         notes.forEach((n) => {
-          this.tone(n.f1, n.d, 'sawtooth', 0.065, n.t, n.f2);
-          this.tone(n.f1 * 0.5, n.d, 'triangle', 0.055, n.t, n.f2 * 0.5);
+          this.tone(n.f1, n.d, 'sawtooth', 0.065, n.t, n.f2, false, forcePlay);
+          this.tone(n.f1 * 0.5, n.d, 'triangle', 0.055, n.t, n.f2 * 0.5, false, forcePlay);
         });
         break;
       }
       case 'wow': {
-        this.tone(260, 0.22, 'triangle', 0.085, 0, 680);
-        this.tone(680, 0.26, 'triangle', 0.08, 0.2, 340);
-        this.tone(1046.5, 0.14, 'sine', 0.055, 0.15, 1318.5);
-        this.tone(1318.5, 0.18, 'sine', 0.05, 0.25, 1567.98);
+        this.tone(260, 0.22, 'triangle', 0.085, 0, 680, false, forcePlay);
+        this.tone(680, 0.26, 'triangle', 0.08, 0.2, 340, false, forcePlay);
+        this.tone(1046.5, 0.14, 'sine', 0.055, 0.15, 1318.5, false, forcePlay);
+        this.tone(1318.5, 0.18, 'sine', 0.05, 0.25, 1567.98, false, forcePlay);
         break;
       }
       case 'yay':
       default: {
         const arp = [523.25, 659.25, 783.99, 1046.5, 1318.5];
         arp.forEach((f, idx) => {
-          this.tone(f, 0.16, 'triangle', 0.075, idx * 0.055, f * 1.06);
+          this.tone(f, 0.16, 'triangle', 0.075, idx * 0.055, f * 1.06, false, forcePlay);
         });
-        this.noise(0.18, 0.05, 0.22, 2200, 'highpass');
+        this.noise(0.18, 0.05, 0.22, 2200, 'highpass', forcePlay);
         break;
       }
     }
