@@ -1138,8 +1138,17 @@ export default function Minifig({
   const lastFaceSignatureRef = useRef('');
 
   useEffect(() => {
+    if (!trickState) return;
+    if (typeof trickState === 'string') {
+      activeTrickRef.current = {
+        nonce: Date.now() + Math.random(),
+        startedAt: performance.now(),
+        kind: trickState,
+        duration: 1.45,
+      };
+      return;
+    }
     if (
-      trickState &&
       trickState.nonce !== activeTrickRef.current.nonce &&
       (trickState.kind || trickState.name)
     ) {
@@ -1147,7 +1156,7 @@ export default function Minifig({
         nonce: trickState.nonce,
         startedAt: trickState.startedAt || performance.now(),
         kind: trickState.kind || trickState.name,
-        duration: trickState.duration || 1.35,
+        duration: trickState.duration || 1.45,
       };
     }
   }, [trickState]);
@@ -1364,7 +1373,16 @@ export default function Minifig({
 
     const pointer = globalPointerRef?.current ?? state.pointer;
 
-    const targetWalk = isWalking && !isGrabbed ? 1 : 0;
+    const liveScrollVel =
+      typeof scrollVelocity === 'object' && scrollVelocity !== null
+        ? scrollVelocity.current || 0
+        : Number(scrollVelocity) || 0;
+
+    const effectiveIsWalking = isWalking || Math.abs(liveScrollVel) > 1.2;
+    const effectiveWalkDirection =
+      Math.abs(liveScrollVel) > 1.2 ? (liveScrollVel >= 0 ? -1 : 1) : walkDirection;
+
+    const targetWalk = effectiveIsWalking && !isGrabbed ? 1 : 0;
     walkBlendRef.current = dampValue(walkBlendRef.current, targetWalk, 14, delta);
     if (walkBlendRef.current > 0.001) {
       walkCycleRef.current += delta * 15.5 * walkBlendRef.current;
@@ -1374,7 +1392,7 @@ export default function Minifig({
       mood,
       emotion,
       isReading,
-      scrollVelocity,
+      scrollVelocity: liveScrollVel,
       elapsed,
       pointer,
       trickKind,
@@ -1382,7 +1400,7 @@ export default function Minifig({
       isBatman,
       walkBlend: walkBlendRef.current,
       walkCycle: walkCycleRef.current,
-      walkDirection,
+      walkDirection: effectiveWalkDirection,
       isGrabbed,
       suitUpProgress,
       expressionKind,
