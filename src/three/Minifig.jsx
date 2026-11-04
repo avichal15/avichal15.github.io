@@ -3,10 +3,11 @@ import { useFrame, useLoader } from '@react-three/fiber';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { OUTFITS } from '../data/portfolioData';
+import { upgradeCharacterMaterialsToABS } from '../utils/upgradeMinifigurePBR';
 
 const OUTFIT_MAP = new Map(OUTFITS.map((outfit) => [outfit.id, outfit]));
 
-const LAUGH_SET = new Set(['laugh', 'cheer', 'yay', 'happy', 'giggle', 'tickle', 'dance']);
+const LAUGH_SET = new Set(['laugh', 'cheer', 'yay', 'giggle', 'tickle', 'dance']);
 const SHOCK_SET = new Set(['faaah', 'wow', 'surprised', 'panic']);
 const CHEEKY_SET = new Set(['fart', 'cheeky', 'peekaboo', 'selfie']);
 const SAD_SET = new Set(['womp-womp', 'wompwomp', 'womp', 'sad', 'sulk', 'dizzy']);
@@ -75,6 +76,9 @@ function paintHeadExpressionCanvas({
   isReading,
   isBlinking,
   elapsed,
+  pointerX = 0,
+  pointerY = 0,
+  isBatman = false,
 }) {
   if (!ctx || !baseImage) return;
 
@@ -127,10 +131,10 @@ function paintHeadExpressionCanvas({
 
   const drawTalkingMouth = () => {
     eraseMouth();
-    const openAmount = Math.abs(Math.sin(elapsed * 16));
-    const syllableMod = 0.72 + 0.28 * Math.cos(elapsed * 7.5);
-    const mouthHalfW = 14 + openAmount * 6.5 * syllableMod;
-    const mouthHalfH = 2.5 + openAmount * 6.8 * syllableMod;
+    const openAmount = Math.abs(Math.sin(elapsed * 22));
+    const syllableMod = 0.7 + 0.3 * Math.cos(elapsed * 9.5);
+    const mouthHalfW = 13.5 + openAmount * 7.2 * syllableMod;
+    const mouthHalfH = 2.0 + openAmount * 7.8 * syllableMod;
 
     ctx.save();
     ctx.beginPath();
@@ -172,6 +176,129 @@ function paintHeadExpressionCanvas({
     ctx.stroke();
   };
 
+  // When Batman cowl is active, completely mask out human eyes/brows on the Head cylinder
+  // so ONLY the cowl's upper white eye lenses and lower mouth/beard cutout are visible!
+  if (isBatman) {
+    // 1. Paint solid matte cowl black over the entire eye/brow/nose-bridge zone
+    ctx.fillStyle = '#0B0C10';
+    ctx.fillRect(90, 80, 240, 98);
+
+    // 2. Paint the LEGO Batman white eye-band (y = 98..136) that shines through the 3D helmet eye holes
+    ctx.fillStyle = '#F8FAFC';
+    if (isBlinking) {
+      ctx.fillRect(130, 117, 160, 5);
+    } else if (expressionKind === 'laugh') {
+      ctx.fillRect(130, 102, 160, 22);
+    } else if (expressionKind === 'cheeky') {
+      ctx.fillRect(130, 98, 78, 36);
+      ctx.fillRect(210, 114, 80, 8);
+    } else if (expressionKind === 'sad') {
+      ctx.fillRect(130, 108, 160, 22);
+    } else {
+      ctx.fillRect(130, 96, 160, 38);
+    }
+
+    // 3. Clean upper cheek skin just above the moustache/stubble so zero human eye pixels appear
+    ctx.fillStyle = SKIN_TONE;
+    ctx.fillRect(156, 178, 106, 13);
+
+    // 4. Draw only the mouth expression inside the lower cowl cutout
+    if (isReading || expressionKind === 'reading') {
+      drawTalkingMouth();
+      return;
+    }
+    if (expressionKind === 'laugh') {
+      eraseMouth();
+      const laughPulse = 1 + Math.sin(elapsed * 18) * 0.08;
+      const mW = 20 * laughPulse;
+      const mH = 10.5 * laughPulse;
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(mouthCenterX - mW, mouthCenterY - 4);
+      ctx.lineTo(mouthCenterX + mW, mouthCenterY - 4);
+      ctx.bezierCurveTo(
+        mouthCenterX + mW,
+        mouthCenterY + mH,
+        mouthCenterX - mW,
+        mouthCenterY + mH,
+        mouthCenterX - mW,
+        mouthCenterY - 4
+      );
+      ctx.closePath();
+      ctx.fillStyle = MOUTH_DARK;
+      ctx.fill();
+      ctx.clip();
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(mouthCenterX - mW, mouthCenterY - 5, mW * 2, 5.2);
+      ctx.fillStyle = TONGUE_PINK;
+      ctx.beginPath();
+      ctx.ellipse(mouthCenterX, mouthCenterY + mH * 0.62, mW * 0.68, 5.8, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+      ctx.strokeStyle = INK_DARK;
+      ctx.lineWidth = 2.4;
+      ctx.beginPath();
+      ctx.moveTo(mouthCenterX - mW, mouthCenterY - 4);
+      ctx.lineTo(mouthCenterX + mW, mouthCenterY - 4);
+      ctx.bezierCurveTo(
+        mouthCenterX + mW,
+        mouthCenterY + mH,
+        mouthCenterX - mW,
+        mouthCenterY + mH,
+        mouthCenterX - mW,
+        mouthCenterY - 4
+      );
+      ctx.closePath();
+      ctx.stroke();
+      return;
+    }
+    if (expressionKind === 'shocked') {
+      eraseMouth();
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(209, 219, 9, 0, Math.PI * 2);
+      ctx.fillStyle = MOUTH_DARK;
+      ctx.fill();
+      ctx.clip();
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(198, 209, 22, 3.8);
+      ctx.fillStyle = TONGUE_PINK;
+      ctx.beginPath();
+      ctx.arc(209, 226, 6.5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+      ctx.strokeStyle = INK_DARK;
+      ctx.lineWidth = 2.4;
+      ctx.beginPath();
+      ctx.arc(209, 219, 9, 0, Math.PI * 2);
+      ctx.stroke();
+      return;
+    }
+    if (expressionKind === 'cheeky') {
+      eraseMouth();
+      ctx.strokeStyle = INK_DARK;
+      ctx.lineWidth = 4.2;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(191, 220);
+      ctx.quadraticCurveTo(211, 224, 228, 212);
+      ctx.stroke();
+      return;
+    }
+    if (expressionKind === 'sad') {
+      eraseMouth();
+      ctx.strokeStyle = INK_DARK;
+      ctx.lineWidth = 4.2;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(192, 225);
+      ctx.quadraticCurveTo(209, 214, 226, 225);
+      ctx.stroke();
+      return;
+    }
+    return;
+  }
+
   // 1. Laughing / Joyful expression
   if (expressionKind === 'laugh') {
     eraseBrows();
@@ -188,14 +315,32 @@ function paintHeadExpressionCanvas({
       ctx.stroke();
     });
 
-    // Bold happy curved ^ ^ squinting laughing arcs
-    ctx.strokeStyle = INK_DARK;
-    ctx.lineWidth = 4.5;
-    [leftEyeX, rightEyeX].forEach((cx) => {
-      ctx.beginPath();
-      ctx.arc(cx, eyeY + 6, 12.5, 1.15 * Math.PI, 1.85 * Math.PI);
-      ctx.stroke();
-    });
+    // Only squint on rapid tickle; otherwise keep bright open joyful eyes
+    if (isBlinking) {
+      ctx.strokeStyle = INK_DARK;
+      ctx.lineWidth = 4.5;
+      [leftEyeX, rightEyeX].forEach((cx) => {
+        ctx.beginPath();
+        ctx.arc(cx, eyeY + 6, 12.5, 1.15 * Math.PI, 1.85 * Math.PI);
+        ctx.stroke();
+      });
+    } else {
+      const shiftX = THREE.MathUtils.clamp(pointerX * 4.0, -4.0, 4.0);
+      const shiftY = THREE.MathUtils.clamp(-pointerY * 2.5, -2.5, 2.5);
+      [leftEyeX, rightEyeX].forEach((cx) => {
+        const sx = cx + shiftX;
+        const sy = eyeY + shiftY;
+        ctx.fillStyle = INK_DARK;
+        ctx.beginPath();
+        ctx.arc(sx, sy, eyeR, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#FFFFFF';
+        ctx.beginPath();
+        ctx.arc(sx - 4, sy - 4, 4.2, 0, Math.PI * 2);
+        ctx.arc(sx + 3.5, sy + 3.5, 1.9, 0, Math.PI * 2);
+        ctx.fill();
+      });
+    }
 
     // Warm rosy cheek blushes at (158, 174) and (260, 174)
     ctx.fillStyle = 'rgba(225, 91, 100, 0.38)';
@@ -203,6 +348,11 @@ function paintHeadExpressionCanvas({
     ctx.ellipse(158, 174, 9.5, 5.5, 0, 0, Math.PI * 2);
     ctx.ellipse(260, 174, 9.5, 5.5, 0, 0, Math.PI * 2);
     ctx.fill();
+
+    if (isReading && rawSignal !== 'tickle') {
+      drawTalkingMouth();
+      return;
+    }
 
     // Big joyful open D-shaped laughing mouth at (209, 218)
     const laughPulse = 1 + Math.sin(elapsed * 18) * 0.08;
@@ -300,6 +450,11 @@ function paintHeadExpressionCanvas({
         ctx.fill();
       }
     });
+
+    if (isReading && rawSignal !== 'grabbed') {
+      drawTalkingMouth();
+      return;
+    }
 
     // Surprised round O mouth (radius = 9px) at (209, 219)
     ctx.save();
@@ -448,18 +603,20 @@ function paintHeadExpressionCanvas({
       drawClosedEyelids();
     } else {
       eraseEyes(16.5);
-      const offsetX = Math.sin(elapsed * 3.5) * 3.5;
+      const offsetX = THREE.MathUtils.clamp(pointerX * 4.2 + Math.sin(elapsed * 3.2) * 1.6, -4.5, 4.5);
+      const offsetY = THREE.MathUtils.clamp(-pointerY * 2.6, -2.8, 2.8);
       [leftEyeX, rightEyeX].forEach((cx) => {
         const shiftedX = cx + offsetX;
+        const shiftedY = eyeY + offsetY;
         ctx.fillStyle = INK_DARK;
         ctx.beginPath();
-        ctx.arc(shiftedX, eyeY, eyeR - 0.5, 0, Math.PI * 2);
+        ctx.arc(shiftedX, shiftedY, eyeR - 0.2, 0, Math.PI * 2);
         ctx.fill();
 
         ctx.fillStyle = '#FFFFFF';
         ctx.beginPath();
-        ctx.arc(shiftedX - 4, eyeY - 4, 4, 0, Math.PI * 2);
-        ctx.arc(shiftedX + 3.5, eyeY + 3.5, 1.8, 0, Math.PI * 2);
+        ctx.arc(shiftedX - 4, shiftedY - 4, 4.1, 0, Math.PI * 2);
+        ctx.arc(shiftedX + 3.5, shiftedY + 3.5, 1.8, 0, Math.PI * 2);
         ctx.fill();
       });
     }
@@ -468,9 +625,26 @@ function paintHeadExpressionCanvas({
     return;
   }
 
-  // 6. Periodic Natural Blink on default face
+  // 6. Default Attentive Face: Gaze tracks cursor + Periodic Natural Blink
   if (isBlinking) {
     drawClosedEyelids();
+  } else if (Math.abs(pointerX) > 0.04 || Math.abs(pointerY) > 0.04) {
+    eraseEyes(16.5);
+    const shiftX = THREE.MathUtils.clamp(pointerX * 4.4, -4.4, 4.4);
+    const shiftY = THREE.MathUtils.clamp(-pointerY * 2.8, -2.8, 2.8);
+    [leftEyeX, rightEyeX].forEach((cx) => {
+      const sx = cx + shiftX;
+      const sy = eyeY + shiftY;
+      ctx.fillStyle = INK_DARK;
+      ctx.beginPath();
+      ctx.arc(sx, sy, eyeR - 0.2, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#FFFFFF';
+      ctx.beginPath();
+      ctx.arc(sx - 4, sy - 4, 4.1, 0, Math.PI * 2);
+      ctx.arc(sx + 3.5, sy + 3.5, 1.8, 0, Math.PI * 2);
+      ctx.fill();
+    });
   }
 }
 
@@ -489,7 +663,6 @@ function getCharacterPose({
   walkDirection,
   isGrabbed,
   suitUpProgress = 0,
-  expressionKind = 'normal',
 }) {
   const idleWave = Math.sin(elapsed * 2.2);
   const idleBounce = Math.abs(Math.sin(elapsed * 2.2));
@@ -498,25 +671,25 @@ function getCharacterPose({
 
   const pose = {
     rootX: 0,
-    rootY: idleBounce * 0.015,
+    rootY: idleBounce * 0.003,
     rootZ: 0,
-    rootRotX: pointer.y * -0.05,
-    rootRotY: pointer.x * 0.28,
-    rootRotZ: pointer.x * -0.02,
+    rootRotX: pointer.y * -0.04,
+    rootRotY: pointer.x * 0.26,
+    rootRotZ: pointer.x * -0.015,
     scaleMult: 1,
-    torsoX: pointer.y * -0.06,
-    torsoY: pointer.x * 0.16,
+    torsoX: pointer.y * -0.05,
+    torsoY: pointer.x * 0.18,
     torsoZ: 0,
-    headX: -pointer.y * 0.22,
-    headY: pointer.x * 0.38,
+    headX: -pointer.y * 0.26,
+    headY: pointer.x * 0.44,
     headZ: pointer.x * -0.04,
-    leftArmX: idleWave * 0.05,
+    leftArmX: idleWave * 0.03,
     leftArmZ: 0.04,
-    rightArmX: -idleWave * 0.05,
+    rightArmX: -idleWave * 0.03,
     rightArmZ: -0.04,
     leftLegX: 0,
     rightLegX: 0,
-    capeX: 0.14 + idleBounce * 0.04 + scrollBillow,
+    capeX: 0.14 + idleBounce * 0.02 + scrollBillow,
   };
 
   // Grabbed in mid-air: dangling legs & flailing arms
@@ -569,14 +742,14 @@ function getCharacterPose({
     pose.headY += Math.sin(elapsed * 2.5) * 0.08;
   }
 
-  // Laughing / Joyful rhythmic shoulder/torso bounce & backward head tilt
-  if (expressionKind === 'laugh' || LAUGH_SET.has(String(emotion || mood || '').toLowerCase())) {
-    const laughBounce = Math.abs(Math.sin(elapsed * 14)) * 0.06;
+  // Brief chuckle shoulder/torso bounce ONLY on active tickle
+  if (String(emotion || '').toLowerCase() === 'tickle') {
+    const laughBounce = Math.abs(Math.sin(elapsed * 14)) * 0.025;
     pose.rootY += laughBounce;
-    pose.torsoX -= laughBounce * 0.85;
-    pose.headX -= 0.14;
-    pose.leftArmX -= laughBounce * 2.2;
-    pose.rightArmX -= laughBounce * 2.2;
+    pose.torsoX -= laughBounce * 0.5;
+    pose.headX -= 0.08;
+    pose.leftArmX -= laughBounce * 1.2;
+    pose.rightArmX -= laughBounce * 1.2;
   }
 
   if (isBatman) {
@@ -783,41 +956,6 @@ function getCharacterPose({
   return pose;
 }
 
-function createBatmanEyeSlitMesh(sideSign) {
-  const shape = new THREE.Shape();
-  // Angular fierce Batman eye slit polygon
-  shape.moveTo(-0.042 * sideSign, -0.008);
-  shape.lineTo(0.042 * sideSign, 0.011);
-  shape.lineTo(0.036 * sideSign, 0.022);
-  shape.lineTo(-0.038 * sideSign, 0.006);
-  shape.closePath();
-
-  const geometry = new THREE.ExtrudeGeometry(shape, {
-    depth: 0.044,
-    bevelEnabled: true,
-    bevelThickness: 0.004,
-    bevelSize: 0.003,
-    bevelSegments: 2,
-  });
-  geometry.center();
-
-  const material = new THREE.MeshPhysicalMaterial({
-    color: '#ffffff',
-    emissive: new THREE.Color('#ffffff'),
-    emissiveIntensity: 0.9,
-    roughness: 0.12,
-    metalness: 0.02,
-    clearcoat: 0.5,
-    clearcoatRoughness: 0.1,
-  });
-
-  const mesh = new THREE.Mesh(geometry, material);
-  mesh.position.set(sideSign * 0.115, 0.34, 0.375);
-  mesh.rotation.y = sideSign * 0.28;
-  mesh.rotation.z = sideSign * 0.18;
-  return mesh;
-}
-
 function createUtilityBeltGroup() {
   const beltGroup = new THREE.Group();
   beltGroup.name = 'BatmanUtilityBelt';
@@ -1022,15 +1160,11 @@ export default function Minifig({
       }
     });
 
-    // Attach glowing white slit eyes to BatmanHelmet and raise cowl +0.04 for beard/mouth clarity
+    // Align BatmanHelmet cowl cleanly over nose bridge while keeping white eye cutouts crisp
     let batEyeLeft = null;
     let batEyeRight = null;
     if (nodes.BatmanHelmet) {
-      nodes.BatmanHelmet.position.y += 0.04;
-      batEyeLeft = createBatmanEyeSlitMesh(-1);
-      batEyeRight = createBatmanEyeSlitMesh(1);
-      nodes.BatmanHelmet.add(batEyeLeft);
-      nodes.BatmanHelmet.add(batEyeRight);
+      nodes.BatmanHelmet.position.y += 0.026;
     }
 
     // Attach 3D molded yellow LEGO utility belt at waist seam on Hips
@@ -1241,7 +1375,8 @@ export default function Minifig({
       currentRig.utilityBelt.visible = isBatman;
     }
 
-    scalePulse.current = 1.08;
+    upgradeCharacterMaterialsToABS(currentRig.root);
+    scalePulse.current = 1.04;
   }, [outfitId, atlasByKey, baseAtlas, gothamCape, hairAtlas, rig]);
 
   useFrame((state, delta) => {
@@ -1285,26 +1420,7 @@ export default function Minifig({
       isGrabbed,
     });
 
-    // Live 60fps facial emotion canvas updates on Head
-    if (faceSurface && selectedAtlas?.image) {
-      const isAnimatedFace = isReading || expressionKind === 'reading' || expressionKind === 'laugh';
-      const timeBucket = isAnimatedFace ? Math.floor(elapsed * 60) : 0;
-      const signature = `${outfit.atlasKey}:${expressionKind}:${rawSignal}:${isReading ? 1 : 0}:${isBlinking ? 1 : 0}:${timeBucket}`;
 
-      if (signature !== lastFaceSignatureRef.current) {
-        lastFaceSignatureRef.current = signature;
-        paintHeadExpressionCanvas({
-          ctx: faceSurface.ctx,
-          baseImage: selectedAtlas.image,
-          expressionKind,
-          rawSignal,
-          isReading,
-          isBlinking,
-          elapsed,
-        });
-        faceSurface.texture.needsUpdate = true;
-      }
-    }
 
     // Scale Batman's glowing white slit eyes during blink / laugh / squint / shock / wink
     const { batEyeLeft, batEyeRight } = rigRef.current;
@@ -1373,32 +1489,57 @@ export default function Minifig({
 
     const pointer = globalPointerRef?.current ?? state.pointer;
 
+    // Re-paint face if pointer moved noticeably
+    if (faceSurface && selectedAtlas?.image) {
+      const pBucketX = Math.round((pointer?.x || 0) * 12);
+      const pBucketY = Math.round((pointer?.y || 0) * 12);
+      const isAnimatedFace = isReading || expressionKind === 'reading' || expressionKind === 'laugh';
+      const timeBucket = isAnimatedFace ? Math.floor(elapsed * 45) : 0;
+      const sig = `${outfit.atlasKey}:${isBatman ? 1 : 0}:${expressionKind}:${rawSignal}:${isReading ? 1 : 0}:${isBlinking ? 1 : 0}:${timeBucket}:${pBucketX}:${pBucketY}`;
+      if (sig !== lastFaceSignatureRef.current) {
+        lastFaceSignatureRef.current = sig;
+        paintHeadExpressionCanvas({
+          ctx: faceSurface.ctx,
+          baseImage: selectedAtlas.image,
+          expressionKind,
+          rawSignal,
+          isReading,
+          isBlinking,
+          elapsed,
+          pointerX: pointer?.x || 0,
+          pointerY: pointer?.y || 0,
+          isBatman,
+        });
+        faceSurface.texture.needsUpdate = true;
+      }
+    }
+
     const liveScrollVel =
       typeof scrollVelocity === 'object' && scrollVelocity !== null
         ? scrollVelocity.current || 0
         : Number(scrollVelocity) || 0;
 
-    const effectiveIsWalking = isWalking || Math.abs(liveScrollVel) > 1.2;
-    const effectiveWalkDirection =
-      Math.abs(liveScrollVel) > 1.2 ? (liveScrollVel >= 0 ? -1 : 1) : walkDirection;
+    // Walk ONLY when translating between section/project slots (isWalking passed from App.jsx)
+    const effectiveIsWalking = Boolean(isWalking) && !badgeMode && !isGrabbed;
+    const effectiveWalkDirection = walkDirection;
 
-    const targetWalk = effectiveIsWalking && !isGrabbed ? 1 : 0;
-    walkBlendRef.current = dampValue(walkBlendRef.current, targetWalk, 14, delta);
+    const targetWalk = effectiveIsWalking ? 1 : 0;
+    walkBlendRef.current = dampValue(walkBlendRef.current, targetWalk, 18, delta);
     if (walkBlendRef.current > 0.001) {
-      walkCycleRef.current += delta * 15.5 * walkBlendRef.current;
+      walkCycleRef.current += delta * 15.0 * walkBlendRef.current;
     }
 
     const pose = getCharacterPose({
-      mood,
+      mood: badgeMode ? 'neutral' : mood,
       emotion,
       isReading,
       scrollVelocity: liveScrollVel,
       elapsed,
       pointer,
-      trickKind,
-      trickProgress,
+      trickKind: badgeMode ? null : trickKind,
+      trickProgress: badgeMode ? 0 : trickProgress,
       isBatman,
-      walkBlend: walkBlendRef.current,
+      walkBlend: badgeMode ? 0 : walkBlendRef.current,
       walkCycle: walkCycleRef.current,
       walkDirection: effectiveWalkDirection,
       isGrabbed,
@@ -1409,17 +1550,28 @@ export default function Minifig({
     scalePulse.current = dampValue(scalePulse.current, 1, 9, delta);
 
     if (outerGroup.current) {
-      const targetY = (badgeMode ? -1.35 : -1.02) + pose.rootY;
-      const targetScale = (badgeMode ? 0.96 : 0.72) * scalePulse.current * pose.scaleMult;
-      outerGroup.current.position.y = dampValue(outerGroup.current.position.y, targetY, 10, delta);
-      outerGroup.current.position.z = dampValue(outerGroup.current.position.z, pose.rootZ, 10, delta);
-      outerGroup.current.rotation.x = dampValue(outerGroup.current.rotation.x, pose.rootRotX, 10, delta);
-      outerGroup.current.rotation.y = dampValue(outerGroup.current.rotation.y, pose.rootRotY, 10, delta);
-      outerGroup.current.rotation.z = dampValue(outerGroup.current.rotation.z, pose.rootRotZ, 10, delta);
+      // In badgeMode (All Work & scrolled Case Studies), frame ONLY the character's head/face like sebg.ch!
+      const badgeTargetY = isBatman ? -5.12 : -5.45;
+      const badgeTargetScale = isBatman ? 2.08 : 2.26;
+      const targetY = (badgeMode ? badgeTargetY : -1.02) + (badgeMode ? 0 : pose.rootY);
+      const targetScale = (badgeMode ? badgeTargetScale : 0.72) * scalePulse.current * (badgeMode ? 1 : pose.scaleMult);
+      outerGroup.current.position.y = dampValue(outerGroup.current.position.y, targetY, 16, delta);
+      outerGroup.current.position.z = dampValue(outerGroup.current.position.z, badgeMode ? 0 : pose.rootZ, 16, delta);
+      outerGroup.current.rotation.x = dampValue(outerGroup.current.rotation.x, badgeMode ? 0.04 : pose.rootRotX, 16, delta);
+      outerGroup.current.rotation.y = dampValue(outerGroup.current.rotation.y, badgeMode ? (pointer?.x || 0) * 0.22 : pose.rootRotY, 16, delta);
+      outerGroup.current.rotation.z = dampValue(outerGroup.current.rotation.z, badgeMode ? 0 : pose.rootRotZ, 16, delta);
       outerGroup.current.scale.setScalar(targetScale);
     }
 
-    const { nodes, rest } = rigRef.current;
+    const { nodes, rest, utilityBelt } = rigRef.current;
+    // In badgeMode, strictly show ONLY the character's Head + Hair/Helmet inside the porthole
+    if (nodes.Torso) nodes.Torso.visible = !badgeMode;
+    if (nodes.ArmL) nodes.ArmL.visible = !badgeMode;
+    if (nodes.ArmR) nodes.ArmR.visible = !badgeMode;
+    if (nodes.LegL) nodes.LegL.visible = !badgeMode;
+    if (nodes.LegR) nodes.LegR.visible = !badgeMode;
+    if (nodes.BatmanCape) nodes.BatmanCape.visible = !badgeMode && Boolean(outfit.showCape);
+    if (utilityBelt) utilityBelt.visible = !badgeMode && isBatman;
     if (nodes.Torso && rest.Torso) {
       nodes.Torso.rotation.x = dampValue(nodes.Torso.rotation.x, rest.Torso.rotation.x + pose.torsoX, 9, delta);
       nodes.Torso.rotation.y = dampValue(nodes.Torso.rotation.y, rest.Torso.rotation.y + pose.torsoY, 9, delta);
