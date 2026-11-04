@@ -1106,53 +1106,39 @@ export default function Minifig({
         child.receiveShadow = true;
 
         if (child.name === 'Head') {
-          headMaterial = new THREE.MeshPhysicalMaterial({
+          headMaterial = new THREE.MeshStandardMaterial({
             color: new THREE.Color('#ffffff'),
-            roughness: 0.22,
-            metalness: 0.05,
-            clearcoat: 0.35,
-            clearcoatRoughness: 0.15,
-            envMapIntensity: 0.9,
+            roughness: 0.56,
+            metalness: 0.02,
           });
           child.material = headMaterial;
         } else if (child.name === 'Hair') {
-          hairMaterial = new THREE.MeshPhysicalMaterial({
+          hairMaterial = new THREE.MeshStandardMaterial({
             color: new THREE.Color('#ffffff'),
-            roughness: 0.22,
-            metalness: 0.05,
-            clearcoat: 0.35,
-            clearcoatRoughness: 0.15,
-            envMapIntensity: 0.85,
+            roughness: 0.64,
+            metalness: 0.02,
           });
           child.material = hairMaterial;
         } else if (child.name === 'BatmanHelmet') {
-          helmetMaterial = new THREE.MeshPhysicalMaterial({
-            color: new THREE.Color('#0B0C10'),
-            roughness: 0.15,
+          helmetMaterial = new THREE.MeshStandardMaterial({
+            color: new THREE.Color('#181c26'),
+            roughness: 0.48,
             metalness: 0.08,
-            clearcoat: 0.5,
-            clearcoatRoughness: 0.12,
-            envMapIntensity: 1.15,
           });
           child.material = helmetMaterial;
         } else if (child.name === 'BatmanCape') {
-          capeMaterial = new THREE.MeshPhysicalMaterial({
-            color: new THREE.Color('#141821'),
-            roughness: 0.85,
+          capeMaterial = new THREE.MeshStandardMaterial({
+            color: new THREE.Color('#1b2230'),
+            roughness: 0.68,
             metalness: 0.01,
-            clearcoat: 0.0,
             side: THREE.DoubleSide,
-            envMapIntensity: 0.35,
           });
           child.material = capeMaterial;
         } else {
-          const bodyMat = new THREE.MeshPhysicalMaterial({
+          const bodyMat = new THREE.MeshStandardMaterial({
             color: new THREE.Color('#ffffff'),
-            roughness: 0.4,
-            metalness: 0.03,
-            clearcoat: 0.1,
-            clearcoatRoughness: 0.25,
-            envMapIntensity: 0.78,
+            roughness: 0.56,
+            metalness: 0.02,
           });
           child.material = bodyMat;
           bodyMaterials.push(bodyMat);
@@ -1315,19 +1301,15 @@ export default function Minifig({
     currentRig.bodyMaterials.forEach((material) => {
       material.map = selectedAtlas;
       material.color.set('#ffffff');
-      material.roughness = 0.4;
-      material.metalness = 0.03;
-      material.clearcoat = 0.1;
-      material.clearcoatRoughness = 0.25;
+      material.roughness = 0.56;
+      material.metalness = 0.02;
       material.needsUpdate = true;
     });
 
     if (currentRig.headMaterial && faceSurface) {
       currentRig.headMaterial.map = faceSurface.texture;
-      currentRig.headMaterial.roughness = 0.22;
-      currentRig.headMaterial.metalness = 0.05;
-      currentRig.headMaterial.clearcoat = 0.35;
-      currentRig.headMaterial.clearcoatRoughness = 0.15;
+      currentRig.headMaterial.roughness = 0.56;
+      currentRig.headMaterial.metalness = 0.02;
       currentRig.headMaterial.needsUpdate = true;
       lastFaceSignatureRef.current = '';
     }
@@ -1335,29 +1317,24 @@ export default function Minifig({
     if (currentRig.hairMaterial) {
       currentRig.hairMaterial.map = hairAtlas;
       currentRig.hairMaterial.color.set('#ffffff');
-      currentRig.hairMaterial.roughness = 0.22;
-      currentRig.hairMaterial.metalness = 0.05;
-      currentRig.hairMaterial.clearcoat = 0.35;
-      currentRig.hairMaterial.clearcoatRoughness = 0.15;
+      currentRig.hairMaterial.roughness = 0.64;
+      currentRig.hairMaterial.metalness = 0.02;
       currentRig.hairMaterial.needsUpdate = true;
     }
 
     if (currentRig.helmetMaterial) {
       currentRig.helmetMaterial.map = null;
-      currentRig.helmetMaterial.color.set('#0B0C10');
-      currentRig.helmetMaterial.roughness = 0.15;
+      currentRig.helmetMaterial.color.set('#181c26');
+      currentRig.helmetMaterial.roughness = 0.48;
       currentRig.helmetMaterial.metalness = 0.08;
-      currentRig.helmetMaterial.clearcoat = 0.5;
-      currentRig.helmetMaterial.clearcoatRoughness = 0.12;
       currentRig.helmetMaterial.needsUpdate = true;
     }
 
     if (currentRig.capeMaterial) {
       currentRig.capeMaterial.map = gothamCape;
-      currentRig.capeMaterial.color.set('#141821');
-      currentRig.capeMaterial.roughness = 0.85;
+      currentRig.capeMaterial.color.set('#1b2230');
+      currentRig.capeMaterial.roughness = 0.68;
       currentRig.capeMaterial.metalness = 0.01;
-      currentRig.capeMaterial.clearcoat = 0.0;
       currentRig.capeMaterial.side = THREE.DoubleSide;
       currentRig.capeMaterial.needsUpdate = true;
     }
