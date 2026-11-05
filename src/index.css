@@ -1866,7 +1866,7 @@ body.batman-mode .bento-card__meta {
   position: relative;
   padding-top: clamp(2.2rem, 5svh, 4rem);
   padding-bottom: clamp(2.8rem, 7svh, 5rem);
-  background-color: var(--window-tint, var(--bg-cream));
+  background-color: transparent;
 }
 
 .case-hero__eyebrow {

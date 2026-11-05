@@ -10,6 +10,7 @@ import {
   OWNER_PROFILE,
   PHONEY_AUDIO_EMOJIS,
   TOUR_CHAPTERS,
+  getAdjacentCertifications,
   getAdjacentProjects,
 } from './data/portfolioData';
 import LegoScene from './three/LegoScene';
@@ -628,6 +629,7 @@ export default function App() {
   const applyMorphOrigin = useCallback((sourceEl, clickEvent) => {
     if (typeof window === 'undefined') return;
     let mediaEl = sourceEl;
+    const nextSec = sourceEl?.closest?.('.case-next');
     if (sourceEl?.querySelector) {
       mediaEl =
         sourceEl.querySelector('.tour__browser, .bento-card__media, .case-next__preview, img') ||
@@ -635,7 +637,6 @@ export default function App() {
     }
     if (mediaEl === sourceEl && sourceEl?.closest) {
       const chapter = sourceEl.closest('.tour__chapter');
-      const nextSec = sourceEl.closest('.case-next');
       if (chapter) {
         mediaEl = chapter.querySelector('.tour__browser') || sourceEl;
       } else if (nextSec) {
@@ -650,6 +651,7 @@ export default function App() {
         top: rect.top,
         width: rect.width,
         height: rect.height,
+        isFromNext: Boolean(nextSec),
       };
       const clickX = clickEvent?.clientX ?? rect.left + rect.width / 2;
       const clickY = clickEvent?.clientY ?? rect.top + rect.height / 2;
@@ -703,9 +705,17 @@ export default function App() {
     [applyMorphOrigin, sayTemporarily]
   );
 
-  // Smooth FLIP enlargement of the clicked project image into .case-hero__cover
+  // Smooth FLIP enlargement of the clicked project/cert image into .case-hero__cover
   useLayoutEffect(() => {
     if (!activeModal) return undefined;
+
+    if (modalScrollRef.current) {
+      const prevBehavior = modalScrollRef.current.style.scrollBehavior;
+      modalScrollRef.current.style.scrollBehavior = 'auto';
+      modalScrollRef.current.scrollTop = 0;
+      modalScrollRef.current.style.scrollBehavior = prevBehavior;
+    }
+
     const raf = requestAnimationFrame(() => {
       setModalTitleRevealed(true);
     });
@@ -715,10 +725,24 @@ export default function App() {
     if (coverEl && srcRect && typeof coverEl.animate === 'function') {
       const targetRect = coverEl.getBoundingClientRect();
       if (targetRect.width > 20 && targetRect.height > 20) {
-        const dx = srcRect.left - targetRect.left;
-        const dy = srcRect.top - targetRect.top;
-        const sx = clamp(srcRect.width / targetRect.width, 0.18, 1.35);
-        const sy = clamp(srcRect.height / targetRect.height, 0.18, 1.35);
+        let sx = clamp(srcRect.width / targetRect.width, 0.18, 1.35);
+        let sy = clamp(srcRect.height / targetRect.height, 0.18, 1.35);
+        let dx = srcRect.left - targetRect.left;
+        let dy = srcRect.top - targetRect.top;
+
+        // When opening the next project/credential from the bottom .case-next section,
+        // .case-next__preview shares the 8-column width with .case-hero__cover (sx ≈ 1.0).
+        // Start from a 0.56x preview card scale at the bottom so it enlarges smoothly just like "All Work"!
+        if (srcRect.isFromNext) {
+          sx = 0.56;
+          sy = 0.56;
+          const startWidth = targetRect.width * sx;
+          const startLeft = srcRect.left + (srcRect.width - startWidth) * 0.5;
+          const startTop = Math.max(srcRect.top + 24, window.innerHeight * 0.58);
+          dx = startLeft - targetRect.left;
+          dy = startTop - targetRect.top;
+        }
+
         coverEl.animate(
           [
             {
@@ -1283,6 +1307,10 @@ export default function App() {
     () => (activeModalProject ? getAdjacentProjects(activeModalProject.slug) : null),
     [activeModalProject]
   );
+  const adjacentCerts = useMemo(
+    () => (activeModalCert ? getAdjacentCertifications(activeModalCert.slug) : null),
+    [activeModalCert]
+  );
 
   // Update character position mode (right side -> porthole bubble -> next-right) & commentary when scrolling inside the Case Study Window
   const handleModalScroll = useCallback(() => {
@@ -1295,12 +1323,13 @@ export default function App() {
     const caseNextEl = el.querySelector('.case-next');
     const heroRect = caseHeroEl?.getBoundingClientRect();
     const nextRect = caseNextEl?.getBoundingClientRect();
+    const hasNextItem = Boolean(adjacentProjects?.next || adjacentCerts?.next);
 
     // Keep character standing on the right side in its original 300x375 size
     // until the entire top section (.case-hero & cover image, which has space on the right) scrolls past!
     if (!heroRect || heroRect.bottom > vh * 0.32) {
       setModalMascotMode('hero-right');
-    } else if (adjacentProjects?.next && nextRect && nextRect.top <= vh * 0.52) {
+    } else if (hasNextItem && nextRect && nextRect.top <= vh * 0.52) {
       setModalMascotMode((prev) => {
         if (prev !== 'next-right') {
           reciteBubbleSentence('Want to see another one?', { forceRestart: true });
@@ -1310,6 +1339,20 @@ export default function App() {
       return;
     } else {
       setModalMascotMode('badge');
+    }
+
+    if (activeModalCert) {
+      const ratio = scrollTop / maxScroll;
+      const certLines = [activeModalCert.summary, ...(activeModalCert.highlights || [])].filter(
+        Boolean
+      );
+      if (certLines.length > 0) {
+        const scaled = ratio * certLines.length;
+        const idx = clamp(Math.floor(scaled), 0, certLines.length - 1);
+        const commentProgress = clamp(scaled - idx, 0, 1);
+        syncScrollSpeech(certLines[idx], commentProgress);
+      }
+      return;
     }
 
     if (!activeModalProject) return;
@@ -1324,7 +1367,15 @@ export default function App() {
       }
       syncScrollSpeech(comments[idx], commentProgress);
     }
-  }, [activeModalProject, activeModalSlideIdx, adjacentProjects, reciteBubbleSentence, syncScrollSpeech]);
+  }, [
+    activeModalProject,
+    activeModalCert,
+    activeModalSlideIdx,
+    adjacentProjects,
+    adjacentCerts,
+    reciteBubbleSentence,
+    syncScrollSpeech,
+  ]);
 
   const isBadgeActive = activeModal ? modalMascotMode === 'badge' : stageState.isBadge;
   const isProjectPreviewSize = !isBadgeActive && Boolean(activeModal);
@@ -2166,13 +2217,19 @@ export default function App() {
           ===================================================================== */}
       {activeModalProject && (
         <div
+          key={`backdrop-project-${activeModalProject.slug}`}
           className="project-window-backdrop"
           style={{
             '--window-bg': batmanMode ? '#0B0C0E' : '#EAE6DF',
             '--window-tint': batmanMode ? '#14161D' : activeModalProject.surfaceTint,
           }}
         >
-          <div className="project-window" role="dialog" aria-modal="true">
+          <div
+            key={`project-${activeModalProject.slug}`}
+            className="project-window"
+            role="dialog"
+            aria-modal="true"
+          >
             <div className="project-window__bg-sweep" aria-hidden="true" />
             <header className="project-window__topbar">
               <button type="button" className="button" onClick={closeWindow}>
@@ -2408,7 +2465,6 @@ export default function App() {
                       className="button button--yellow"
                       onClick={(e) => {
                         openProjectWindow(adjacentProjects.next.slug, e);
-                        modalScrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
                       }}
                     >
                       <span>View project</span>
@@ -2419,7 +2475,6 @@ export default function App() {
                     className="case-next__preview"
                     onClick={(e) => {
                       openProjectWindow(adjacentProjects.next.slug, e);
-                      modalScrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
                     }}
                   >
                     <img
@@ -2439,13 +2494,19 @@ export default function App() {
           ===================================================================== */}
       {activeModalCert && (
         <div
+          key={`backdrop-cert-${activeModalCert.slug}`}
           className="project-window-backdrop"
           style={{
             '--window-bg': batmanMode ? '#0B0C0E' : '#EAE6DF',
             '--window-tint': batmanMode ? '#14161D' : activeModalCert.surfaceTint,
           }}
         >
-          <div className="project-window" role="dialog" aria-modal="true">
+          <div
+            key={`cert-${activeModalCert.slug}`}
+            className="project-window"
+            role="dialog"
+            aria-modal="true"
+          >
             <div className="project-window__bg-sweep" aria-hidden="true" />
             <header className="project-window__topbar">
               <button type="button" className="button" onClick={closeWindow}>
@@ -2536,6 +2597,41 @@ export default function App() {
                   ))}
                 </div>
               </section>
+
+              {adjacentCerts?.next && (
+                <section className="case-next grid-page bg-grid">
+                  <span className="case-next__eyebrow">Next credential</span>
+                  <div className="case-next__header">
+                    <h2 className="case-next__title">
+                      <SmoothTitleReveal
+                        text={adjacentCerts.next.title}
+                        revealed={modalMascotMode === 'next-right' || modalTitleRevealed}
+                      />
+                    </h2>
+                    <button
+                      type="button"
+                      className="button button--yellow"
+                      onClick={(e) => {
+                        openCertWindow(adjacentCerts.next.slug, e);
+                      }}
+                    >
+                      <span>View credential</span>
+                    </button>
+                  </div>
+
+                  <div
+                    className="case-next__preview"
+                    onClick={(e) => {
+                      openCertWindow(adjacentCerts.next.slug, e);
+                    }}
+                  >
+                    <img
+                      src={adjacentCerts.next.coverImage}
+                      alt={adjacentCerts.next.title}
+                    />
+                  </div>
+                </section>
+              )}
             </div>
           </div>
         </div>
