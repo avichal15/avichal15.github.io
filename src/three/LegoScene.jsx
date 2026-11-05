@@ -11,12 +11,26 @@ function SoftContactShadow({ badgeMode = false, isWalking = false }) {
     canvas.width = 128;
     canvas.height = 128;
     const ctx = canvas.getContext('2d');
-    const grad = ctx.createRadialGradient(64, 64, 8, 64, 64, 60);
-    grad.addColorStop(0, 'rgba(15, 23, 42, 0.38)');
-    grad.addColorStop(0.55, 'rgba(15, 23, 42, 0.16)');
-    grad.addColorStop(1, 'rgba(15, 23, 42, 0)');
+
+    // Directional 45-deg ground contact shadow falloff
+    const grad = ctx.createRadialGradient(66, 66, 6, 66, 66, 58);
+    grad.addColorStop(0, 'rgba(10, 12, 18, 0.62)');
+    grad.addColorStop(0.38, 'rgba(10, 12, 18, 0.36)');
+    grad.addColorStop(0.72, 'rgba(10, 12, 18, 0.12)');
+    grad.addColorStop(1, 'rgba(10, 12, 18, 0)');
     ctx.fillStyle = grad;
     ctx.fillRect(0, 0, 128, 128);
+
+    // Direct physical foot-to-baseplate contact occlusion patches
+    ctx.fillStyle = 'rgba(8, 10, 16, 0.52)';
+    ctx.beginPath();
+    ctx.ellipse(48, 64, 14, 8.5, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.ellipse(80, 64, 14, 8.5, 0, 0, Math.PI * 2);
+    ctx.fill();
+
     const tex = new THREE.CanvasTexture(canvas);
     tex.needsUpdate = true;
     return tex;
@@ -24,8 +38,8 @@ function SoftContactShadow({ badgeMode = false, isWalking = false }) {
 
   useFrame((_, delta) => {
     if (!meshRef.current) return;
-    const targetX = isWalking ? 1.35 : 1.22;
-    const targetY = isWalking ? 0.85 : 0.78;
+    const targetX = isWalking ? 1.32 : 1.2;
+    const targetY = isWalking ? 0.84 : 0.76;
     meshRef.current.scale.x = THREE.MathUtils.damp(meshRef.current.scale.x, targetX, 10, delta);
     meshRef.current.scale.y = THREE.MathUtils.damp(meshRef.current.scale.y, targetY, 10, delta);
   });
@@ -37,9 +51,9 @@ function SoftContactShadow({ badgeMode = false, isWalking = false }) {
   return (
     <mesh
       ref={meshRef}
-      position={[0, -1.03, 0]}
+      position={[0.04, -1.03, 0]}
       rotation={[-Math.PI / 2, 0, 0]}
-      scale={isWalking ? [1.35, 0.85, 1] : [1.22, 0.78, 1]}
+      scale={isWalking ? [1.32, 0.84, 1] : [1.2, 0.76, 1]}
     >
       <planeGeometry args={[1.55, 1.55]} />
       <meshBasicMaterial map={shadowTexture} transparent depthWrite={false} />
@@ -53,7 +67,7 @@ export default function LegoScene({
   emotion,
   isReading = false,
   scrollVelocity = 0,
-  accent = '#F5C518',
+  accent = '#FFD000',
   trickState,
   onCharacterClick,
   isWalking = false,
@@ -66,7 +80,7 @@ export default function LegoScene({
 
   return (
     <Canvas
-      shadows
+      shadows={{ type: THREE.PCFSoftShadowMap }}
       dpr={[1, 2]}
       resize={{ scroll: false, debounce: { scroll: 0, resize: 0 } }}
       camera={{ position: [0, -0.02, 6.75], fov: 22 }}
@@ -74,31 +88,66 @@ export default function LegoScene({
         antialias: true,
         alpha: true,
         toneMapping: THREE.ACESFilmicToneMapping,
-        toneMappingExposure: 1.04,
+        toneMappingExposure: 1.08,
+      }}
+      onCreated={({ scene }) => {
+        scene.environment = null;
       }}
     >
-      {/* Balanced Studio Lighting for Matte-Satin Designer Vinyl Finish (No Harsh Glossy Glare) */}
+      {/* 3c. Soft Fill Bounce Light */}
       <hemisphereLight
-        skyColor={isBatman ? '#e2e8f0' : '#fffbeb'}
-        groundColor={isBatman ? '#1e293b' : '#d6d3d1'}
-        intensity={isBatman ? 1.35 : 1.75}
+        name="LegoStudioFillLight"
+        skyColor={isBatman ? '#e2e8f0' : '#ffffff'}
+        groundColor={isBatman ? '#1e293b' : '#d8d2c5'}
+        intensity={isBatman ? 0.95 : 1.15}
       />
+
+      {/* 3a. 45-degree Top-Left Warm Key Light */}
       <directionalLight
-        position={[2.8, 4.2, 5.4]}
-        intensity={isBatman ? 1.35 : 1.05}
-        color={isBatman ? '#fef08a' : '#fffdf7'}
+        name="LegoStudioKeyLight"
+        position={[-6, 10, 8]}
+        intensity={isBatman ? 2.1 : 2.2}
+        color={isBatman ? '#fef08a' : '#fff7e8'}
         castShadow
+        shadow-mapSize={[2048, 2048]}
+        shadow-camera-near={0.5}
+        shadow-camera-far={35}
+        shadow-camera-left={-6}
+        shadow-camera-right={6}
+        shadow-camera-top={6}
+        shadow-camera-bottom={-6}
+        shadow-bias={-0.0005}
+        shadow-normalBias={0.02}
+        shadow-radius={3.5}
       />
+
+      {/* 3b. Cool Back-Right Rim Light (Separates dark hair & black torso from baseplates) */}
       <directionalLight
-        position={[-3.2, 2.2, 3.6]}
-        intensity={isBatman ? 0.75 : 0.48}
-        color={isBatman ? '#60a5fa' : '#f1f5f9'}
+        name="LegoStudioRimLight"
+        position={[7, 8, -6]}
+        intensity={1.45}
+        color={isBatman ? '#93c5fd' : '#cce2ff'}
       />
+
+      {/* Subtle Warm Accent Rim */}
       <pointLight
-        position={[0, 1.6, -2.6]}
-        intensity={isBatman ? 1.1 : 0.42}
-        color={isBatman ? '#facc15' : accent}
+        position={[0, 1.6, -2.8]}
+        intensity={isBatman ? 1.15 : 0.42}
+        color={isBatman ? '#FFD000' : accent}
       />
+
+      {/* 4. Invisible Shadow-Catcher Ground Plane */}
+      {!badgeMode && (
+        <mesh
+          name="LegoGroundShadowCatcher"
+          rotation={[-Math.PI / 2, 0, 0]}
+          position={[0, -1.03, 0]}
+          receiveShadow
+        >
+          <planeGeometry args={[6, 6]} />
+          <shadowMaterial transparent opacity={isBatman ? 0.42 : 0.26} color="#0a0a0a" />
+        </mesh>
+      )}
 
       <Suspense fallback={null}>
         <SoftContactShadow badgeMode={badgeMode} isWalking={isWalking} />
