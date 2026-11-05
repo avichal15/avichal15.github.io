@@ -1137,10 +1137,10 @@ export default function App() {
         p.targetX = isMobile ? vw * 0.5 : vw * 0.78;
         p.targetY = isMobile ? vh * 0.72 : vh * 0.584;
       } else if (stageState.sectionMode === 'about') {
-        p.targetX = isMobile ? vw * 0.25 : vw * 0.15;
+        p.targetX = isMobile ? vw * 0.25 : vw * 0.145;
         p.targetY = isMobile ? vh * 0.76 : vh * 0.545;
       } else if (stageState.sectionMode === 'tour') {
-        // Keep the increased 435x544 character size across the main page Tour chapters
+        // Keep the 392x490 character size across the main page Tour chapters
         if (stageState.mascotSide === 'left') {
           p.targetX = isMobile ? vw * 0.22 : vw * 0.17;
         } else {
@@ -1149,7 +1149,7 @@ export default function App() {
         p.targetY = isMobile ? vh * 0.78 : vh * 0.625;
       } else if (stageState.sectionMode === 'footer') {
         p.targetX = isMobile ? vw * 0.72 : vw * 0.76;
-        p.targetY = isMobile ? vh * 0.70 : vh * 0.53;
+        p.targetY = isMobile ? vh * 0.64 : Math.min(vh * 0.485, vh - 295);
       }
 
       if (!p.isDragging) {

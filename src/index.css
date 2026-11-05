@@ -506,7 +506,7 @@ body.batman-mode .hero__name-sub {
 
 .about__inner {
   grid-column: 4 / span 9;
-  padding: clamp(0.5rem, 1.5vw, 1.25rem) 0;
+  padding: clamp(0.5rem, 1.5vw, 1.25rem) clamp(1rem, 3vw, 2.75rem) clamp(0.5rem, 1.5vw, 1.25rem) clamp(3.25rem, 6.2vw, 5.75rem);
   background: transparent;
   border: none;
   box-shadow: none;
@@ -515,15 +515,16 @@ body.batman-mode .hero__name-sub {
 @media (max-width: 1024px) {
   .about__inner {
     grid-column: 1 / -1;
+    padding-inline: 0;
   }
 }
 
 .about__text {
   margin: 0;
   font-family: var(--font-display);
-  font-size: clamp(1.65rem, 3vw, 3.25rem);
+  font-size: clamp(1.55rem, 2.75vw, 2.95rem);
   font-weight: 600;
-  line-height: 1.12;
+  line-height: 1.14;
   letter-spacing: -0.03em;
   color: var(--ink);
   text-shadow: var(--clean-heading-shadow);
@@ -557,10 +558,10 @@ body.batman-mode .hero__name-sub {
   position: absolute;
   top: 0;
   left: 0;
-  width: 435px;
-  height: 544px;
-  margin-left: -218px;
-  margin-top: -272px;
+  width: 392px;
+  height: 490px;
+  margin-left: -196px;
+  margin-top: -245px;
   pointer-events: none;
   will-change: transform, width, height, margin;
   transition:
@@ -619,7 +620,7 @@ body.batman-mode .mascot-anchor.is-badge .mascot-canvas-wrap {
 /* Tactile 3D Speech Bubble Positioned Directly ABOVE the Character's Head */
 .mascot-bubble {
   position: absolute;
-  bottom: calc(100% - 52px);
+  bottom: calc(100% - 46px);
   left: 50%;
   transform: translateX(-50%);
   width: max-content;
