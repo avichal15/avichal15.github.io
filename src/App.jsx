@@ -1148,32 +1148,32 @@ export default function App() {
       const isProjectSizeNow = !isBadgeNow && Boolean(activeModal);
 
       if (isBadgeNow) {
-        p.targetX = isMobile ? 58 : 74;
-        p.targetY = isMobile ? vh - 64 : vh - 76;
+        p.targetX = isMobile ? 52 : 74;
+        p.targetY = isMobile ? vh - 56 : vh - 76;
       } else if (activeModal) {
         // Upon opening a project (or at Next Project footer), character stands on the RIGHT side at original 300x375 size!
-        p.targetX = isMobile ? vw * 0.78 : vw * 0.83;
+        p.targetX = isMobile ? vw * 0.72 : vw * 0.83;
         p.targetY = isMobile ? vh * 0.78 : vh * 0.67;
       } else if (p.hasCustomDropPos) {
         p.targetX = clamp(p.customX, 80, vw - 80);
         p.targetY = clamp(p.customY, 110, vh - 90);
       } else if (stageState.sectionMode === 'hero') {
         p.targetX = isMobile ? vw * 0.5 : vw * 0.78;
-        p.targetY = isMobile ? vh * 0.72 : vh * 0.584;
+        p.targetY = isMobile ? vh * 0.83 : vh * 0.584;
       } else if (stageState.sectionMode === 'about') {
-        p.targetX = isMobile ? vw * 0.25 : vw * 0.145;
-        p.targetY = isMobile ? vh * 0.76 : vh * 0.545;
+        p.targetX = isMobile ? vw * 0.34 : vw * 0.145;
+        p.targetY = isMobile ? vh * 0.82 : vh * 0.545;
       } else if (stageState.sectionMode === 'tour') {
-        // Keep the 392x490 character size across the main page Tour chapters
+        // Keep the 392x490 character size across the main page Tour chapters on desktop, and compact clamped coords on mobile
         if (stageState.mascotSide === 'left') {
-          p.targetX = isMobile ? vw * 0.22 : vw * 0.17;
+          p.targetX = isMobile ? vw * 0.32 : vw * 0.17;
         } else {
-          p.targetX = isMobile ? vw * 0.78 : vw * 0.83;
+          p.targetX = isMobile ? vw * 0.64 : vw * 0.83;
         }
-        p.targetY = isMobile ? vh * 0.78 : vh * 0.625;
+        p.targetY = isMobile ? vh * 0.85 : vh * 0.625;
       } else if (stageState.sectionMode === 'footer') {
-        p.targetX = isMobile ? vw * 0.72 : vw * 0.76;
-        p.targetY = isMobile ? vh * 0.64 : Math.min(vh * 0.485, vh - 295);
+        p.targetX = isMobile ? vw * 0.5 : vw * 0.76;
+        p.targetY = isMobile ? Math.min(vh * 0.67, vh - 190) : Math.min(vh * 0.485, vh - 295);
       }
 
       if (!p.isDragging) {
@@ -1204,7 +1204,30 @@ export default function App() {
       }
 
       if (mascotAnchorRef.current) {
-        mascotAnchorRef.current.style.transform = `translate3d(${p.x.toFixed(1)}px, ${p.y.toFixed(1)}px, 0)`;
+        const anchorEl = mascotAnchorRef.current;
+        anchorEl.style.transform = `translate3d(${p.x.toFixed(1)}px, ${p.y.toFixed(1)}px, 0)`;
+
+        if (!isBadgeNow) {
+          const bubbleEl = anchorEl.querySelector('.mascot-bubble');
+          if (bubbleEl) {
+            const bw = bubbleEl.offsetWidth || (isMobile ? 250 : 300);
+            const halfW = bw * 0.5;
+            const minEdge = 14;
+            const maxEdge = vw - 14;
+            let shiftX = 0;
+            if (p.x - halfW < minEdge) {
+              shiftX = minEdge - (p.x - halfW);
+            } else if (p.x + halfW > maxEdge) {
+              shiftX = maxEdge - (p.x + halfW);
+            }
+            const tailShiftX = clamp(-shiftX, -(halfW - 22), halfW - 22);
+            anchorEl.style.setProperty('--bubble-shift-x', `${shiftX.toFixed(1)}px`);
+            anchorEl.style.setProperty('--tail-shift-x', `${tailShiftX.toFixed(1)}px`);
+          }
+        } else {
+          anchorEl.style.setProperty('--bubble-shift-x', '0px');
+          anchorEl.style.setProperty('--tail-shift-x', '0px');
+        }
       }
 
       if (mascotMenuRef.current) {
