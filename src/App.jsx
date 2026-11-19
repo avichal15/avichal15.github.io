@@ -1,4 +1,13 @@
-import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import React, {
+  Suspense,
+  lazy,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import {
   ALL_PROJECTS,
   ALL_WORK_BY_SLUG,
@@ -13,9 +22,71 @@ import {
   getAdjacentCertifications,
   getAdjacentProjects,
 } from './data/portfolioData';
-import LegoScene from './three/LegoScene';
 import { injectProceduralLegoBaseplate } from './utils/legoBaseplateTexture';
 import { soundEngine } from './utils/soundEngine';
+
+const LegoScene = lazy(() => import('./three/LegoScene'));
+
+function parseModalFromPathname(pathname) {
+  const raw =
+    typeof pathname === 'string'
+      ? pathname
+      : typeof window !== 'undefined'
+        ? window.location.pathname
+        : '/';
+  const cleanPath = raw.replace(/\/+$/, '') || '/';
+  if (cleanPath.startsWith('/work/')) {
+    const slugPart = cleanPath.slice('/work/'.length);
+    if (slugPart && !slugPart.includes('/')) {
+      try {
+        const slug = decodeURIComponent(slugPart);
+        if (Object.hasOwn(ALL_WORK_BY_SLUG, slug)) {
+          return { type: 'project', slug };
+        }
+      } catch {
+        return null;
+      }
+    }
+  } else if (cleanPath.startsWith('/certifications/')) {
+    const slugPart = cleanPath.slice('/certifications/'.length);
+    if (slugPart && !slugPart.includes('/')) {
+      try {
+        const slug = decodeURIComponent(slugPart);
+        if (Object.hasOwn(CERTIFICATIONS_BY_SLUG, slug)) {
+          return { type: 'cert', slug };
+        }
+      } catch {
+        return null;
+      }
+    }
+  }
+  return null;
+}
+
+function getModalPath(modal) {
+  if (!modal) return '/';
+  if (modal.type === 'project') return `/work/${modal.slug}`;
+  if (modal.type === 'cert') return `/certifications/${modal.slug}`;
+  return '/';
+}
+
+function getInitialSpeech(modal) {
+  if (modal?.type === 'project') {
+    const project = ALL_WORK_BY_SLUG[modal.slug];
+    if (project) {
+      return (
+        project.characterComments?.[0] ||
+        `This is ${project.title}! Explore the full showcase and live links.`
+      );
+    }
+  } else if (modal?.type === 'cert') {
+    const cert = CERTIFICATIONS_BY_SLUG[modal.slug];
+    if (cert) {
+      return `Verified Credential: ${cert.title} issued by ${cert.issuer}.`;
+    }
+  }
+  return HERO_IDLE_QUIPS[0];
+}
 
 function clamp(v, min, max) {
   return Math.max(min, Math.min(max, v));
@@ -64,7 +135,7 @@ const MASTERPLAYER_STUDIO_MODES = [
     slideIdx: 1,
     label: 'Custom CRM & Top SEO',
     swatch: '#FFD500',
-    quip: 'I built their custom order CRM and technical SEO — ranking them #1 on Google.',
+    quip: 'I built their custom order CRM and technical SEO to drive top Google search visibility.',
   },
   {
     id: 'gst',
@@ -93,8 +164,10 @@ export default function App() {
   const [isWalkingState, setIsWalkingState] = useState(false);
   const [walkDirectionState, setWalkDirectionState] = useState(-1);
 
+  const initialModal = useMemo(() => parseModalFromPathname(), []);
+
   // Active in-site Case Study Window: { type: 'project' | 'cert', slug: string } | null
-  const [activeModal, setActiveModal] = useState(null);
+  const [activeModal, setActiveModal] = useState(initialModal);
   const [activeModalSlideIdx, setActiveModalSlideIdx] = useState(0);
   // Inside opened project: starts 'hero-right' on right side -> transitions to 'badge' when scrolling down -> 'next-right' at bottom
   const [modalMascotMode, setModalMascotMode] = useState('hero-right');
@@ -114,7 +187,7 @@ export default function App() {
   const [aboutLitCount, setAboutLitCount] = useState(0);
 
   // Mascot speech & stage state (Speech bubble renders ABOVE character's head)
-  const [speechText, setSpeechText] = useState(HERO_IDLE_QUIPS[0]);
+  const [speechText, setSpeechText] = useState(() => getInitialSpeech(initialModal));
   const [speechLitCount, setSpeechLitCount] = useState(1);
   const [speechVisible, setSpeechVisible] = useState(true);
   const [stageState, setStageState] = useState({
@@ -144,6 +217,10 @@ export default function App() {
   const pixelCanvasRefs = useRef({});
   const prevChapterStepsRef = useRef({});
   const modalScrollRef = useRef(null);
+  const projectWindowRef = useRef(null);
+  const lastFocusedElRef = useRef(null);
+  const activeModalRef = useRef(initialModal);
+  const initialModalRef = useRef(initialModal);
   const morphSourceRectRef = useRef(null);
   const caseCoverRef = useRef(null);
 
@@ -157,6 +234,9 @@ export default function App() {
   const readingPulseTimerRef = useRef(null);
   const speechWordTimerRef = useRef(null);
   const speechDelayTimerRef = useRef(null);
+  const trickTimerRef = useRef(null);
+  const phoneyEmojiTimerRef = useRef(null);
+  const unpixelateTimersRef = useRef({});
   const currentRecitedTextRef = useRef('');
   const scrollSpeechLitRef = useRef(1);
   const aboutCurrentCountRef = useRef(0);
@@ -346,25 +426,46 @@ export default function App() {
         scrollSpeechLitRef.current = targetLit;
         setSpeechLitCount(targetLit);
         if (!silentOnInit) {
-          soundEngine.speakWord(words[targetLit - 1], targetLit - 1);
           pulseLipMovement(185);
+          soundEngine.speakWord(words[targetLit - 1], targetLit - 1);
         }
       } else if (targetLit !== scrollSpeechLitRef.current) {
-        if (targetLit > scrollSpeechLitRef.current) {
-          soundEngine.speakWord(words[targetLit - 1], targetLit - 1);
-          pulseLipMovement(185);
-        }
+        const shouldSpeak = targetLit > scrollSpeechLitRef.current;
         scrollSpeechLitRef.current = targetLit;
         setSpeechLitCount(targetLit);
+        if (shouldSpeak) {
+          pulseLipMovement(185);
+          soundEngine.speakWord(words[targetLit - 1], targetLit - 1);
+        }
       }
     },
     [pulseLipMovement]
   );
 
-  // Initialize Hero greeting on mount with word #1 lit (waits for user scroll to read further)
+  // Sync activeModalRef after commit
+  useEffect(() => {
+    activeModalRef.current = activeModal;
+  }, [activeModal]);
+
+  // Clear all active timers on unmount
+  useEffect(() => {
+    const unpixelateTimers = unpixelateTimersRef.current;
+    return () => {
+      if (trickTimerRef.current) clearTimeout(trickTimerRef.current);
+      if (phoneyEmojiTimerRef.current) clearTimeout(phoneyEmojiTimerRef.current);
+      if (emotionResetTimerRef.current) clearTimeout(emotionResetTimerRef.current);
+      if (readingPulseTimerRef.current) clearTimeout(readingPulseTimerRef.current);
+      if (speechWordTimerRef.current) clearInterval(speechWordTimerRef.current);
+      if (speechDelayTimerRef.current) clearTimeout(speechDelayTimerRef.current);
+      if (scrollStopTimerRef.current) clearTimeout(scrollStopTimerRef.current);
+      Object.values(unpixelateTimers).forEach((timerId) => clearTimeout(timerId));
+    };
+  }, []);
+
+  // Initialize Hero greeting (or deep-linked modal speech) on mount with word #1 lit
   useEffect(() => {
     const timer = setTimeout(() => {
-      syncScrollSpeech(HERO_IDLE_QUIPS[0], 0, { silentOnInit: true });
+      syncScrollSpeech(getInitialSpeech(initialModalRef.current), 0, { silentOnInit: true });
     }, 0);
     return () => {
       clearTimeout(timer);
@@ -402,6 +503,11 @@ export default function App() {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
+    if (unpixelateTimersRef.current[chapterId]) {
+      clearTimeout(unpixelateTimersRef.current[chapterId]);
+      delete unpixelateTimersRef.current[chapterId];
+    }
+
     const w = (canvas.width = 320);
     const h = (canvas.height = 200);
     canvas.classList.add('is-active');
@@ -413,6 +519,7 @@ export default function App() {
       if (stepIdx >= steps.length) {
         ctx.clearRect(0, 0, w, h);
         canvas.classList.remove('is-active');
+        delete unpixelateTimersRef.current[chapterId];
         return;
       }
       const blockSize = steps[stepIdx];
@@ -430,7 +537,7 @@ export default function App() {
         }
       }
       stepIdx += 1;
-      setTimeout(drawStep, 55);
+      unpixelateTimersRef.current[chapterId] = setTimeout(drawStep, 55);
     };
 
     drawStep();
@@ -451,7 +558,7 @@ export default function App() {
   // TOGGLE SOUND ENGINE
   // -------------------------------------------------------------------------
   const handleToggleSound = useCallback(() => {
-    const nextState = soundEngine.toggle();
+    const nextState = !soundEnabled;
     setSoundEnabled(nextState);
     if (nextState) {
       sayTemporarily(
@@ -461,7 +568,11 @@ export default function App() {
         'laugh'
       );
     }
-  }, [sayTemporarily]);
+    soundEngine.setEnabled(nextState);
+    if (nextState) {
+      soundEngine.bell();
+    }
+  }, [soundEnabled, sayTemporarily]);
 
   // -------------------------------------------------------------------------
   // TOGGLE LEGO BATMAN ("BATCAVE & BATCOMPUTER") MODE
@@ -470,8 +581,6 @@ export default function App() {
     (next) => {
       setBatmanMode(next);
       document.body.classList.toggle('batman-mode', next);
-      soundEngine.setBatmanMode(next);
-      soundEngine.batmanTransform(next);
       if (next) {
         setManualOutfit('gotham');
         sayTemporarily(OWNER_PROFILE.batmanHeroQuip, 4800, 'surprised', 'surprised', {
@@ -483,6 +592,8 @@ export default function App() {
           speechDelayMs: 220,
         });
       }
+      soundEngine.setBatmanMode(next);
+      soundEngine.batmanTransform(next);
     },
     [sayTemporarily]
   );
@@ -504,14 +615,16 @@ export default function App() {
       if (batmanMode) {
         setBatmanMode(false);
         document.body.classList.remove('batman-mode');
-        soundEngine.setBatmanMode(false);
       }
       setManualOutfit(outfitId);
-      soundEngine.pop();
       const found = OUTFITS.find((o) => o.id === outfitId);
       if (found) {
         sayTemporarily(`Switched to ${found.label}! ${found.tagline}`, 3200, 'happy', 'laugh');
       }
+      if (batmanMode) {
+        soundEngine.setBatmanMode(false);
+      }
+      soundEngine.pop();
     },
     [batmanMode, applyBatmanMode, sayTemporarily]
   );
@@ -523,7 +636,6 @@ export default function App() {
     (trickId) => {
       setActiveTrick(trickId);
       setMenuOpen(false);
-      soundEngine.playTrickSound(trickId);
 
       const trickQuips = {
         dance: 'Watch the footwork! 60fps procedural groove.',
@@ -564,10 +676,14 @@ export default function App() {
         trickEmotions[trickId] || 'laugh',
         { speechDelayMs: 440 }
       );
-      const timer = setTimeout(() => {
+      if (trickTimerRef.current) {
+        clearTimeout(trickTimerRef.current);
+      }
+      trickTimerRef.current = setTimeout(() => {
+        trickTimerRef.current = null;
         setActiveTrick((curr) => (curr === trickId ? null : curr));
       }, 2400);
-      return () => clearTimeout(timer);
+      soundEngine.playTrickSound(trickId);
     },
     [sayTemporarily]
   );
@@ -578,12 +694,11 @@ export default function App() {
   const handlePlayPhoneyEmoji = useCallback(
     (emojiItem, e) => {
       if (e) e.stopPropagation();
-      if (!soundEngine.enabled) {
-        soundEngine.setEnabled(true);
+      const shouldEnableSound = !soundEngine.enabled;
+      if (shouldEnableSound) {
         setSoundEnabled(true);
       }
       setPlayingEmojiId(emojiItem.id);
-      soundEngine.playPhoneyEmoji(emojiItem.id);
       const targetEmotion =
         emojiItem.id === 'wow' ? 'wow' : emojiItem.emotion || 'laugh';
       sayTemporarily(emojiItem.quip, 3200, targetEmotion, targetEmotion, {
@@ -591,13 +706,22 @@ export default function App() {
       });
       setStageState((prev) => ({ ...prev, gesture: 'cheer' }));
 
-      setTimeout(() => {
+      if (phoneyEmojiTimerRef.current) {
+        clearTimeout(phoneyEmojiTimerRef.current);
+      }
+      phoneyEmojiTimerRef.current = setTimeout(() => {
+        phoneyEmojiTimerRef.current = null;
         setPlayingEmojiId((curr) => (curr === emojiItem.id ? null : curr));
         setStageState((prev) => ({
           ...prev,
           gesture: prev.gesture === 'cheer' ? null : prev.gesture,
         }));
       }, 1250);
+
+      if (shouldEnableSound) {
+        soundEngine.setEnabled(true);
+      }
+      soundEngine.playPhoneyEmoji(emojiItem.id);
     },
     [sayTemporarily]
   );
@@ -608,7 +732,6 @@ export default function App() {
   const handleSelectChapterSlide = useCallback(
     (chapterId, slideIdx, e) => {
       if (e) e.stopPropagation();
-      soundEngine.click();
       setChapterSteps((prev) => ({ ...prev, [chapterId]: slideIdx }));
       const ch = TOUR_CHAPTERS.find((c) => c.id === chapterId);
       if (ch && ch.bubbles[slideIdx]) {
@@ -619,6 +742,7 @@ export default function App() {
       if (bEl) {
         bEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }
+      soundEngine.click();
     },
     [sayTemporarily]
   );
@@ -668,17 +792,25 @@ export default function App() {
     (slug, e) => {
       const project = ALL_WORK_BY_SLUG[slug];
       if (!project) return;
+      if (!activeModalRef.current && typeof document !== 'undefined') {
+        lastFocusedElRef.current = document.activeElement;
+      }
       applyMorphOrigin(e?.currentTarget, e);
-      soundEngine.openWindow();
       setModalTitleRevealed(false);
       setModalMascotMode('hero-right');
-      setActiveModal({ type: 'project', slug });
+      const nextModal = { type: 'project', slug };
+      setActiveModal(nextModal);
       setActiveModalSlideIdx(0);
       setMenuOpen(false);
+      const nextPath = getModalPath(nextModal);
+      if (typeof window !== 'undefined' && window.location.pathname !== nextPath) {
+        window.history.pushState({ modal: nextModal }, '', nextPath);
+      }
       const firstComment =
         project.characterComments?.[0] ||
         `This is ${project.title}! Explore the full showcase and live links.`;
       sayTemporarily(firstComment, 6500, 'happy', 'laugh', { speechDelayMs: 160 });
+      soundEngine.openWindow();
     },
     [applyMorphOrigin, sayTemporarily]
   );
@@ -687,13 +819,20 @@ export default function App() {
     (slug, e) => {
       const cert = CERTIFICATIONS_BY_SLUG[slug];
       if (!cert) return;
+      if (!activeModalRef.current && typeof document !== 'undefined') {
+        lastFocusedElRef.current = document.activeElement;
+      }
       applyMorphOrigin(e?.currentTarget, e);
-      soundEngine.openWindow();
       setModalTitleRevealed(false);
       setModalMascotMode('hero-right');
-      setActiveModal({ type: 'cert', slug });
+      const nextModal = { type: 'cert', slug };
+      setActiveModal(nextModal);
       setActiveModalSlideIdx(0);
       setMenuOpen(false);
+      const nextPath = getModalPath(nextModal);
+      if (typeof window !== 'undefined' && window.location.pathname !== nextPath) {
+        window.history.pushState({ modal: nextModal }, '', nextPath);
+      }
       sayTemporarily(
         `Verified Credential: ${cert.title} issued by ${cert.issuer}.`,
         6000,
@@ -701,6 +840,7 @@ export default function App() {
         'laugh',
         { speechDelayMs: 160 }
       );
+      soundEngine.openWindow();
     },
     [applyMorphOrigin, sayTemporarily]
   );
@@ -768,18 +908,74 @@ export default function App() {
   }, [activeModal]);
 
   const closeWindow = useCallback(() => {
-    soundEngine.closeWindow();
     setModalTitleRevealed(false);
     setActiveModal(null);
+    if (typeof window !== 'undefined' && window.location.pathname !== '/') {
+      window.history.pushState({ modal: null }, '', '/');
+    }
+    soundEngine.closeWindow();
   }, []);
 
-  // Lock body scroll & handle Escape when Case Study Window is open
+  // Sync browser Back / Forward navigation with activeModal
+  useEffect(() => {
+    const onPopState = () => {
+      const nextModal = parseModalFromPathname(window.location.pathname);
+      morphSourceRectRef.current = null;
+      if (nextModal?.type === 'project') {
+        const project = ALL_WORK_BY_SLUG[nextModal.slug];
+        if (!project) return;
+        setModalTitleRevealed(false);
+        setModalMascotMode('hero-right');
+        setActiveModal(nextModal);
+        setActiveModalSlideIdx(0);
+        setMenuOpen(false);
+        const firstComment =
+          project.characterComments?.[0] ||
+          `This is ${project.title}! Explore the full showcase and live links.`;
+        sayTemporarily(firstComment, 6500, 'happy', 'laugh', { speechDelayMs: 160 });
+        soundEngine.openWindow();
+      } else if (nextModal?.type === 'cert') {
+        const cert = CERTIFICATIONS_BY_SLUG[nextModal.slug];
+        if (!cert) return;
+        setModalTitleRevealed(false);
+        setModalMascotMode('hero-right');
+        setActiveModal(nextModal);
+        setActiveModalSlideIdx(0);
+        setMenuOpen(false);
+        sayTemporarily(
+          `Verified Credential: ${cert.title} issued by ${cert.issuer}.`,
+          6000,
+          'happy',
+          'laugh',
+          { speechDelayMs: 160 }
+        );
+        soundEngine.openWindow();
+      } else {
+        const wasOpen = Boolean(activeModalRef.current);
+        setModalTitleRevealed(false);
+        setActiveModal(null);
+        if (wasOpen) {
+          soundEngine.closeWindow();
+        }
+      }
+    };
+    window.addEventListener('popstate', onPopState);
+    return () => window.removeEventListener('popstate', onPopState);
+  }, [sayTemporarily]);
+
+  // Lock body scroll, manage dialog focus & handle Escape when Case Study Window is open
   useEffect(() => {
     if (!activeModal) {
       document.body.style.overflow = '';
-      return;
+      const prevFocus = lastFocusedElRef.current;
+      lastFocusedElRef.current = null;
+      if (prevFocus && typeof prevFocus.focus === 'function' && prevFocus.isConnected) {
+        prevFocus.focus({ preventScroll: true });
+      }
+      return undefined;
     }
     document.body.style.overflow = 'hidden';
+    projectWindowRef.current?.focus({ preventScroll: true });
     const onKeyDown = (e) => {
       if (e.key === 'Escape') closeWindow();
     };
@@ -819,13 +1015,13 @@ export default function App() {
         posRef.current.isDragging = false;
         posRef.current.hasCustomDropPos = true;
         setIsDraggingState(false);
-        soundEngine.drop();
         sayTemporarily(
           'Solid landing! Double-click me anytime to switch outfits or do a trick.',
           3000,
           'happy',
           'laugh'
         );
+        soundEngine.drop();
       }
     };
 
@@ -904,13 +1100,15 @@ export default function App() {
         aboutTargetCountRef.current = targetCount;
 
         if (targetCount !== aboutCurrentCountRef.current) {
-          if (targetCount > aboutCurrentCountRef.current && targetCount >= 1) {
-            const spokenWord = aboutWordsList[clamp(targetCount - 1, 0, wordCount - 1)];
-            soundEngine.speakWord(spokenWord, targetCount - 1);
-            pulseLipMovement(190);
-          }
+          const shouldSpeakAbout =
+            targetCount > aboutCurrentCountRef.current && targetCount >= 1;
           aboutCurrentCountRef.current = targetCount;
           setAboutLitCount(targetCount);
+          if (shouldSpeakAbout) {
+            const spokenWord = aboutWordsList[clamp(targetCount - 1, 0, wordCount - 1)];
+            pulseLipMovement(190);
+            soundEngine.speakWord(spokenWord, targetCount - 1);
+          }
         }
       }
 
@@ -1011,7 +1209,7 @@ export default function App() {
         nextOutfit = batmanMode ? 'gotham' : 'classic';
         nextFacingYaw = -0.35;
         nextMood = 'wave';
-        if (now > customSpeechUntilRef.current) {
+        if (!activeModalRef.current && now > customSpeechUntilRef.current) {
           lastSpokenSectionRef.current = 'footer';
           const footerBp = clamp((vh * 0.65 - footerRect.top) / Math.max(120, vh * 0.34), 0, 1);
           syncScrollSpeech(
@@ -1027,7 +1225,7 @@ export default function App() {
         nextFacingYaw = 0.24;
         const certsLine =
           '5 verified credentials in Java DSA, Full-Stack MERN, Business Intelligence, R & Google Developer Program.';
-        if (now > customSpeechUntilRef.current) {
+        if (!activeModalRef.current && now > customSpeechUntilRef.current) {
           lastSpokenSectionRef.current = 'certs';
           const certsBp = clamp((vh * 0.55 - certsRect.top) / Math.max(120, vh * 0.38), 0, 1);
           syncScrollSpeech(certsLine, certsBp);
@@ -1042,7 +1240,7 @@ export default function App() {
         const workLine = batmanMode
           ? OWNER_PROFILE.bentoTooltipBatman
           : OWNER_PROFILE.bentoTooltipNormal;
-        if (now > customSpeechUntilRef.current) {
+        if (!activeModalRef.current && now > customSpeechUntilRef.current) {
           lastSpokenSectionRef.current = 'work';
           const workBp = clamp((vh * 0.55 - workRect.top) / Math.max(120, vh * 0.42), 0, 1);
           syncScrollSpeech(workLine, workBp);
@@ -1060,7 +1258,7 @@ export default function App() {
 
         // Speak Tour descriptions EXCLUSIVELY in the speech bubble ABOVE the character's head,
         // driven 100% by user scroll progress (activeBp) starting from word #1 ("MediStudyGo")!
-        if (now > customSpeechUntilRef.current) {
+        if (!activeModalRef.current && now > customSpeechUntilRef.current) {
           const line =
             detectedChapter.bubbles[detectedChapterStep] || detectedChapter.bubbles[0];
           const activeBp =
@@ -1076,7 +1274,7 @@ export default function App() {
         nextFacingYaw = 0.32;
         nextPointSide = 1;
         nextMood = 'pointRight';
-        if (now > customSpeechUntilRef.current) {
+        if (!activeModalRef.current && now > customSpeechUntilRef.current) {
           setSpeechVisible(false);
         }
       } else {
@@ -1087,7 +1285,7 @@ export default function App() {
         nextOutfit = batmanMode ? 'gotham' : 'classic';
         nextFacingYaw = -0.28;
         nextMood = 'neutral';
-        if (now > customSpeechUntilRef.current) {
+        if (!activeModalRef.current && now > customSpeechUntilRef.current) {
           const heroLine = batmanMode ? OWNER_PROFILE.batmanHeroQuip : HERO_IDLE_QUIPS[0];
           const heroBp = clamp(scrollY / Math.max(120, vh * 0.28), 0, 1);
           syncScrollSpeech(heroLine, heroBp, { silentOnInit: scrollY < 5 });
@@ -1270,21 +1468,21 @@ export default function App() {
     p.dragOffsetX = e.clientX - p.x;
     p.dragOffsetY = e.clientY - p.y;
     setIsDraggingState(true);
-    soundEngine.grab();
     sayTemporarily(
       'Whoa! Careful with the ABS plastic hair — where are we flying?',
       2600,
       'surprised',
       'surprised'
     );
+    soundEngine.grab();
   };
 
   const handleMascotClick = () => {
     const now = performance.now();
     if (now - lastMascotTapRef.current < 340) {
-      soundEngine.pop();
       setMenuOpen((prev) => !prev);
       lastMascotTapRef.current = 0;
+      soundEngine.pop();
     } else {
       lastMascotTapRef.current = now;
     }
@@ -1298,13 +1496,13 @@ export default function App() {
       tickleCounterRef.current += 1;
       if (tickleCounterRef.current > 24) {
         tickleCounterRef.current = 0;
-        soundEngine.giggle();
         sayTemporarily(
           'Haha, that tickles! Double-click me for a trick!',
           1100,
           'tickle',
           'tickle'
         );
+        soundEngine.giggle();
       }
     } else if (now - lastTickleTimeRef.current > 350) {
       tickleCounterRef.current = 0;
@@ -1500,34 +1698,36 @@ export default function App() {
               const now = Date.now();
               if (now - lastMascotTapRef.current < 380) {
                 e.preventDefault();
-                soundEngine.pop();
                 setMenuOpen((prev) => !prev);
+                soundEngine.pop();
               }
               lastMascotTapRef.current = now;
             }}
             onClick={handleMascotClick}
             onDoubleClick={(e) => {
               e.stopPropagation();
-              soundEngine.pop();
               setMenuOpen((prev) => !prev);
+              soundEngine.pop();
             }}
             title="Drag me around, or double-click me to pick an outfit or trick!"
           >
-            <LegoScene
-              outfitId={activeOutfitId}
-              mood={effectiveMood}
-              emotion={activeEmotion}
-              isReading={isReadingActive}
-              scrollVelocity={scrollVelocityState}
-              accent="#FFD500"
-              trickState={activeTrick}
-              onCharacterClick={handleMascotClick}
-              isWalking={isWalkingState}
-              walkDirection={walkDirectionState}
-              isGrabbed={isDraggingState}
-              badgeMode={isBadgeActive}
-              globalPointerRef={globalPointerRef}
-            />
+            <Suspense fallback={null}>
+              <LegoScene
+                outfitId={activeOutfitId}
+                mood={effectiveMood}
+                emotion={activeEmotion}
+                isReading={isReadingActive}
+                scrollVelocity={scrollVelocityState}
+                accent="#FFD500"
+                trickState={activeTrick}
+                onCharacterClick={handleMascotClick}
+                isWalking={isWalkingState}
+                walkDirection={walkDirectionState}
+                isGrabbed={isDraggingState}
+                badgeMode={isBadgeActive}
+                globalPointerRef={globalPointerRef}
+              />
+            </Suspense>
           </div>
         </div>
 
@@ -1603,8 +1803,8 @@ export default function App() {
                 type="button"
                 className="button"
                 onClick={() => {
-                  soundEngine.pop();
                   setMenuOpen((prev) => !prev);
+                  soundEngine.pop();
                 }}
               >
                 <span>Do a trick</span>
@@ -1614,8 +1814,8 @@ export default function App() {
                 className="button button--yellow"
                 onClick={(e) => {
                   e.preventDefault();
-                  soundEngine.pop();
                   footerRef.current?.scrollIntoView({ behavior: 'smooth' });
+                  soundEngine.pop();
                 }}
               >
                 <span>Get in touch</span>
@@ -1638,6 +1838,7 @@ export default function App() {
               <button
                 type="button"
                 className="batman-trigger"
+                aria-pressed={batmanMode}
                 onClick={toggleBatmanMode}
                 title="Click to toggle LEGO Batman Batcave Mode!"
               >
@@ -1835,7 +2036,16 @@ export default function App() {
                       {/* Overlapping 3D Dark-Metallic Smartphone Hardware with Dynamic Island */}
                       <div
                         className="tour__phone"
+                        role="button"
+                        tabIndex={0}
+                        aria-label={`Open ${chapter.title} full case study`}
                         onClick={(e) => openProjectWindow(chapter.projectSlug, e)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            openProjectWindow(chapter.projectSlug, e);
+                          }
+                        }}
                         title={`Click to open ${chapter.title} case study`}
                       >
                         <div
@@ -2012,7 +2222,17 @@ export default function App() {
                     '--card-accent': project.accentColor,
                     '--card-tint': project.surfaceTint,
                   }}
+                  role="button"
+                  tabIndex={0}
+                  aria-label={`Open ${project.title} case study`}
                   onClick={(e) => openProjectWindow(project.slug, e)}
+                  onKeyDown={(e) => {
+                    if (e.target !== e.currentTarget && e.target.closest('a, button')) return;
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      openProjectWindow(project.slug, e);
+                    }
+                  }}
                   onMouseEnter={() => {
                     customSpeechUntilRef.current = performance.now() + 2600;
                     setSpeechText(`${project.title} — ${project.subtitle}`);
@@ -2092,7 +2312,17 @@ export default function App() {
                     '--card-accent': cert.accentColor,
                     '--card-tint': cert.surfaceTint,
                   }}
+                  role="button"
+                  tabIndex={0}
+                  aria-label={`Inspect ${cert.title} credential`}
                   onClick={(e) => openCertWindow(cert.slug, e)}
+                  onKeyDown={(e) => {
+                    if (e.target !== e.currentTarget && e.target.closest('a, button')) return;
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      openCertWindow(cert.slug, e);
+                    }
+                  }}
                   onMouseEnter={() => {
                     customSpeechUntilRef.current = performance.now() + 2600;
                     setSpeechText(`${cert.title} — Issued by ${cert.issuer}`);
@@ -2162,8 +2392,7 @@ export default function App() {
               type="button"
               className="footer__email"
               onClick={() => {
-                navigator.clipboard?.writeText(OWNER_PROFILE.email);
-                soundEngine.playTrickSound('dance');
+                navigator.clipboard?.writeText(OWNER_PROFILE.email)?.catch(() => {});
                 setStageState((prev) => ({ ...prev, gesture: 'cheer' }));
                 sayTemporarily(
                   `Copied ${OWNER_PROFILE.email} to your clipboard! Talk soon!`,
@@ -2171,6 +2400,7 @@ export default function App() {
                   'laugh',
                   'laugh'
                 );
+                soundEngine.playTrickSound('dance');
               }}
               title="Click to copy email address"
             >
@@ -2207,8 +2437,8 @@ export default function App() {
                 type="button"
                 className="footer__action-btn"
                 onClick={() => {
-                  soundEngine.pop();
                   setMenuOpen(true);
+                  soundEngine.pop();
                 }}
               >
                 Do a trick
@@ -2217,8 +2447,8 @@ export default function App() {
                 type="button"
                 className="footer__action-btn"
                 onClick={() => {
-                  soundEngine.pop();
                   setMenuOpen(true);
+                  soundEngine.pop();
                 }}
               >
                 Dress me up
@@ -2249,9 +2479,12 @@ export default function App() {
         >
           <div
             key={`project-${activeModalProject.slug}`}
+            ref={projectWindowRef}
             className="project-window"
             role="dialog"
             aria-modal="true"
+            aria-label={`${activeModalProject.title} case study`}
+            tabIndex={-1}
           >
             <div className="project-window__bg-sweep" aria-hidden="true" />
             <header className="project-window__topbar">
@@ -2496,8 +2729,17 @@ export default function App() {
 
                   <div
                     className="case-next__preview"
+                    role="button"
+                    tabIndex={0}
+                    aria-label={`Open next project: ${adjacentProjects.next.title}`}
                     onClick={(e) => {
                       openProjectWindow(adjacentProjects.next.slug, e);
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        openProjectWindow(adjacentProjects.next.slug, e);
+                      }
                     }}
                   >
                     <img
@@ -2526,9 +2768,12 @@ export default function App() {
         >
           <div
             key={`cert-${activeModalCert.slug}`}
+            ref={projectWindowRef}
             className="project-window"
             role="dialog"
             aria-modal="true"
+            aria-label={`${activeModalCert.title} credential`}
+            tabIndex={-1}
           >
             <div className="project-window__bg-sweep" aria-hidden="true" />
             <header className="project-window__topbar">
@@ -2644,8 +2889,17 @@ export default function App() {
 
                   <div
                     className="case-next__preview"
+                    role="button"
+                    tabIndex={0}
+                    aria-label={`Inspect next credential: ${adjacentCerts.next.title}`}
                     onClick={(e) => {
                       openCertWindow(adjacentCerts.next.slug, e);
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        openCertWindow(adjacentCerts.next.slug, e);
+                      }
                     }}
                   >
                     <img

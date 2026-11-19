@@ -23,6 +23,7 @@ export default defineConfig({
   base: '/',
   plugins: [react(), tailwindcss(), githubPagesSpaFallback()],
   build: {
+    chunkSizeWarningLimit: 800,
     rollupOptions: {
       output: {
         manualChunks: {
