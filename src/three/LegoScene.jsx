@@ -1,7 +1,40 @@
-import { Suspense, useMemo, useRef } from 'react';
+import { Component, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import Minifig from './Minifig';
+import { downgradeTier, probeWebGL, resolveTier } from './quality';
+import { useFpsGovernor } from './useFpsGovernor';
+
+const POSTER_FALLBACK = (
+  <img
+    src="/poster.jpg"
+    alt="Avichal Goyal 3D LEGO Minifigure"
+    style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block', pointerEvents: 'none' }}
+  />
+);
+
+class CanvasErrorBoundary extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return this.props.fallback;
+    }
+    return this.props.children;
+  }
+}
+
+function FpsGovernor({ onDowngrade }) {
+  useFpsGovernor(onDowngrade);
+  return null;
+}
 
 function SoftContactShadow({ badgeMode = false, isWalking = false }) {
   const meshRef = useRef(null);
@@ -77,23 +110,61 @@ export default function LegoScene({
   globalPointerRef,
 }) {
   const isBatman = outfitId === 'gotham';
+  const [webglSupported] = useState(() => Boolean(probeWebGL()));
+  const [tier, setTier] = useState(() => resolveTier(webglSupported));
+  const [contextLost, setContextLost] = useState(false);
+  const [canvasEl, setCanvasEl] = useState(null);
+
+  const handleDowngrade = useCallback(() => {
+    setTier((prev) => downgradeTier(prev));
+  }, []);
+
+  useEffect(() => {
+    if (!canvasEl) return undefined;
+
+    const handleContextLost = (e) => {
+      e.preventDefault();
+      setContextLost(true);
+    };
+
+    const handleContextRestored = () => {
+      setContextLost(false);
+    };
+
+    canvasEl.addEventListener('webglcontextlost', handleContextLost);
+    canvasEl.addEventListener('webglcontextrestored', handleContextRestored);
+
+    return () => {
+      canvasEl.removeEventListener('webglcontextlost', handleContextLost);
+      canvasEl.removeEventListener('webglcontextrestored', handleContextRestored);
+    };
+  }, [canvasEl]);
+
+  if (!webglSupported || tier.level === 0) {
+    return POSTER_FALLBACK;
+  }
 
   return (
-    <Canvas
-      shadows={{ type: THREE.PCFSoftShadowMap }}
-      dpr={[1, 2]}
-      resize={{ scroll: false, debounce: { scroll: 0, resize: 0 } }}
-      camera={{ position: [0, -0.02, 6.75], fov: 22 }}
-      gl={{
-        antialias: true,
-        alpha: true,
-        toneMapping: THREE.ACESFilmicToneMapping,
-        toneMappingExposure: 1.08,
-      }}
-      onCreated={({ scene }) => {
-        scene.environment = null;
-      }}
-    >
+    <CanvasErrorBoundary fallback={POSTER_FALLBACK}>
+      {contextLost && POSTER_FALLBACK}
+      <Canvas
+        shadows={{ type: THREE.PCFSoftShadowMap }}
+        dpr={tier.dpr}
+        resize={{ scroll: false, debounce: { scroll: 0, resize: 0 } }}
+        camera={{ position: [0, -0.02, 6.75], fov: 22 }}
+        style={contextLost ? { display: 'none' } : undefined}
+        gl={{
+          antialias: true,
+          alpha: true,
+          toneMapping: THREE.ACESFilmicToneMapping,
+          toneMappingExposure: 1.08,
+        }}
+        onCreated={({ gl, scene }) => {
+          scene.environment = null;
+          setCanvasEl(gl.domElement);
+        }}
+      >
+        <FpsGovernor onDowngrade={handleDowngrade} />
       {/* 3c. Soft Fill Bounce Light */}
       <hemisphereLight
         name="LegoStudioFillLight"
@@ -167,6 +238,7 @@ export default function LegoScene({
           globalPointerRef={globalPointerRef}
         />
       </Suspense>
-    </Canvas>
+      </Canvas>
+    </CanvasErrorBoundary>
   );
 }

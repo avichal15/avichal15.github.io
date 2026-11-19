@@ -4,6 +4,7 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { OUTFITS } from '../data/portfolioData';
 import { upgradeCharacterMaterialsToABS } from '../utils/upgradeMinifigurePBR';
+import { prefersReducedMotion } from './quality';
 
 const OUTFIT_MAP = new Map(OUTFITS.map((outfit) => [outfit.id, outfit]));
 
@@ -79,6 +80,7 @@ function paintHeadExpressionCanvas({
   pointerX = 0,
   pointerY = 0,
   isBatman = false,
+  reducedMotion = false,
 }) {
   if (!ctx || !baseImage) return;
 
@@ -131,8 +133,8 @@ function paintHeadExpressionCanvas({
 
   const drawTalkingMouth = () => {
     eraseMouth();
-    const openAmount = Math.abs(Math.sin(elapsed * 22));
-    const syllableMod = 0.7 + 0.3 * Math.cos(elapsed * 9.5);
+    const openAmount = reducedMotion ? 0.55 : Math.abs(Math.sin(elapsed * 22));
+    const syllableMod = reducedMotion ? 1 : 0.7 + 0.3 * Math.cos(elapsed * 9.5);
     const mouthHalfW = 13.5 + openAmount * 7.2 * syllableMod;
     const mouthHalfH = 2.0 + openAmount * 7.8 * syllableMod;
 
@@ -209,7 +211,7 @@ function paintHeadExpressionCanvas({
     }
     if (expressionKind === 'laugh') {
       eraseMouth();
-      const laughPulse = 1 + Math.sin(elapsed * 18) * 0.08;
+      const laughPulse = reducedMotion ? 1 : 1 + Math.sin(elapsed * 18) * 0.08;
       const mW = 20 * laughPulse;
       const mH = 10.5 * laughPulse;
       ctx.save();
@@ -355,7 +357,7 @@ function paintHeadExpressionCanvas({
     }
 
     // Big joyful open D-shaped laughing mouth at (209, 218)
-    const laughPulse = 1 + Math.sin(elapsed * 18) * 0.08;
+    const laughPulse = reducedMotion ? 1 : 1 + Math.sin(elapsed * 18) * 0.08;
     const mW = 20 * laughPulse;
     const mH = 10.5 * laughPulse;
 
@@ -603,7 +605,8 @@ function paintHeadExpressionCanvas({
       drawClosedEyelids();
     } else {
       eraseEyes(16.5);
-      const offsetX = THREE.MathUtils.clamp(pointerX * 4.2 + Math.sin(elapsed * 3.2) * 1.6, -4.5, 4.5);
+      const readingSway = reducedMotion ? 0 : Math.sin(elapsed * 3.2) * 1.6;
+      const offsetX = THREE.MathUtils.clamp(pointerX * 4.2 + readingSway, -4.5, 4.5);
       const offsetY = THREE.MathUtils.clamp(-pointerY * 2.6, -2.8, 2.8);
       [leftEyeX, rightEyeX].forEach((cx) => {
         const shiftedX = cx + offsetX;
@@ -663,11 +666,12 @@ function getCharacterPose({
   walkDirection,
   isGrabbed,
   suitUpProgress = 0,
+  reducedMotion = false,
 }) {
-  const idleWave = Math.sin(elapsed * 2.2);
-  const idleBounce = Math.abs(Math.sin(elapsed * 2.2));
+  const idleWave = reducedMotion ? 0 : Math.sin(elapsed * 2.2);
+  const idleBounce = reducedMotion ? 0 : Math.abs(Math.sin(elapsed * 2.2));
   const clampedScroll = THREE.MathUtils.clamp(scrollVelocity, -3, 3);
-  const scrollBillow = Math.min(0.55, Math.abs(clampedScroll) * 0.16);
+  const scrollBillow = reducedMotion ? 0 : Math.min(0.55, Math.abs(clampedScroll) * 0.16);
 
   const pose = {
     rootX: 0,
@@ -694,7 +698,7 @@ function getCharacterPose({
 
   // Grabbed in mid-air: dangling legs & flailing arms
   if (isGrabbed) {
-    const flail = Math.sin(elapsed * 16);
+    const flail = reducedMotion ? 0 : Math.sin(elapsed * 16);
     pose.rootY += 0.12;
     pose.rootRotZ = flail * 0.08;
     pose.leftArmX = -1.35 + flail * 0.35;
@@ -709,10 +713,10 @@ function getCharacterPose({
 
   // Contextual Mood Poses (idle gestures)
   if (mood === 'wave') {
-    pose.rightArmX = -2.1 + Math.sin(elapsed * 5.2) * 0.14;
-    pose.rightArmZ = -0.22 + Math.cos(elapsed * 5.2) * 0.16;
+    pose.rightArmX = -2.1 + (reducedMotion ? 0 : Math.sin(elapsed * 5.2) * 0.14);
+    pose.rightArmZ = -0.22 + (reducedMotion ? 0 : Math.cos(elapsed * 5.2) * 0.16);
   } else if (mood === 'pointRight') {
-    const pointBeat = Math.sin(elapsed * 4.8);
+    const pointBeat = reducedMotion ? 0 : Math.sin(elapsed * 4.8);
     pose.rootRotY = 0.24 + pointer.x * 0.12;
     pose.headY = 0.18 + pointer.x * 0.15;
     pose.headX = pointBeat * 0.04 - pointer.y * 0.1;
@@ -720,7 +724,7 @@ function getCharacterPose({
     pose.leftArmZ = 0.34;
     pose.rightArmX = 0.12;
   } else if (mood === 'pointLeft') {
-    const pointBeat = Math.sin(elapsed * 4.8);
+    const pointBeat = reducedMotion ? 0 : Math.sin(elapsed * 4.8);
     pose.rootRotY = -0.24 + pointer.x * 0.12;
     pose.headY = -0.18 + pointer.x * 0.15;
     pose.headX = pointBeat * 0.04 - pointer.y * 0.1;
@@ -728,23 +732,23 @@ function getCharacterPose({
     pose.rightArmZ = -0.34;
     pose.leftArmX = 0.12;
   } else if (mood === 'caller') {
-    pose.rightArmX = -1.55 + Math.sin(elapsed * 3.4) * 0.06;
+    pose.rightArmX = -1.55 + (reducedMotion ? 0 : Math.sin(elapsed * 3.4) * 0.06);
     pose.rightArmZ = -0.15;
-    pose.leftArmX = -0.45 + Math.cos(elapsed * 3.4) * 0.08;
+    pose.leftArmX = -0.45 + (reducedMotion ? 0 : Math.cos(elapsed * 3.4) * 0.08);
   } else if (mood === 'champion' || mood === 'thumbsup') {
-    pose.rightArmX = -1.65 + Math.sin(elapsed * 3.6) * 0.08;
+    pose.rightArmX = -1.65 + (reducedMotion ? 0 : Math.sin(elapsed * 3.6) * 0.08);
     pose.leftArmX = -0.35;
   }
 
   // Reading / Talking subtle head nods
-  if (isReading) {
+  if (isReading && !reducedMotion) {
     pose.headX += Math.sin(elapsed * 6) * 0.045;
     pose.headY += Math.sin(elapsed * 2.5) * 0.08;
   }
 
   // Brief chuckle shoulder/torso bounce ONLY on active tickle
   if (String(emotion || '').toLowerCase() === 'tickle') {
-    const laughBounce = Math.abs(Math.sin(elapsed * 14)) * 0.025;
+    const laughBounce = reducedMotion ? 0.01 : Math.abs(Math.sin(elapsed * 14)) * 0.025;
     pose.rootY += laughBounce;
     pose.torsoX -= laughBounce * 0.5;
     pose.headX -= 0.08;
@@ -753,17 +757,18 @@ function getCharacterPose({
   }
 
   if (isBatman) {
-    pose.capeX =
-      0.16 +
-      Math.sin(elapsed * 2.8) * 0.05 +
-      scrollBillow +
-      Math.sin(elapsed * 12) * Math.min(0.08, scrollBillow * 0.35);
+    pose.capeX = reducedMotion
+      ? 0.16
+      : 0.16 +
+        Math.sin(elapsed * 2.8) * 0.05 +
+        scrollBillow +
+        Math.sin(elapsed * 12) * Math.min(0.08, scrollBillow * 0.35);
   }
 
   // Real Walk / Run Cycle — smoothly blended via walkBlend (0 -> 1)
   if (walkBlend > 0.001) {
-    const stride = Math.sin(walkCycle);
-    const bob = Math.abs(Math.cos(walkCycle));
+    const stride = reducedMotion ? 0 : Math.sin(walkCycle);
+    const bob = reducedMotion ? 0 : Math.abs(Math.cos(walkCycle));
     const dir = walkDirection < 0 ? -1 : 1;
 
     const walkRootY = bob * 0.075;
@@ -796,7 +801,7 @@ function getCharacterPose({
   }
 
   // 600ms "Suit-Up" 360-degree spin + grapple-line drop transition
-  if (suitUpProgress > 0 && suitUpProgress < 1) {
+  if (!reducedMotion && suitUpProgress > 0 && suitUpProgress < 1) {
     const inv = 1 - suitUpProgress;
     const dropArc = inv * inv;
     pose.rootY += dropArc * 0.52;
@@ -811,23 +816,33 @@ function getCharacterPose({
     const arc = Math.sin(trickProgress * Math.PI);
     switch (trickKind) {
       case 'backflip':
-        pose.rootY += arc * 0.38;
-        pose.rootRotX = -trickProgress * Math.PI * 2;
-        pose.leftArmX = -2.1;
-        pose.rightArmX = -2.1;
-        pose.leftLegX = -0.32 * arc;
-        pose.rightLegX = 0.32 * arc;
+        if (reducedMotion) {
+          pose.rootY += arc * 0.12;
+          pose.leftArmX = -1.4 * arc;
+          pose.rightArmX = -1.4 * arc;
+        } else {
+          pose.rootY += arc * 0.38;
+          pose.rootRotX = -trickProgress * Math.PI * 2;
+          pose.leftArmX = -2.1;
+          pose.rightArmX = -2.1;
+          pose.leftLegX = -0.32 * arc;
+          pose.rightLegX = 0.32 * arc;
+        }
         break;
       case 'spin':
-        pose.rootY += arc * 0.24;
-        pose.rootRotY += trickProgress * Math.PI * 2;
-        pose.leftArmZ = 0.32;
-        pose.rightArmZ = -0.32;
+        if (reducedMotion) {
+          pose.rootRotY += arc * 0.35;
+        } else {
+          pose.rootY += arc * 0.24;
+          pose.rootRotY += trickProgress * Math.PI * 2;
+          pose.leftArmZ = 0.32;
+          pose.rightArmZ = -0.32;
+        }
         break;
       case 'superhero': {
         if (trickProgress < 0.42) {
           const leap = Math.sin((trickProgress / 0.42) * Math.PI);
-          pose.rootY += leap * 0.48;
+          pose.rootY += leap * (reducedMotion ? 0.14 : 0.48);
           pose.headX = -0.35 * leap;
           pose.rightArmX = -2.4 * leap;
           pose.leftArmX = -2.4 * leap;
@@ -835,7 +850,7 @@ function getCharacterPose({
         } else {
           const landProg = (trickProgress - 0.42) / 0.58;
           const punch = Math.sin(landProg * Math.PI);
-          pose.rootY -= 0.14 * punch;
+          pose.rootY -= (reducedMotion ? 0.05 : 0.14) * punch;
           pose.torsoX = 0.35 * punch;
           pose.headX = -0.42 * punch;
           pose.headY = pointer.x * 0.15;
@@ -850,9 +865,9 @@ function getCharacterPose({
         break;
       }
       case 'dance': {
-        const beat = Math.sin(trickProgress * Math.PI * 8);
-        pose.rootY += Math.abs(beat) * 0.16;
-        pose.rootRotY += beat * 0.45;
+        const beat = reducedMotion ? arc * 0.45 : Math.sin(trickProgress * Math.PI * 8);
+        pose.rootY += Math.abs(beat) * (reducedMotion ? 0.04 : 0.16);
+        pose.rootRotY += beat * (reducedMotion ? 0.2 : 0.45);
         pose.torsoZ = beat * 0.15;
         pose.leftArmX = -1.6 + beat * 0.65;
         pose.rightArmX = -1.6 - beat * 0.65;
@@ -861,8 +876,8 @@ function getCharacterPose({
         break;
       }
       case 'panic': {
-        const shake = Math.sin(trickProgress * Math.PI * 14);
-        pose.rootY += Math.abs(shake) * 0.12;
+        const shake = reducedMotion ? arc * 0.3 : Math.sin(trickProgress * Math.PI * 14);
+        pose.rootY += Math.abs(shake) * (reducedMotion ? 0.04 : 0.12);
         pose.rootRotY += shake * 0.35;
         pose.leftArmX = -2.4 + shake * 0.25;
         pose.rightArmX = -2.4 - shake * 0.25;
@@ -871,27 +886,31 @@ function getCharacterPose({
         break;
       }
       case 'fly':
-        pose.rootY += arc * 0.52;
-        pose.rootRotX = 0.28 * arc;
-        pose.rootRotY += Math.sin(trickProgress * Math.PI * 2) * 0.35;
+        pose.rootY += arc * (reducedMotion ? 0.16 : 0.52);
+        pose.rootRotX = (reducedMotion ? 0.12 : 0.28) * arc;
+        pose.rootRotY += reducedMotion ? 0 : Math.sin(trickProgress * Math.PI * 2) * 0.35;
         pose.leftArmX = -2.45 * arc;
         pose.rightArmX = -2.45 * arc;
         pose.capeX = 0.55 * arc;
         break;
       case 'vanish':
-        pose.scaleMult = Math.max(0.06, 1 - arc * 0.94);
-        pose.rootRotY += trickProgress * Math.PI * 4;
+        if (reducedMotion) {
+          pose.scaleMult = Math.max(0.75, 1 - arc * 0.25);
+        } else {
+          pose.scaleMult = Math.max(0.06, 1 - arc * 0.94);
+          pose.rootRotY += trickProgress * Math.PI * 4;
+        }
         break;
       case 'hiccup': {
-        const jolt = Math.sin(trickProgress * Math.PI * 4);
-        pose.rootY += Math.max(0, jolt) * 0.22;
+        const jolt = reducedMotion ? arc * 0.4 : Math.sin(trickProgress * Math.PI * 4);
+        pose.rootY += Math.max(0, jolt) * (reducedMotion ? 0.08 : 0.22);
         pose.torsoX = -Math.max(0, jolt) * 0.25;
         pose.leftArmX = -0.8 * Math.max(0, jolt);
         pose.rightArmX = -0.8 * Math.max(0, jolt);
         break;
       }
       case 'peekaboo':
-        pose.headY = Math.sin(trickProgress * Math.PI * 2) * 0.55;
+        pose.headY = reducedMotion ? 0.25 * arc : Math.sin(trickProgress * Math.PI * 2) * 0.55;
         pose.leftArmX = -1.95 * arc;
         pose.rightArmX = -1.95 * arc;
         pose.leftArmZ = -0.25 * arc;
@@ -905,18 +924,24 @@ function getCharacterPose({
         pose.leftArmX = -1.2 * arc;
         break;
       case 'dizzy': {
-        const wobble = Math.sin(trickProgress * Math.PI * 6);
-        pose.rootRotZ = wobble * 0.22;
-        pose.rootRotY += trickProgress * Math.PI * 2;
-        pose.headZ = -wobble * 0.28;
-        pose.headX = Math.cos(trickProgress * Math.PI * 6) * 0.22;
-        pose.leftArmX = -0.9 + wobble * 0.35;
-        pose.rightArmX = -0.9 - wobble * 0.35;
+        if (reducedMotion) {
+          pose.headZ = 0.18 * arc;
+          pose.leftArmX = -0.7 * arc;
+          pose.rightArmX = -0.7 * arc;
+        } else {
+          const wobble = Math.sin(trickProgress * Math.PI * 6);
+          pose.rootRotZ = wobble * 0.22;
+          pose.rootRotY += trickProgress * Math.PI * 2;
+          pose.headZ = -wobble * 0.28;
+          pose.headX = Math.cos(trickProgress * Math.PI * 6) * 0.22;
+          pose.leftArmX = -0.9 + wobble * 0.35;
+          pose.rightArmX = -0.9 - wobble * 0.35;
+        }
         break;
       }
       case 'tickle': {
-        const wiggle = Math.sin(trickProgress * Math.PI * 12);
-        pose.rootY += Math.abs(wiggle) * 0.1;
+        const wiggle = reducedMotion ? arc * 0.35 : Math.sin(trickProgress * Math.PI * 12);
+        pose.rootY += Math.abs(wiggle) * (reducedMotion ? 0.03 : 0.1);
         pose.torsoZ = wiggle * 0.16;
         pose.headZ = -wiggle * 0.18;
         pose.leftArmX = -1.2 + wiggle * 0.4;
@@ -928,7 +953,7 @@ function getCharacterPose({
           const windup = trickProgress / 0.45;
           pose.torsoX = -0.32 * windup;
           pose.headX = -0.38 * windup;
-          pose.rootY += 0.06 * windup;
+          pose.rootY += (reducedMotion ? 0.02 : 0.06) * windup;
         } else {
           const snap = Math.sin(((trickProgress - 0.45) / 0.55) * Math.PI);
           pose.torsoX = 0.42 * snap;
@@ -946,9 +971,9 @@ function getCharacterPose({
         pose.rightArmX = 0.15 * arc;
         break;
       default:
-        pose.rootY += arc * 0.18;
+        pose.rootY += arc * (reducedMotion ? 0.06 : 0.18);
         pose.rightArmX = -2.15;
-        pose.rightArmZ = -0.22 + Math.sin(trickProgress * Math.PI * 6) * 0.22;
+        pose.rightArmZ = -0.22 + (reducedMotion ? 0 : Math.sin(trickProgress * Math.PI * 6) * 0.22);
         break;
     }
   }
@@ -1161,8 +1186,6 @@ export default function Minifig({
     });
 
     // Align BatmanHelmet cowl cleanly over nose bridge while keeping white eye cutouts crisp
-    let batEyeLeft = null;
-    let batEyeRight = null;
     if (nodes.BatmanHelmet) {
       nodes.BatmanHelmet.position.y += 0.026;
     }
@@ -1206,8 +1229,6 @@ export default function Minifig({
       hairMaterial,
       helmetMaterial,
       capeMaterial,
-      batEyeLeft,
-      batEyeRight,
       utilityBelt,
     };
   }, [gltf]);
@@ -1303,13 +1324,17 @@ export default function Minifig({
     const isBatman = Boolean(outfit.showHelmet);
     const faceSurface = getHeadFaceSurface();
 
+    const reducedMotion = prefersReducedMotion();
+
     if (prevOutfitRef.current !== outfitId) {
       prevOutfitRef.current = outfitId;
-      suitUpRef.current = {
-        active: true,
-        startedAt: performance.now(),
-        duration: 600,
-      };
+      suitUpRef.current = reducedMotion
+        ? { active: false, startedAt: 0, duration: 600 }
+        : {
+            active: true,
+            startedAt: performance.now(),
+            duration: 600,
+          };
     }
 
     currentRig.bodyMaterials.forEach((material) => {
@@ -1376,12 +1401,13 @@ export default function Minifig({
     }
 
     upgradeCharacterMaterialsToABS(currentRig.root);
-    scalePulse.current = 1.04;
+    scalePulse.current = reducedMotion ? 1 : 1.04;
   }, [outfitId, atlasByKey, baseAtlas, gothamCape, hairAtlas, rig]);
 
   useFrame((state, delta) => {
     const elapsed = state.clock.getElapsedTime();
     const now = performance.now();
+    const reducedMotion = prefersReducedMotion();
     const outfit = OUTFIT_MAP.get(outfitId) ?? OUTFITS[0];
     const selectedAtlas = atlasByKey[outfit.atlasKey] ?? baseAtlas;
     const isBatman = Boolean(outfit.showHelmet);
@@ -1400,7 +1426,9 @@ export default function Minifig({
 
     // 600ms Suit-Up progress
     let suitUpProgress = 0;
-    if (suitUpRef.current.active) {
+    if (reducedMotion) {
+      suitUpRef.current.active = false;
+    } else if (suitUpRef.current.active) {
       const rawSuit = (now - suitUpRef.current.startedAt) / suitUpRef.current.duration;
       if (rawSuit >= 0 && rawSuit <= 1) {
         suitUpProgress = rawSuit;
@@ -1419,35 +1447,6 @@ export default function Minifig({
       isReading,
       isGrabbed,
     });
-
-
-
-    // Scale Batman's glowing white slit eyes during blink / laugh / squint / shock / wink
-    const { batEyeLeft, batEyeRight } = rigRef.current;
-    if (batEyeLeft && batEyeRight) {
-      let targetLeftScaleY = 1;
-      let targetRightScaleY = 1;
-
-      if (isBlinking) {
-        targetLeftScaleY = 0.08;
-        targetRightScaleY = 0.08;
-      } else if (expressionKind === 'laugh') {
-        targetLeftScaleY = 0.36;
-        targetRightScaleY = 0.36;
-      } else if (expressionKind === 'shocked') {
-        targetLeftScaleY = 1.32;
-        targetRightScaleY = 1.32;
-      } else if (expressionKind === 'cheeky') {
-        targetLeftScaleY = 1.08;
-        targetRightScaleY = 0.12;
-      } else if (expressionKind === 'sad') {
-        targetLeftScaleY = 0.5;
-        targetRightScaleY = 0.5;
-      }
-
-      batEyeLeft.scale.y = dampValue(batEyeLeft.scale.y, targetLeftScaleY, 18, delta);
-      batEyeRight.scale.y = dampValue(batEyeRight.scale.y, targetRightScaleY, 18, delta);
-    }
 
     // Update 10-Stud Particle Burst & Grapple Line during 600ms Suit-Up transition
     studGroupRefs.current.forEach((studNode, i) => {
@@ -1493,9 +1492,9 @@ export default function Minifig({
     if (faceSurface && selectedAtlas?.image) {
       const pBucketX = Math.round((pointer?.x || 0) * 12);
       const pBucketY = Math.round((pointer?.y || 0) * 12);
-      const isAnimatedFace = isReading || expressionKind === 'reading' || expressionKind === 'laugh';
+      const isAnimatedFace = !reducedMotion && (isReading || expressionKind === 'reading' || expressionKind === 'laugh');
       const timeBucket = isAnimatedFace ? Math.floor(elapsed * 45) : 0;
-      const sig = `${outfit.atlasKey}:${isBatman ? 1 : 0}:${expressionKind}:${rawSignal}:${isReading ? 1 : 0}:${isBlinking ? 1 : 0}:${timeBucket}:${pBucketX}:${pBucketY}`;
+      const sig = `${outfit.atlasKey}:${isBatman ? 1 : 0}:${expressionKind}:${rawSignal}:${isReading ? 1 : 0}:${isBlinking ? 1 : 0}:${reducedMotion ? 1 : 0}:${timeBucket}:${pBucketX}:${pBucketY}`;
       if (sig !== lastFaceSignatureRef.current) {
         lastFaceSignatureRef.current = sig;
         paintHeadExpressionCanvas({
@@ -1509,6 +1508,7 @@ export default function Minifig({
           pointerX: pointer?.x || 0,
           pointerY: pointer?.y || 0,
           isBatman,
+          reducedMotion,
         });
         faceSurface.texture.needsUpdate = true;
       }
@@ -1525,7 +1525,7 @@ export default function Minifig({
 
     const targetWalk = effectiveIsWalking ? 1 : 0;
     walkBlendRef.current = dampValue(walkBlendRef.current, targetWalk, 18, delta);
-    if (walkBlendRef.current > 0.001) {
+    if (!reducedMotion && walkBlendRef.current > 0.001) {
       walkCycleRef.current += delta * 15.0 * walkBlendRef.current;
     }
 
@@ -1544,6 +1544,7 @@ export default function Minifig({
       walkDirection: effectiveWalkDirection,
       isGrabbed,
       suitUpProgress,
+      reducedMotion,
       expressionKind,
     });
 

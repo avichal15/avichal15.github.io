@@ -29,7 +29,7 @@ export function probeWebGL() {
     }
 }
 
-function prefersReducedMotion() {
+export function prefersReducedMotion() {
     return typeof window !== 'undefined'
         && typeof window.matchMedia === 'function'
         && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -42,8 +42,10 @@ function isMobile() {
 }
 
 /** Resolve the quality tier for the current device. */
-export function resolveTier() {
-    if (typeof window === 'undefined' || !probeWebGL()) return TIERS[0];
+export function resolveTier(hasWebGL) {
+    if (typeof window === 'undefined') return TIERS[0];
+    const webglAvailable = hasWebGL === undefined ? Boolean(probeWebGL()) : Boolean(hasWebGL);
+    if (!webglAvailable) return TIERS[0];
 
     const cores = navigator.hardwareConcurrency ?? 8;
     const memory = navigator.deviceMemory ?? 8;
