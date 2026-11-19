@@ -206,7 +206,8 @@ export const TOUR_CHAPTERS = [
         src: '/projects/medistudygo/desktop-hero.webp',
         alt: 'MediStudyGo live desktop storefront showing MBBS, BDS, BPT, and Nursing mind maps',
         badge: 'LIVE STOREFRONT · 50,000+ LEARNERS',
-        caption: 'MBBS, BDS & Nursing visual mind maps, flashcards, and NEET PG bundles.',
+        caption:
+          'Former role (May 2025 – Feb 2026): MBBS, BDS & Nursing visual mind maps, flashcards, and NEET PG bundles.',
       },
       {
         src: '/projects/medistudygo/desktop-feature.webp',
@@ -274,9 +275,9 @@ export const TOUR_CHAPTERS = [
       },
       {
         src: '/projects/phoney/audio-emojis.webp',
-        alt: 'Phoney adaptive themes, silent call recording, and local privacy',
-        badge: 'SILENT RECORDING & ADAPTIVE THEMES',
-        caption: 'Record calls cleanly without announcement alerts across 4 adaptive themes.',
+        alt: 'Phoney adaptive themes, consent-flow call recording, and local privacy',
+        badge: 'CALL RECORDING & ADAPTIVE THEMES · BETA',
+        caption: 'Call recording with an explicit consent flow across 4 adaptive themes — currently in beta testing.',
       },
     ],
     mobileSlides: [
@@ -294,7 +295,7 @@ export const TOUR_CHAPTERS = [
       },
     ],
     bubbles: [
-      'Phoney is my custom Android 15 dialer with silent call recording and live Audio Emojis.',
+      'Phoney is my custom Android 15 dialer (in beta) with consent-flow call recording and live Audio Emojis.',
       'I built the native Kotlin InCallService and this 3D showcase at phoney.avichalgoyal.me.',
       'Tap any of the 6 Audio Emoji buttons in the tray to hear them right now!',
     ],
@@ -386,9 +387,9 @@ export const TOUR_CHAPTERS = [
       },
       {
         src: '/projects/masterplayer/desktop-hero.webp',
-        alt: 'Masterplayer storefront, custom CRM, and top Google SEO',
-        badge: 'MASTERPLAYERPRINTS.COM · CRM + TOP SEO',
-        caption: 'Full-stack B2B print storefront, custom order CRM, and top Google search rankings.',
+        alt: 'Masterplayer storefront, custom CRM, and ongoing technical SEO',
+        badge: 'MASTERPLAYERPRINTS.COM · CRM + SEO (ONGOING)',
+        caption: 'Shipped B2B print storefront and custom order CRM, with ongoing technical SEO and ad optimization in progress.',
       },
       {
         src: '/projects/masterplayer/product-catalog.webp',
@@ -414,7 +415,7 @@ export const TOUR_CHAPTERS = [
     bubbles: [
       'For Masterplayer Prints, I built a 360° 3D WebGL apparel studio and custom CRM.',
       'Buyers spin 3D garments in real time and snap logos onto five precision print slots.',
-      'I also lead their technical SEO and digital ads, ranking them at the top of Google.',
+      'Shipped the storefront and CRM, with ongoing technical SEO and digital ad campaigns in progress.',
     ],
   },
   {
@@ -441,7 +442,7 @@ export const TOUR_CHAPTERS = [
         src: '/projects/omniroute/cover.webp',
         alt: 'OmniRoute Session Sync Chrome MV3 extension popup paired and unpaired states',
         badge: 'SESSION-SYNC · CHROME MV3 TO CLI BRIDGE',
-        caption: 'Syncs live browser sessions across ChatGPT, Gemini, Qwen, Z.ai, Grok & DeepSeek.',
+        caption: 'Independent community-maintained companion integration (not official OmniRoute core) syncing ChatGPT, Gemini, Qwen, Z.ai, Grok & DeepSeek.',
       },
       {
         src: '/projects/omniroute/extension-paired.webp',
@@ -471,7 +472,7 @@ export const TOUR_CHAPTERS = [
       },
     ],
     bubbles: [
-      'OmniRoute Session Sync is my open-source Chrome MV3 extension for AI gateways.',
+      'OmniRoute Session Sync is my independent, community-maintained companion extension — not official OmniRoute core.',
       'It pairs your browser with local CLI tools to sync cookies and bearer tokens.',
       'Background heartbeats keep ChatGPT, Gemini, Qwen, and DeepSeek connected 24/7.',
     ],
@@ -503,8 +504,8 @@ export const ALL_PROJECTS = [
     surfaceTint: '#E6F4F1',
     liveUrl: 'https://medistudygo.com/',
     liveLabel: 'Visit medistudygo.com',
-    repoUrl: 'https://github.com/avichal15',
-    repoLabel: 'GitHub Profile',
+    repoUrl: null,
+    repoLabel: null,
     coverImage: '/projects/medistudygo/desktop-hero.webp',
     stack: [
       'Shopify Storefront',
@@ -516,9 +517,9 @@ export const ALL_PROJECTS = [
       'Google Sheets Telemetry',
     ],
     summary:
-      'Unified Shopify, Graphy LMS, Shiprocket, DoubleTick WhatsApp, Brevo, and Razorpay into one automated brain for 50,000+ medical students.',
+      'Former full-time operations & product engineering work (May 2025 – Feb 2026): unified Shopify, Graphy LMS, Shiprocket, DoubleTick WhatsApp, Brevo, and Razorpay into one automated brain for 50,000+ medical students.',
     description: [
-      'Connected seven separate operational tools so course entitlements in Graphy LMS and print dispatches in Shiprocket trigger automatically on checkout.',
+      'In this previous role (May 2025 – Feb 2026), connected seven separate operational tools so course entitlements in Graphy LMS and print dispatches in Shiprocket trigger automatically on checkout.',
       'Structured 29,500+ active-recall flashcards, visual mind maps, and automated WhatsApp cart recovery for NEET PG and MBBS cohorts.',
     ],
     metrics: [
@@ -572,21 +573,21 @@ export const ALL_PROJECTS = [
       'Kotlin',
       'Jetpack Compose',
       'Android 15 InCallService',
-      'Clean Call Recording',
+      'Consent-Flow Call Recording',
       'React 19',
       'Three.js / WebGL',
       'WebAudio API',
     ],
     summary:
-      'Native Android 15 dialer built in Kotlin & Jetpack Compose featuring silent call recording, adaptive themes, and a 6-slot live Audio Emoji tray.',
+      'Native Android 15 dialer (in beta testing) built in Kotlin & Jetpack Compose featuring call recording with an explicit consent flow across 4 adaptive themes and a 6-slot live Audio Emoji tray.',
     description: [
-      'Built on Android’s Telecom InCallService API to replace the stock dialer with clean local call recording and sub-180ms in-call Audio Emojis.',
-      'Accompanied by an interactive 3D web showcase at phoney.avichalgoyal.me where visitors can test all 6 reactions live.',
+      'Built on Android’s Telecom InCallService API to replace the stock dialer with call recording via an explicit consent flow across 4 adaptive themes and sub-180ms in-call Audio Emojis.',
+      'Currently in beta testing alongside an interactive 3D web showcase at phoney.avichalgoyal.me where visitors can test all 6 reactions live.',
     ],
     metrics: [
       { value: '6 Emojis', label: 'Live In-Call Audio Reactions' },
       { value: '< 180ms', label: 'In-Call Sound Trigger Latency' },
-      { value: 'Android 15', label: 'Native Kotlin InCallService' },
+      { value: 'Android 15', label: 'Native Kotlin InCallService (Beta)' },
     ],
     slides: [
       {
@@ -599,7 +600,7 @@ export const ALL_PROJECTS = [
       },
       {
         src: '/projects/phoney/audio-emojis.webp',
-        caption: 'Native Kotlin InCallService — Clean Call Recording & 4 Adaptive Themes',
+        caption: 'Native Kotlin InCallService (Beta) — Consent-Flow Call Recording & 4 Adaptive Themes',
       },
     ],
     mobileSlides: [
@@ -608,7 +609,7 @@ export const ALL_PROJECTS = [
       { src: '/media/projects/theme-neo.webp', alt: 'Phoney adaptive Neo theme' },
     ],
     characterComments: [
-      'Phoney replaces your stock Android dialer with silent call recording and live Audio Emojis.',
+      'Phoney (in beta) replaces your stock Android dialer with consent-flow call recording and live Audio Emojis.',
       'Tap any of the 6 Quick Tray buttons below to hear the real in-call sound effects!',
     ],
   },
@@ -626,8 +627,8 @@ export const ALL_PROJECTS = [
     surfaceTint: '#FBF2E3',
     liveUrl: 'https://www.trugiftingsolutions.com/',
     liveLabel: 'Visit trugiftingsolutions.com',
-    repoUrl: 'https://github.com/avichal15',
-    repoLabel: 'GitHub Profile',
+    repoUrl: null,
+    repoLabel: null,
     coverImage: '/projects/trugifting/desktop-hero.webp',
     stack: [
       'React 19',
@@ -698,15 +699,15 @@ export const ALL_PROJECTS = [
       '18% GST Quote Engine',
     ],
     summary:
-      'Interactive 360° WebGL 3D apparel customizer, 22-department B2B print storefront, custom order CRM, and top-ranked Google SEO.',
+      'Ongoing B2B build: shipped 360° WebGL 3D apparel customizer, 22-department print storefront, and custom order CRM, with technical SEO and digital ads in progress.',
     description: [
-      'Built masterplayerprints.com with a real-time 360° 3D garment studio where buyers spin 240 GSM apparel, strip white logo backgrounds, and snap art onto 5 print slots.',
-      'Delivered their internal order CRM, 18% GST bulk quote engine, technical SEO rankings, and digital ad funnels end to end.',
+      'Shipped masterplayerprints.com with a real-time 360° 3D garment studio where buyers spin 240 GSM apparel, strip white logo backgrounds, and snap art onto 5 print slots, alongside their internal order CRM and 18% GST bulk quote engine.',
+      'In-progress scope covers ongoing technical SEO refinements, catalog indexing, and digital ad campaign optimization.',
     ],
     metrics: [
       { value: '360° 3D', label: 'Real-Time WebGL Garment Studio' },
       { value: '22 Depts', label: 'Custom Apparel & Corporate Merch' },
-      { value: 'Top SEO', label: 'Custom CRM + Search & Ad Growth' },
+      { value: 'CRM + SEO', label: 'Shipped CRM · Ongoing Search & Ads' },
     ],
     slides: [
       {
@@ -715,7 +716,7 @@ export const ALL_PROJECTS = [
       },
       {
         src: '/projects/masterplayer/desktop-hero.webp',
-        caption: 'Masterplayer Prints Storefront — Custom CRM, Top Google SEO & Ad Funnels',
+        caption: 'Masterplayer Prints Storefront — Shipped CRM & Ongoing Technical SEO / Ad Funnels',
       },
       {
         src: '/projects/masterplayer/product-catalog.webp',
@@ -758,15 +759,15 @@ export const ALL_PROJECTS = [
       'Multi-Model AI Bridge',
     ],
     summary:
-      'Open-source Chrome MV3 extension and daemon bridge that syncs live browser sessions across ChatGPT, Gemini, Qwen, Z.ai, Grok, and DeepSeek.',
+      'Independent, community-maintained open-source Chrome MV3 companion extension and daemon bridge (not official OmniRoute core) that syncs live browser sessions across ChatGPT, Gemini, Qwen, Z.ai, Grok, and DeepSeek.',
     description: [
-      'Harvests HttpOnly cookies, bearer tokens, and User-Agent client-hint headers automatically so local CLI agents and AI gateways never break on expired cookies.',
+      'Built as an independent companion integration rather than official OmniRoute core, it harvests HttpOnly cookies, bearer tokens, and User-Agent client-hint headers automatically so local CLI agents and AI gateways never break on expired cookies.',
       'Uses cryptographic token pairing and MV3 alarm heartbeats for zero-downtime 24/7 authentication.',
     ],
     metrics: [
       { value: '6+ AI Hosts', label: 'ChatGPT · Gemini · Qwen · Grok · DeepSeek' },
       { value: 'MV3 Alarms', label: 'Zero-Downtime Heartbeat Rotation' },
-      { value: 'Open Source', label: 'Contributed to OmniRoute Ecosystem' },
+      { value: 'Companion', label: 'Independent Community-Maintained Tool' },
     ],
     slides: [
       {
@@ -803,10 +804,10 @@ export const ALL_PROJECTS = [
     bentoTall: false,
     accentColor: '#6366F1',
     surfaceTint: '#ECECFB',
-    liveUrl: 'https://github.com/avichal15',
-    liveLabel: 'View on GitHub',
-    repoUrl: 'https://github.com/avichal15',
-    repoLabel: 'GitHub',
+    liveUrl: null,
+    liveLabel: null,
+    repoUrl: null,
+    repoLabel: null,
     coverImage: '/projects/antigravity-stack/cover.webp',
     stack: [
       'Gemini API',
@@ -852,9 +853,9 @@ export const ALL_PROJECTS = [
     bentoTall: false,
     accentColor: '#DB2777',
     surfaceTint: '#F7E8F0',
-    liveUrl: 'https://github.com/avichal15',
+    liveUrl: 'https://github.com/avichal15/Insta-manager',
     liveLabel: 'View on GitHub',
-    repoUrl: 'https://github.com/avichal15',
+    repoUrl: 'https://github.com/avichal15/Insta-manager',
     repoLabel: 'GitHub',
     coverImage: '/projects/insta-manager/cover.webp',
     stack: ['Node.js', 'React', 'Instagram Graph Bridge', 'SPR Telemetry', 'SQLite'],
@@ -895,27 +896,27 @@ export const ALL_PROJECTS = [
     bentoTall: false,
     accentColor: '#0D9488',
     surfaceTint: '#E6F4F1',
-    liveUrl: 'https://github.com/avichal15',
+    liveUrl: 'https://github.com/avichal15/recruitment-funnel-dashboard',
     liveLabel: 'View on GitHub',
-    repoUrl: 'https://github.com/avichal15',
+    repoUrl: 'https://github.com/avichal15/recruitment-funnel-dashboard',
     repoLabel: 'GitHub',
     coverImage: '/projects/recruitment-funnel/desktop-overview.webp',
     stack: ['Python', 'Streamlit', 'Plotly', 'Pandas', 'SQLite', 'Rule-Based BI Engine'],
     summary:
-      'Interactive Python, Streamlit & SQLite BI dashboard modeling 250K+ job clicks through to hires with automated budget optimization.',
+      'Interactive Python, Streamlit & SQLite BI dashboard modeling a synthetic demo dataset of 250K+ job clicks through to hires with automated budget optimization.',
     description: [
-      'Slices Cost-Per-Applicant ($18.88) and Cost-Per-Hire ($291) across 7 acquisition channels, devices, and geographies.',
+      'Built on a synthetic demo dataset, the dashboard slices Cost-Per-Applicant ($18.88) and Cost-Per-Hire ($291) across 7 acquisition channels, devices, and geographies.',
       'Includes a rule-based recommendation engine that flags inefficient ad spend and mobile/tablet form drop-offs.',
     ],
     metrics: [
-      { value: '250.0K', label: 'Top-of-Funnel Clicks Modeled' },
-      { value: '$291 CPH', label: 'Channel & Geo Cost-Per-Hire Attribution' },
+      { value: '250.0K', label: 'Synthetic Demo Clicks Modeled' },
+      { value: '$291 CPH', label: 'Demo Channel & Geo Attribution' },
       { value: 'SQLite + BI', label: 'Automated Spend Recommendations' },
     ],
     slides: [
       {
         src: '/projects/recruitment-funnel/desktop-overview.webp',
-        caption: 'Executive Funnel Overview — 250K Clicks, 35K Applications & 1.8K Hires',
+        caption: 'Executive Funnel Overview (Synthetic Demo Dataset) — 250K Clicks, 35K Applications & 1.8K Hires',
       },
       {
         src: '/projects/recruitment-funnel/channel-performance.webp',
@@ -944,8 +945,8 @@ export const ALL_PROJECTS = [
     surfaceTint: '#F5EFE6',
     liveUrl: 'https://mahadev-plywood.live/',
     liveLabel: 'Visit mahadev-plywood.live',
-    repoUrl: 'https://github.com/avichal15',
-    repoLabel: 'GitHub',
+    repoUrl: null,
+    repoLabel: null,
     coverImage: '/projects/mahadev-plywood/desktop-hero.webp',
     stack: ['React 19', 'Vite', 'Sheet Estimator', 'Finish Visualizer', 'WhatsApp BOQ'],
     summary:
@@ -994,8 +995,8 @@ export const ALL_PROJECTS = [
     surfaceTint: '#F6F0DF',
     liveUrl: 'https://dhurihoonmai.com/',
     liveLabel: 'Visit dhurihoonmai.com',
-    repoUrl: 'https://github.com/avichal15',
-    repoLabel: 'GitHub',
+    repoUrl: null,
+    repoLabel: null,
     coverImage: '/projects/dhuri-hoon-mai/desktop-hero.webp',
     stack: ['React', 'Vite', 'Responsive Civic UI', 'Volunteer Workflows', 'Bilingual Storytelling'],
     summary:
