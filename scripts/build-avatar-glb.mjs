@@ -447,4 +447,9 @@ function buildGlb() {
   console.log(`Generated valid GLB: ${OUT_PATH} (${glb.byteLength} bytes, ${nodes.length} nodes, ${meshes.length} meshes, ${animations.length} animations)`);
 }
 
+if (fs.existsSync(OUT_PATH) && !process.argv.includes('--force')) {
+  console.error(`Refusing to overwrite existing ${OUT_PATH} without --force.`);
+  process.exit(1);
+}
+
 buildGlb();
