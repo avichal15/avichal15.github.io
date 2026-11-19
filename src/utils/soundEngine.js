@@ -7,6 +7,48 @@
 
 const BATMAN_PITCH_RATIO = Math.pow(2, -4 / 12); // ~0.7937005 (-4 semitones)
 
+function setParamValue(param, value, time) {
+  if (!param) return;
+  const safeValue = Number.isFinite(value) ? value : 0;
+  const safeTime = Number.isFinite(time) ? time : 0;
+  try {
+    if (typeof param.setValueAtTime === 'function') {
+      param.setValueAtTime(safeValue, safeTime);
+      return;
+    }
+  } catch {
+    // Fall through to direct .value assignment
+  }
+  try {
+    param.value = safeValue;
+  } catch {
+    // Ignore AudioParam assignment errors in restricted environments
+  }
+}
+
+function rampValue(param, value, endTime, exponential = true) {
+  if (!param) return;
+  const safeValue = Number.isFinite(value) ? value : 0;
+  const safeTime = Number.isFinite(endTime) ? endTime : 0;
+  if (exponential && safeValue > 0 && typeof param.exponentialRampToValueAtTime === 'function') {
+    try {
+      param.exponentialRampToValueAtTime(safeValue, safeTime);
+      return;
+    } catch {
+      // Fall back to linear ramp
+    }
+  }
+  if (typeof param.linearRampToValueAtTime === 'function') {
+    try {
+      param.linearRampToValueAtTime(safeValue, safeTime);
+      return;
+    } catch {
+      // Fall back to setValueAtTime / .value
+    }
+  }
+  setParamValue(param, safeValue, safeTime);
+}
+
 class SoundEngine {
   constructor() {
     this.ctx = null;
@@ -62,16 +104,20 @@ class SoundEngine {
   }
 
   ensureContext() {
-    if (typeof window === 'undefined') return null;
-    if (!this.ctx) {
-      const AudioCtx = window.AudioContext || window.webkitAudioContext;
-      if (!AudioCtx) return null;
-      this.ctx = new AudioCtx();
+    try {
+      if (typeof window === 'undefined') return null;
+      if (!this.ctx) {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return null;
+        this.ctx = new AudioCtx();
+      }
+      if (this.ctx?.state === 'suspended' && typeof this.ctx.resume === 'function') {
+        Promise.resolve(this.ctx.resume()).catch(() => {});
+      }
+      return this.ctx;
+    } catch {
+      return null;
     }
-    if (this.ctx.state === 'suspended') {
-      this.ctx.resume().catch(() => {});
-    }
-    return this.ctx;
   }
 
   toggle() {
@@ -92,198 +138,195 @@ class SoundEngine {
   // Triggered every time the character reads/highlights a word while lips move
   // ============================================================================
   speakWord(word = '', wordIndex = 0) {
-    if (!this.enabled) return;
-    const nowPerf = performance.now();
-    if (nowPerf - this.lastBlipAt < 42) return;
-    this.lastBlipAt = nowPerf;
+    try {
+      if (!this.enabled) return;
+      const nowPerf = performance.now();
+      if (nowPerf - this.lastBlipAt < 42) return;
+      this.lastBlipAt = nowPerf;
 
-    const ctx = this.ensureContext();
-    if (!ctx) return;
+      const ctx = this.ensureContext();
+      if (!ctx) return;
 
-    const rawStr = String(word || 'a').trim();
-    if (!rawStr) return;
+      const rawStr = String(word || 'a').trim();
+      if (!rawStr) return;
 
-    // Compute deterministic hash & prosody features from the word
-    let hash = 0;
-    for (let i = 0; i < rawStr.length; i += 1) {
-      hash = (hash * 31 + rawStr.charCodeAt(i)) & 0xffff;
-    }
-    const isQuestion = rawStr.includes('?');
-    const isExclaim = rawStr.includes('!');
-    const isLongWord = rawStr.replace(/[^a-zA-Z]/g, '').length >= 6;
-    const stepIndex = Number.isFinite(wordIndex) ? wordIndex : this.wordCounter++;
+      // Compute deterministic hash & prosody features from the word
+      let hash = 0;
+      for (let i = 0; i < rawStr.length; i += 1) {
+        hash = (hash * 31 + rawStr.charCodeAt(i)) & 0xffff;
+      }
+      const isQuestion = rawStr.includes('?');
+      const isExclaim = rawStr.includes('!');
+      const isLongWord = rawStr.replace(/[^a-zA-Z]/g, '').length >= 6;
+      const stepIndex = Number.isFinite(wordIndex) ? wordIndex : this.wordCounter++;
 
-    if (this.isBatmanMode) {
-      this.synthesizeBatmanWord(ctx, hash, stepIndex, isQuestion, isExclaim, isLongWord);
-    } else {
-      this.synthesizeNormalWord(ctx, hash, stepIndex, isQuestion, isExclaim, isLongWord);
+      if (this.isBatmanMode) {
+        this.synthesizeBatmanWord(ctx, hash, stepIndex, isQuestion, isExclaim, isLongWord);
+      } else {
+        this.synthesizeNormalWord(ctx, hash, stepIndex, isQuestion, isExclaim, isLongWord);
+      }
+    } catch {
+      // Ignore WebAudio errors in restricted/headless browsers
     }
   }
 
   // Normal character voice: sebg.ch / Animal-Crossing style warm formant syllable blip
   synthesizeNormalWord(ctx, hash, stepIndex, isQuestion, isExclaim, isLongWord) {
-    const now = ctx.currentTime;
-    // Melodic pentatonic-inflected speech prosody around 330Hz - 480Hz
-    const prosodyOffsets = [0, 22, -14, 34, -8, 18, -20, 28];
-    const baseFreq =
-      340 +
-      (hash % 115) +
-      prosodyOffsets[Math.abs(stepIndex) % prosodyOffsets.length] +
-      (isExclaim ? 35 : 0);
+    try {
+      const now = ctx.currentTime;
+      // Melodic pentatonic-inflected speech prosody around 330Hz - 480Hz
+      const prosodyOffsets = [0, 22, -14, 34, -8, 18, -20, 28];
+      const baseFreq =
+        340 +
+        (hash % 115) +
+        prosodyOffsets[Math.abs(stepIndex) % prosodyOffsets.length] +
+        (isExclaim ? 35 : 0);
 
-    const endMultiplier = isQuestion ? 1.24 : isExclaim ? 1.15 : 1.08 + ((hash % 7) - 3) * 0.015;
-    const dur = isLongWord ? 0.068 : 0.052;
+      const endMultiplier = isQuestion ? 1.24 : isExclaim ? 1.15 : 1.08 + ((hash % 7) - 3) * 0.015;
+      const dur = isLongWord ? 0.068 : 0.052;
 
-    const playSyllable = (startFreq, endFreq, startOffset, syllableDur, gainPeak) => {
-      const t0 = now + startOffset;
-      const oscMain = ctx.createOscillator();
-      const oscHarm = ctx.createOscillator();
-      const formant = ctx.createBiquadFilter();
-      const gain = ctx.createGain();
+      const playSyllable = (startFreq, endFreq, startOffset, syllableDur, gainPeak) => {
+        const t0 = now + startOffset;
+        const oscMain = ctx.createOscillator();
+        const oscHarm = ctx.createOscillator();
+        const formant = ctx.createBiquadFilter();
+        const gain = ctx.createGain();
 
-      oscMain.type = 'triangle';
-      oscMain.frequency.setValueAtTime(startFreq, t0);
-      oscMain.frequency.exponentialRampToValueAtTime(
-        Math.max(80, endFreq),
-        t0 + syllableDur
-      );
+        oscMain.type = 'triangle';
+        setParamValue(oscMain.frequency, startFreq, t0);
+        rampValue(oscMain.frequency, Math.max(80, endFreq), t0 + syllableDur);
 
-      oscHarm.type = 'sine';
-      oscHarm.frequency.setValueAtTime(startFreq * 2, t0);
-      oscHarm.frequency.exponentialRampToValueAtTime(
-        Math.max(160, endFreq * 1.95),
-        t0 + syllableDur
-      );
+        oscHarm.type = 'sine';
+        setParamValue(oscHarm.frequency, startFreq * 2, t0);
+        rampValue(oscHarm.frequency, Math.max(160, endFreq * 1.95), t0 + syllableDur);
 
-      // Vocal vowel formant resonance
-      formant.type = 'bandpass';
-      formant.Q.setValueAtTime(2.2, t0);
-      const formantFreq = 1150 + (hash % 550);
-      formant.frequency.setValueAtTime(formantFreq, t0);
-      formant.frequency.exponentialRampToValueAtTime(formantFreq * 1.18, t0 + syllableDur);
+        // Vocal vowel formant resonance
+        formant.type = 'bandpass';
+        setParamValue(formant.Q, 2.2, t0);
+        const formantFreq = 1150 + (hash % 550);
+        setParamValue(formant.frequency, formantFreq, t0);
+        rampValue(formant.frequency, formantFreq * 1.18, t0 + syllableDur);
 
-      const harmGain = ctx.createGain();
-      harmGain.gain.setValueAtTime(0.32, t0);
+        const harmGain = ctx.createGain();
+        setParamValue(harmGain.gain, 0.32, t0);
 
-      gain.gain.setValueAtTime(0.0001, t0);
-      gain.gain.linearRampToValueAtTime(gainPeak, t0 + 0.009);
-      gain.gain.exponentialRampToValueAtTime(0.0001, t0 + syllableDur);
+        setParamValue(gain.gain, 0.0001, t0);
+        rampValue(gain.gain, gainPeak, t0 + 0.009, false);
+        rampValue(gain.gain, 0.0001, t0 + syllableDur);
 
-      oscMain.connect(formant);
-      oscHarm.connect(harmGain);
-      harmGain.connect(formant);
-      formant.connect(gain);
-      gain.connect(ctx.destination);
+        oscMain.connect(formant);
+        oscHarm.connect(harmGain);
+        harmGain.connect(formant);
+        formant.connect(gain);
+        gain.connect(ctx.destination);
 
-      oscMain.start(t0);
-      oscHarm.start(t0);
-      oscMain.stop(t0 + syllableDur + 0.01);
-      oscHarm.stop(t0 + syllableDur + 0.01);
-    };
+        oscMain.start(t0);
+        oscHarm.start(t0);
+        oscMain.stop(t0 + syllableDur + 0.01);
+        oscHarm.stop(t0 + syllableDur + 0.01);
+      };
 
-    playSyllable(baseFreq, baseFreq * endMultiplier, 0, dur, 0.14);
+      playSyllable(baseFreq, baseFreq * endMultiplier, 0, dur, 0.14);
 
-    // Give longer words a natural second micro-syllable articulation
-    if (isLongWord) {
-      const secondFreq = baseFreq * (isQuestion ? 1.16 : 0.94);
-      playSyllable(
-        secondFreq,
-        secondFreq * (isQuestion ? 1.22 : 1.06),
-        dur * 0.78,
-        0.044,
-        0.11
-      );
+      // Give longer words a natural second micro-syllable articulation
+      if (isLongWord) {
+        const secondFreq = baseFreq * (isQuestion ? 1.16 : 0.94);
+        playSyllable(
+          secondFreq,
+          secondFreq * (isQuestion ? 1.22 : 1.06),
+          dur * 0.78,
+          0.044,
+          0.11
+        );
+      }
+    } catch {
+      // Ignore WebAudio synthesis errors
     }
   }
 
   // LEGO Batman voice: Deep, raspy, gravelly Dark Knight baritone growl
   synthesizeBatmanWord(ctx, hash, stepIndex, isQuestion, isExclaim, isLongWord) {
-    const now = ctx.currentTime;
-    // Deep sub-baritone fundamental (82Hz - 114Hz)
-    const prosodyOffsets = [0, -4, 3, -6, 2, -5, 4, -3];
-    const baseFreq =
-      88 +
-      (hash % 24) +
-      prosodyOffsets[Math.abs(stepIndex) % prosodyOffsets.length] +
-      (isExclaim ? 8 : 0);
+    try {
+      const now = ctx.currentTime;
+      // Deep sub-baritone fundamental (82Hz - 114Hz)
+      const prosodyOffsets = [0, -4, 3, -6, 2, -5, 4, -3];
+      const baseFreq =
+        88 +
+        (hash % 24) +
+        prosodyOffsets[Math.abs(stepIndex) % prosodyOffsets.length] +
+        (isExclaim ? 8 : 0);
 
-    const endMultiplier = isQuestion ? 1.12 : isExclaim ? 0.92 : 0.95;
-    const dur = isLongWord ? 0.082 : 0.066;
+      const endMultiplier = isQuestion ? 1.12 : isExclaim ? 0.92 : 0.95;
+      const dur = isLongWord ? 0.082 : 0.066;
 
-    const playGrowlSyllable = (startFreq, endFreq, startOffset, syllableDur, gainPeak) => {
-      const t0 = now + startOffset;
-      const sawOsc = ctx.createOscillator();
-      const subOsc = ctx.createOscillator();
-      const raspOsc = ctx.createOscillator();
-      const throatFilter = ctx.createBiquadFilter();
-      const gain = ctx.createGain();
+      const playGrowlSyllable = (startFreq, endFreq, startOffset, syllableDur, gainPeak) => {
+        const t0 = now + startOffset;
+        const sawOsc = ctx.createOscillator();
+        const subOsc = ctx.createOscillator();
+        const raspOsc = ctx.createOscillator();
+        const throatFilter = ctx.createBiquadFilter();
+        const gain = ctx.createGain();
 
-      // Gravelly sawtooth vocal cords
-      sawOsc.type = 'sawtooth';
-      sawOsc.frequency.setValueAtTime(startFreq, t0);
-      sawOsc.frequency.exponentialRampToValueAtTime(Math.max(45, endFreq), t0 + syllableDur);
+        // Gravelly sawtooth vocal cords
+        sawOsc.type = 'sawtooth';
+        setParamValue(sawOsc.frequency, startFreq, t0);
+        rampValue(sawOsc.frequency, Math.max(45, endFreq), t0 + syllableDur);
 
-      // Sub-octave chest resonance
-      subOsc.type = 'square';
-      subOsc.frequency.setValueAtTime(startFreq * 0.5, t0);
-      subOsc.frequency.exponentialRampToValueAtTime(
-        Math.max(28, endFreq * 0.5),
-        t0 + syllableDur
-      );
+        // Sub-octave chest resonance
+        subOsc.type = 'square';
+        setParamValue(subOsc.frequency, startFreq * 0.5, t0);
+        rampValue(subOsc.frequency, Math.max(28, endFreq * 0.5), t0 + syllableDur);
 
-      // Slight detuned rasp oscillator for gravelly Batman texture
-      raspOsc.type = 'sawtooth';
-      raspOsc.frequency.setValueAtTime(startFreq * 1.035, t0);
-      raspOsc.frequency.exponentialRampToValueAtTime(
-        Math.max(45, endFreq * 0.98),
-        t0 + syllableDur
-      );
+        // Slight detuned rasp oscillator for gravelly Batman texture
+        raspOsc.type = 'sawtooth';
+        setParamValue(raspOsc.frequency, startFreq * 1.035, t0);
+        rampValue(raspOsc.frequency, Math.max(45, endFreq * 0.98), t0 + syllableDur);
 
-      const subGain = ctx.createGain();
-      subGain.gain.setValueAtTime(0.55, t0);
+        const subGain = ctx.createGain();
+        setParamValue(subGain.gain, 0.55, t0);
 
-      const raspGain = ctx.createGain();
-      raspGain.gain.setValueAtTime(0.45, t0);
+        const raspGain = ctx.createGain();
+        setParamValue(raspGain.gain, 0.45, t0);
 
-      // Dark throat-formant filter (320Hz - 520Hz)
-      throatFilter.type = 'bandpass';
-      throatFilter.Q.setValueAtTime(3.2, t0);
-      const formantFreq = 310 + (hash % 160);
-      throatFilter.frequency.setValueAtTime(formantFreq, t0);
-      throatFilter.frequency.exponentialRampToValueAtTime(
-        formantFreq * 0.86,
-        t0 + syllableDur
-      );
+        // Dark throat-formant filter (320Hz - 520Hz)
+        throatFilter.type = 'bandpass';
+        setParamValue(throatFilter.Q, 3.2, t0);
+        const formantFreq = 310 + (hash % 160);
+        setParamValue(throatFilter.frequency, formantFreq, t0);
+        rampValue(throatFilter.frequency, formantFreq * 0.86, t0 + syllableDur);
 
-      gain.gain.setValueAtTime(0.0001, t0);
-      gain.gain.linearRampToValueAtTime(gainPeak, t0 + 0.01);
-      gain.gain.exponentialRampToValueAtTime(0.0001, t0 + syllableDur);
+        setParamValue(gain.gain, 0.0001, t0);
+        rampValue(gain.gain, gainPeak, t0 + 0.01, false);
+        rampValue(gain.gain, 0.0001, t0 + syllableDur);
 
-      sawOsc.connect(throatFilter);
-      subOsc.connect(subGain);
-      subGain.connect(throatFilter);
-      raspOsc.connect(raspGain);
-      raspGain.connect(throatFilter);
+        sawOsc.connect(throatFilter);
+        subOsc.connect(subGain);
+        subGain.connect(throatFilter);
+        raspOsc.connect(raspGain);
+        raspGain.connect(throatFilter);
 
-      throatFilter.connect(gain);
-      gain.connect(ctx.destination);
+        throatFilter.connect(gain);
+        gain.connect(ctx.destination);
 
-      sawOsc.start(t0);
-      subOsc.start(t0);
-      raspOsc.start(t0);
-      sawOsc.stop(t0 + syllableDur + 0.01);
-      subOsc.stop(t0 + syllableDur + 0.01);
-      raspOsc.stop(t0 + syllableDur + 0.01);
+        sawOsc.start(t0);
+        subOsc.start(t0);
+        raspOsc.start(t0);
+        sawOsc.stop(t0 + syllableDur + 0.01);
+        subOsc.stop(t0 + syllableDur + 0.01);
+        raspOsc.stop(t0 + syllableDur + 0.01);
 
-      // Subtle gravelly breath rasp
-      this.noise(syllableDur * 0.75, gainPeak * 0.25, startOffset, 280 + (hash % 120), 'bandpass');
-    };
+        // Subtle gravelly breath rasp
+        this.noise(syllableDur * 0.75, gainPeak * 0.25, startOffset, 280 + (hash % 120), 'bandpass');
+      };
 
-    playGrowlSyllable(baseFreq, baseFreq * endMultiplier, 0, dur, 0.19);
+      playGrowlSyllable(baseFreq, baseFreq * endMultiplier, 0, dur, 0.19);
 
-    if (isLongWord) {
-      const secondFreq = baseFreq * 0.94;
-      playGrowlSyllable(secondFreq, secondFreq * 0.9, dur * 0.78, 0.056, 0.15);
+      if (isLongWord) {
+        const secondFreq = baseFreq * 0.94;
+        playGrowlSyllable(secondFreq, secondFreq * 0.9, dur * 0.78, 0.056, 0.15);
+      }
+    } catch {
+      // Ignore WebAudio synthesis errors
     }
   }
 
@@ -329,56 +372,60 @@ class SoundEngine {
     this.isBatmanMode = Boolean(isBatman);
     if (!this.enabled) return;
 
-    if (isBatman) {
-      const ctx = this.ensureContext();
-      if (!ctx) return;
+    try {
+      if (isBatman) {
+        const ctx = this.ensureContext();
+        if (!ctx) return;
 
-      const now = ctx.currentTime;
+        const now = ctx.currentTime;
 
-      const brassOsc = ctx.createOscillator();
-      const subOsc = ctx.createOscillator();
-      const brassFilter = ctx.createBiquadFilter();
-      const brassGain = ctx.createGain();
+        const brassOsc = ctx.createOscillator();
+        const subOsc = ctx.createOscillator();
+        const brassFilter = ctx.createBiquadFilter();
+        const brassGain = ctx.createGain();
 
-      brassOsc.type = 'sawtooth';
-      brassOsc.frequency.setValueAtTime(75, now);
-      brassOsc.frequency.exponentialRampToValueAtTime(146.83, now + 0.58);
+        brassOsc.type = 'sawtooth';
+        setParamValue(brassOsc.frequency, 75, now);
+        rampValue(brassOsc.frequency, 146.83, now + 0.58);
 
-      subOsc.type = 'triangle';
-      subOsc.frequency.setValueAtTime(37.5, now);
-      subOsc.frequency.exponentialRampToValueAtTime(73.42, now + 0.58);
+        subOsc.type = 'triangle';
+        setParamValue(subOsc.frequency, 37.5, now);
+        rampValue(subOsc.frequency, 73.42, now + 0.58);
 
-      brassFilter.type = 'lowpass';
-      brassFilter.Q.setValueAtTime(3.6, now);
-      brassFilter.frequency.setValueAtTime(160, now);
-      brassFilter.frequency.exponentialRampToValueAtTime(1050, now + 0.58);
+        brassFilter.type = 'lowpass';
+        setParamValue(brassFilter.Q, 3.6, now);
+        setParamValue(brassFilter.frequency, 160, now);
+        rampValue(brassFilter.frequency, 1050, now + 0.58);
 
-      brassGain.gain.setValueAtTime(0.0001, now);
-      brassGain.gain.linearRampToValueAtTime(0.16, now + 0.08);
-      brassGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.6);
+        setParamValue(brassGain.gain, 0.0001, now);
+        rampValue(brassGain.gain, 0.16, now + 0.08, false);
+        rampValue(brassGain.gain, 0.0001, now + 0.6);
 
-      brassOsc.connect(brassFilter);
-      subOsc.connect(brassFilter);
-      brassFilter.connect(brassGain);
-      brassGain.connect(ctx.destination);
+        brassOsc.connect(brassFilter);
+        subOsc.connect(brassFilter);
+        brassFilter.connect(brassGain);
+        brassGain.connect(ctx.destination);
 
-      brassOsc.start(now);
-      subOsc.start(now);
-      brassOsc.stop(now + 0.62);
-      subOsc.stop(now + 0.62);
+        brassOsc.start(now);
+        subOsc.start(now);
+        brassOsc.stop(now + 0.62);
+        subOsc.stop(now + 0.62);
 
-      // LEGO armor plate click-assembly burst
-      for (let i = 0; i < 6; i += 1) {
-        const clickDelay = i * 0.052;
-        const baseFreq = 920 + i * 115;
-        this.tone(baseFreq, 0.032, 'square', 0.075, clickDelay, baseFreq * 1.45, true);
-        this.noise(0.026, 0.065, clickDelay, 2400 + i * 220, 'bandpass');
+        // LEGO armor plate click-assembly burst
+        for (let i = 0; i < 6; i += 1) {
+          const clickDelay = i * 0.052;
+          const baseFreq = 920 + i * 115;
+          this.tone(baseFreq, 0.032, 'square', 0.075, clickDelay, baseFreq * 1.45, true);
+          this.noise(0.026, 0.065, clickDelay, 2400 + i * 220, 'bandpass');
+        }
+
+        // Cape billow swoosh
+        this.noise(0.42, 0.11, 0.14, 680, 'bandpass');
+      } else {
+        this.bell();
       }
-
-      // Cape billow swoosh
-      this.noise(0.42, 0.11, 0.14, 680, 'bandpass');
-    } else {
-      this.bell();
+    } catch {
+      // Ignore WebAudio errors in restricted/headless browsers
     }
   }
 
@@ -386,21 +433,29 @@ class SoundEngine {
   // BESPOKE PROCEDURAL SOUND EFFECTS FOR ALL 13 CHARACTER TRICKS
   // ============================================================================
   trick(trickId = 'dance') {
-    this.ensureContext();
-    if (trickId === 'superhero') {
-      this.superhero();
-      return;
-    }
-    if (typeof this[trickId] === 'function') {
-      this[trickId]();
-    } else {
-      this.surprise();
+    try {
+      this.ensureContext();
+      if (trickId === 'superhero') {
+        this.superhero();
+        return;
+      }
+      if (typeof this[trickId] === 'function') {
+        this[trickId]();
+      } else {
+        this.surprise();
+      }
+    } catch {
+      // Ignore WebAudio errors in restricted/headless browsers
     }
   }
 
   playTrickSound(trickId) {
-    this.ensureContext();
-    return this.trick(trickId);
+    try {
+      this.ensureContext();
+      return this.trick(trickId);
+    } catch {
+      return undefined;
+    }
   }
 
   // 1. DANCE — Upbeat funky synth bass + chiptune lead groove + rhythmic shaker
@@ -563,65 +618,73 @@ class SoundEngine {
 
   tone(freq, duration, type = 'sine', volume = 0.08, delay = 0, freqEnd = null, rawPitch = false, forcePlay = false) {
     if (!this.enabled && !forcePlay) return;
-    const ctx = this.ensureContext();
-    if (!ctx) return;
+    try {
+      const ctx = this.ensureContext();
+      if (!ctx) return;
 
-    const pitchScale = this.isBatmanMode && !rawPitch ? BATMAN_PITCH_RATIO : 1;
-    const adjustedFreq = Math.max(20, freq * pitchScale);
-    const adjustedFreqEnd =
-      freqEnd !== null && freqEnd !== undefined ? Math.max(20, freqEnd * pitchScale) : null;
+      const pitchScale = this.isBatmanMode && !rawPitch ? BATMAN_PITCH_RATIO : 1;
+      const adjustedFreq = Math.max(20, freq * pitchScale);
+      const adjustedFreqEnd =
+        freqEnd !== null && freqEnd !== undefined ? Math.max(20, freqEnd * pitchScale) : null;
 
-    const start = ctx.currentTime + delay;
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
+      const start = ctx.currentTime + delay;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
 
-    osc.type = type;
-    osc.frequency.setValueAtTime(adjustedFreq, start);
-    if (adjustedFreqEnd !== null) {
-      osc.frequency.exponentialRampToValueAtTime(adjustedFreqEnd, start + duration);
+      osc.type = type;
+      setParamValue(osc.frequency, adjustedFreq, start);
+      if (adjustedFreqEnd !== null) {
+        rampValue(osc.frequency, adjustedFreqEnd, start + duration);
+      }
+
+      const scaledVol = Math.min(0.35, volume * (this.volume ?? 0.88));
+      setParamValue(gain.gain, 0.0001, start);
+      rampValue(gain.gain, scaledVol, start + Math.min(0.012, duration * 0.25), false);
+      rampValue(gain.gain, 0.0001, start + duration);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(start);
+      osc.stop(start + duration + 0.01);
+    } catch {
+      // Ignore WebAudio errors in restricted/headless browsers
     }
-
-    const scaledVol = Math.min(0.35, volume * (this.volume ?? 0.88));
-    gain.gain.setValueAtTime(0.0001, start);
-    gain.gain.linearRampToValueAtTime(scaledVol, start + Math.min(0.012, duration * 0.25));
-    gain.gain.exponentialRampToValueAtTime(0.0001, start + duration);
-
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-    osc.start(start);
-    osc.stop(start + duration + 0.01);
   }
 
   noise(duration, volume = 0.06, delay = 0, filterFreq = 1200, filterType = 'bandpass', forcePlay = false) {
     if (!this.enabled && !forcePlay) return;
-    const ctx = this.ensureContext();
-    if (!ctx) return;
+    try {
+      const ctx = this.ensureContext();
+      if (!ctx) return;
 
-    const start = ctx.currentTime + delay;
-    const length = Math.max(1, Math.floor(ctx.sampleRate * duration));
-    const buffer = ctx.createBuffer(1, length, ctx.sampleRate);
-    const data = buffer.getChannelData(0);
-    for (let i = 0; i < length; i += 1) {
-      data[i] = Math.random() * 2 - 1;
+      const start = ctx.currentTime + delay;
+      const length = Math.max(1, Math.floor(ctx.sampleRate * duration));
+      const buffer = ctx.createBuffer(1, length, ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < length; i += 1) {
+        data[i] = Math.random() * 2 - 1;
+      }
+
+      const src = ctx.createBufferSource();
+      src.buffer = buffer;
+
+      const filter = ctx.createBiquadFilter();
+      filter.type = filterType;
+      setParamValue(filter.frequency, filterFreq, start);
+
+      const scaledVol = Math.min(0.35, volume * (this.volume ?? 0.88));
+      const gain = ctx.createGain();
+      setParamValue(gain.gain, scaledVol, start);
+      rampValue(gain.gain, 0.0001, start + duration);
+
+      src.connect(filter);
+      filter.connect(gain);
+      gain.connect(ctx.destination);
+      src.start(start);
+      src.stop(start + duration + 0.01);
+    } catch {
+      // Ignore WebAudio errors in restricted/headless browsers
     }
-
-    const src = ctx.createBufferSource();
-    src.buffer = buffer;
-
-    const filter = ctx.createBiquadFilter();
-    filter.type = filterType;
-    filter.frequency.setValueAtTime(filterFreq, start);
-
-    const scaledVol = Math.min(0.35, volume * (this.volume ?? 0.88));
-    const gain = ctx.createGain();
-    gain.gain.setValueAtTime(scaledVol, start);
-    gain.gain.exponentialRampToValueAtTime(0.0001, start + duration);
-
-    src.connect(filter);
-    filter.connect(gain);
-    gain.connect(ctx.destination);
-    src.start(start);
-    src.stop(start + duration + 0.01);
   }
 
   pat() {
@@ -665,126 +728,134 @@ class SoundEngine {
   // PHONEY'S 6 DEFAULT QUICK TRAY AUDIO EMOJIS
   // ============================================================================
   playPhoneyEmoji(id) {
-    this.stopActiveAudio();
-    this.ensureContext();
+    try {
+      this.stopActiveAudio();
+      this.ensureContext();
 
-    const normalized = String(id || '').toLowerCase();
-    const fileMap = {
-      cheer: '/sounds/original/cheer.wav',
-      faaah: '/sounds/original/faaah.wav',
-      faah: '/sounds/original/faaah.wav',
-      fart: '/sounds/original/fart.wav',
-      wompwomp: '/sounds/original/womp-womp.wav',
-      womp: '/sounds/original/womp-womp.wav',
-      sad: '/sounds/original/womp-womp.wav',
-      wow: '/sounds/original/wow.wav',
-      yay: '/sounds/original/yay.wav',
-    };
+      const normalized = String(id || '').toLowerCase();
+      const fileMap = {
+        cheer: '/sounds/original/cheer.wav',
+        faaah: '/sounds/original/faaah.wav',
+        faah: '/sounds/original/faaah.wav',
+        fart: '/sounds/original/fart.wav',
+        wompwomp: '/sounds/original/womp-womp.wav',
+        womp: '/sounds/original/womp-womp.wav',
+        sad: '/sounds/original/womp-womp.wav',
+        wow: '/sounds/original/wow.wav',
+        yay: '/sounds/original/yay.wav',
+      };
 
-    const fallbackMap = {
-      cheer: '/media/sounds/phoney/cheer.wav',
-      faaah: '/media/sounds/phoney/faaah.wav',
-      faah: '/media/sounds/phoney/faaah.wav',
-      fart: '/media/sounds/phoney/fart.wav',
-      wompwomp: '/media/sounds/phoney/womp-womp.wav',
-      womp: '/media/sounds/phoney/womp-womp.wav',
-      sad: '/media/sounds/phoney/womp-womp.wav',
-      wow: '/media/sounds/phoney/wow.wav',
-      yay: '/media/sounds/phoney/yay.wav',
-    };
+      const fallbackMap = {
+        cheer: '/media/sounds/phoney/cheer.wav',
+        faaah: '/media/sounds/phoney/faaah.wav',
+        faah: '/media/sounds/phoney/faaah.wav',
+        fart: '/media/sounds/phoney/fart.wav',
+        wompwomp: '/media/sounds/phoney/womp-womp.wav',
+        womp: '/media/sounds/phoney/womp-womp.wav',
+        sad: '/media/sounds/phoney/womp-womp.wav',
+        wow: '/media/sounds/phoney/wow.wav',
+        yay: '/media/sounds/phoney/yay.wav',
+      };
 
-    const soundUrl = fileMap[normalized];
-    const fallbackUrl = fallbackMap[normalized];
-    const targetVolume = Math.max(0, Math.min(1, this.volume ?? 0.88));
+      const soundUrl = fileMap[normalized];
+      const fallbackUrl = fallbackMap[normalized];
+      const targetVolume = Math.max(0, Math.min(1, this.volume ?? 0.88));
 
-    if (soundUrl && typeof Audio !== 'undefined') {
-      try {
-        const audio = new Audio(soundUrl);
-        audio.volume = targetVolume;
-        this.activeAudio = audio;
-        this.audioCache[normalized] = audio;
-        audio.play().catch(() => {
-          if (fallbackUrl) {
-            try {
-              const fallbackAudio = new Audio(fallbackUrl);
-              fallbackAudio.volume = targetVolume;
-              this.activeAudio = fallbackAudio;
-              fallbackAudio.play().catch(() => {
-                this.synthesizePhoneyEmoji(normalized, true);
-              });
-              return;
-            } catch {
-              // Fall back to synthesis
+      if (soundUrl && typeof Audio !== 'undefined') {
+        try {
+          const audio = new Audio(soundUrl);
+          audio.volume = targetVolume;
+          this.activeAudio = audio;
+          this.audioCache[normalized] = audio;
+          Promise.resolve(audio.play()).catch(() => {
+            if (fallbackUrl) {
+              try {
+                const fallbackAudio = new Audio(fallbackUrl);
+                fallbackAudio.volume = targetVolume;
+                this.activeAudio = fallbackAudio;
+                Promise.resolve(fallbackAudio.play()).catch(() => {
+                  this.synthesizePhoneyEmoji(normalized, true);
+                });
+                return;
+              } catch {
+                // Fall back to synthesis
+              }
             }
-          }
-          this.synthesizePhoneyEmoji(normalized, true);
-        });
-        return;
-      } catch {
-        // Fall back to synthesis
+            this.synthesizePhoneyEmoji(normalized, true);
+          });
+          return;
+        } catch {
+          // Fall back to synthesis
+        }
       }
+      this.synthesizePhoneyEmoji(normalized, true);
+    } catch {
+      // Ignore audio playback errors in restricted/headless browsers
     }
-    this.synthesizePhoneyEmoji(normalized, true);
   }
 
   synthesizePhoneyEmoji(id, forcePlay = true) {
-    switch (id) {
-      case 'cheer': {
-        for (let i = 0; i < 9; i += 1) {
-          this.noise(0.055, 0.085, i * 0.048, 1500 + (i % 3) * 350, 'bandpass', forcePlay);
+    try {
+      switch (id) {
+        case 'cheer': {
+          for (let i = 0; i < 9; i += 1) {
+            this.noise(0.055, 0.085, i * 0.048, 1500 + (i % 3) * 350, 'bandpass', forcePlay);
+          }
+          [523.25, 659.25, 783.99, 1046.5].forEach((freq, idx) => {
+            this.tone(freq, 0.28, 'triangle', 0.07, 0.06 + idx * 0.045, freq * 1.03, false, forcePlay);
+          });
+          break;
         }
-        [523.25, 659.25, 783.99, 1046.5].forEach((freq, idx) => {
-          this.tone(freq, 0.28, 'triangle', 0.07, 0.06 + idx * 0.045, freq * 1.03, false, forcePlay);
-        });
-        break;
-      }
-      case 'faaah':
-      case 'faah': {
-        this.noise(0.12, 0.09, 0, 1800, 'highpass', forcePlay);
-        this.tone(620, 0.52, 'sawtooth', 0.08, 0.05, 290, false, forcePlay);
-        this.tone(930, 0.48, 'triangle', 0.065, 0.06, 435, false, forcePlay);
-        this.tone(310, 0.55, 'sine', 0.085, 0.05, 165, false, forcePlay);
-        break;
-      }
-      case 'fart': {
-        this.tone(135, 0.36, 'sawtooth', 0.11, 0, 62, false, forcePlay);
-        for (let i = 0; i < 7; i += 1) {
-          this.tone(115 - i * 6, 0.045, 'square', 0.075, i * 0.045, 72, false, forcePlay);
+        case 'faaah':
+        case 'faah': {
+          this.noise(0.12, 0.09, 0, 1800, 'highpass', forcePlay);
+          this.tone(620, 0.52, 'sawtooth', 0.08, 0.05, 290, false, forcePlay);
+          this.tone(930, 0.48, 'triangle', 0.065, 0.06, 435, false, forcePlay);
+          this.tone(310, 0.55, 'sine', 0.085, 0.05, 165, false, forcePlay);
+          break;
         }
-        this.noise(0.32, 0.08, 0.02, 260, 'lowpass', forcePlay);
-        break;
+        case 'fart': {
+          this.tone(135, 0.36, 'sawtooth', 0.11, 0, 62, false, forcePlay);
+          for (let i = 0; i < 7; i += 1) {
+            this.tone(115 - i * 6, 0.045, 'square', 0.075, i * 0.045, 72, false, forcePlay);
+          }
+          this.noise(0.32, 0.08, 0.02, 260, 'lowpass', forcePlay);
+          break;
+        }
+        case 'wompwomp':
+        case 'womp':
+        case 'sad': {
+          const notes = [
+            { f1: 466.16, f2: 446.0, d: 0.22, t: 0 },
+            { f1: 440.0, f2: 420.0, d: 0.22, t: 0.24 },
+            { f1: 415.3, f2: 396.0, d: 0.22, t: 0.48 },
+            { f1: 392.0, f2: 330.0, d: 0.46, t: 0.72 },
+          ];
+          notes.forEach((n) => {
+            this.tone(n.f1, n.d, 'sawtooth', 0.08, n.t, n.f2, false, forcePlay);
+            this.tone(n.f1 * 0.5, n.d, 'triangle', 0.07, n.t, n.f2 * 0.5, false, forcePlay);
+          });
+          break;
+        }
+        case 'wow': {
+          this.tone(260, 0.22, 'triangle', 0.1, 0, 680, false, forcePlay);
+          this.tone(680, 0.26, 'triangle', 0.095, 0.2, 340, false, forcePlay);
+          this.tone(1046.5, 0.14, 'sine', 0.07, 0.15, 1318.5, false, forcePlay);
+          this.tone(1318.5, 0.18, 'sine', 0.065, 0.25, 1567.98, false, forcePlay);
+          break;
+        }
+        case 'yay':
+        default: {
+          const arp = [523.25, 659.25, 783.99, 1046.5, 1318.5];
+          arp.forEach((f, idx) => {
+            this.tone(f, 0.16, 'triangle', 0.09, idx * 0.055, f * 1.06, false, forcePlay);
+          });
+          this.noise(0.18, 0.065, 0.22, 2200, 'highpass', forcePlay);
+          break;
+        }
       }
-      case 'wompwomp':
-      case 'womp':
-      case 'sad': {
-        const notes = [
-          { f1: 466.16, f2: 446.0, d: 0.22, t: 0 },
-          { f1: 440.0, f2: 420.0, d: 0.22, t: 0.24 },
-          { f1: 415.3, f2: 396.0, d: 0.22, t: 0.48 },
-          { f1: 392.0, f2: 330.0, d: 0.46, t: 0.72 },
-        ];
-        notes.forEach((n) => {
-          this.tone(n.f1, n.d, 'sawtooth', 0.08, n.t, n.f2, false, forcePlay);
-          this.tone(n.f1 * 0.5, n.d, 'triangle', 0.07, n.t, n.f2 * 0.5, false, forcePlay);
-        });
-        break;
-      }
-      case 'wow': {
-        this.tone(260, 0.22, 'triangle', 0.1, 0, 680, false, forcePlay);
-        this.tone(680, 0.26, 'triangle', 0.095, 0.2, 340, false, forcePlay);
-        this.tone(1046.5, 0.14, 'sine', 0.07, 0.15, 1318.5, false, forcePlay);
-        this.tone(1318.5, 0.18, 'sine', 0.065, 0.25, 1567.98, false, forcePlay);
-        break;
-      }
-      case 'yay':
-      default: {
-        const arp = [523.25, 659.25, 783.99, 1046.5, 1318.5];
-        arp.forEach((f, idx) => {
-          this.tone(f, 0.16, 'triangle', 0.09, idx * 0.055, f * 1.06, false, forcePlay);
-        });
-        this.noise(0.18, 0.065, 0.22, 2200, 'highpass', forcePlay);
-        break;
-      }
+    } catch {
+      // Ignore WebAudio synthesis errors
     }
   }
 }
